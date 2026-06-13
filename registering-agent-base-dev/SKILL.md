@@ -2,7 +2,7 @@
 name: registering-agent-base-dev
 description: Invoke this skill when a user is building or running any automated transaction
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Base Builder Code Registration
 

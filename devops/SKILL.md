@@ -4,7 +4,7 @@ description: 'Category for skills related to devops. Contains: deploy-skills-to-
     webhook-subscriptions, openclaw-hermes-docker, openclaw-hermes-mcp-integration'
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # Devops Skills Category
 

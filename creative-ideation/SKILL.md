@@ -6,7 +6,7 @@ description: Generate project ideas through creative constraints. Use when the u
   for code, art, hardware, writing, tools, and anything that can be made.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Creative Ideation

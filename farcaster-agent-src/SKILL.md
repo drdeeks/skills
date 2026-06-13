@@ -1,7 +1,7 @@
 ---
 name: farcaster-agent-src
 description: "Create Farcaster accounts and post casts autonomously — source-based variant for Farcaster identity and social operations"
-version: 0.0.2
+version: 0.0.3
 license: MIT
 metadata:
   openclaw:

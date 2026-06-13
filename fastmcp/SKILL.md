@@ -3,7 +3,7 @@ name: fastmcp
 description: Build, test, inspect, install, and deploy MCP servers with FastMCP in Python. Use when creating a new MCP server, wrapping an API or database as MCP tools, exposing resources or prompts, or preparing a FastMCP server for Claude Code, Cursor, or HTTP deployment.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # FastMCP
 

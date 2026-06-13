@@ -1,7 +1,7 @@
 ---
 name: converting-minikit-to-farcaster
 description: Converts Mini Apps from MiniKit (OnchainKit) to native Farcaster SDK. Use when migrating from @coinbase/onchainkit/minikit, converting MiniKit hooks, removing MiniKitProvider, or when user mentions MiniKit, OnchainKit, or Farcaster SDK migration.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # MiniKit to Farcaster SDK

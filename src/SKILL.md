@@ -10,7 +10,7 @@ metadata:
     - src
     - placeholder
 name: src
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Src

@@ -3,7 +3,7 @@ name: opencode
 description: Delegate coding tasks to OpenCode CLI agent for feature implementation, refactoring, PR review, and long-running autonomous sessions. Requires the opencode CLI installed and authenticated.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # OpenCode CLI
 

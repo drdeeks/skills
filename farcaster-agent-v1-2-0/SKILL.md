@@ -1,7 +1,7 @@
 ---
 name: farcaster-agent-v1-2-0
 description: "Create Farcaster accounts and post casts autonomously — official Farcaster team skill for identity registration and social posting"
-version: 1.2.1
+version: 1.2.2
 license: MIT
 metadata:
   openclaw:

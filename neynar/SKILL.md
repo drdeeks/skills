@@ -2,7 +2,7 @@
 name: neynar
 description: Interact with Farcaster via Neynar API. Use when the user wants to read Farcaster feeds, look up users, post casts, search content, or interact with the Farcaster social protocol. Requires NEYNAR_API_KEY.
 metadata: {"clawdbot":{"emoji":"🟪","homepage":"https://neynar.com","requires":{"bins":["curl","jq"]}}}
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Neynar (Farcaster API)

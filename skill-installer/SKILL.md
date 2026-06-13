@@ -12,7 +12,7 @@ metadata:
   version: "1.0.0"
   author: "skill-creator"
   category: "skill-management"
-version: 0.0.8
+version: 0.0.9
 ---
 
 # Skill Installer

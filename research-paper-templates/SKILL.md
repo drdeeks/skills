@@ -2,7 +2,7 @@
 name: research-paper-templates
 description: "Component extracted from parent skill. See original skill for full documentation."
 license: MIT
-version: 0.0.3
+version: 0.0.4
 ---
 
 # research-paper-templates

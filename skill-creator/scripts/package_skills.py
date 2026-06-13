@@ -184,8 +184,8 @@ class SkillPackager:
         else:
             new_version = old_version
 
-        # Output .skill file
-        skill_file = self.output_dir / f"{skill_name}.skill"
+        # Output .skill file inside skill directory
+        skill_file = skill_dir / f"{skill_name}.skill"
 
         if skill_file.exists() and not overwrite:
             return {"skill": skill_name, "status": "skipped", "reason": "File exists, use --overwrite"}

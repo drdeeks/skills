@@ -2,7 +2,7 @@
 name: dogfood
 description: Systematic exploratory QA testing of web applications — find bugs, capture evidence, and generate structured reports
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # Dogfood: Systematic Web Application QA Testing
 

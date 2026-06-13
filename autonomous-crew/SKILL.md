@@ -33,7 +33,7 @@ metadata:
     - systemd
     - telegram_bot_token (for each agent)
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Enterprise Multi-Agent System
 

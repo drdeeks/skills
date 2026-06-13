@@ -5,7 +5,7 @@ metadata:
   hermes:
     tags: [base, builder-code, erc-8021, pinata, agentmail, onboarding]
     related_skills: [registering-agent-base-dev, pinata-erc-8004, multi-agent-workspace-setup]
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Base Agent Bootstrap

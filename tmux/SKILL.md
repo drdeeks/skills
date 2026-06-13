@@ -3,7 +3,7 @@ name: tmux
 description: Remote-control tmux sessions for interactive CLIs by sending keystrokes
 license: MIT
 metadata:
-version: 0.0.3
+version: 0.0.4
 ---
 # tmux Session Control
 

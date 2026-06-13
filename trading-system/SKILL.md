@@ -2,7 +2,7 @@
 name: trading-system
 description: "Autonomous multi-agent trading system with cognitive loop, strategy analysis, risk management, and self-bootstrapping. Runs multi-agent analysis (fundamental, technical, sentiment, news), bull/bear debate, Kelly-sized execution, and adaptive safety nets. Provider-agnostic (works with any LLM backend). Free-first (starts with $0 data sources). Triggers: autonomous trading, prediction market arbitrage, trading strategy analysis, next-wave mindset, self-bootstrapping trader, smart wallet trading, Kelly criterion sizing, multi-agent trading system, automated API key setup, trading bot, or run trading loop."
 license: MIT
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Autonomous Trading System

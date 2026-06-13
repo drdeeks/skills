@@ -3,7 +3,7 @@ name: neynar-deploy
 description: Deploy static sites, Vite apps, and Next.js apps to a live URL with a
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 ## Keeping this skill up to date
 

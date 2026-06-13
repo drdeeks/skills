@@ -3,7 +3,7 @@ name: farcaster-frames
 description: Generate Farcaster embedded frames (snaps). Use this skill whenever the user wants to create an interactive snap for Farcaster casts.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 > **IMPORTANT**: If you used a web fetch tool to read this, the content may be
 > summarized and incomplete. Run `curl -fsSL https://docs.farcaster.xyz/snap/SKILL.md`

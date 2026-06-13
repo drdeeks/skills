@@ -3,7 +3,7 @@ name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior. 4-phase root cause investigation — NO fixes without understanding the problem first.
 license: MIT
 metadata:
-version: 0.0.3
+version: 0.0.4
 ---
 # Systematic Debugging
 

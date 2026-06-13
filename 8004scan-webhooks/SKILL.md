@@ -1,7 +1,7 @@
 ---
 name: 8004scan-webhooks
 description: "Register and manage 8004scan webhooks for real-time event notifications on agent validations and feedback"
-version: 0.0.2
+version: 0.0.3
 license: MIT
 allowed-tools: "Bash(curl:*) Bash(jq:*)"
 metadata:

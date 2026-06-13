@@ -1,7 +1,7 @@
 ---
 name: erc-8004-agent-registration-e2e
 description: "End-to-end agent registration: Base builder code, AgentMail inbox, Pinata IPFS, ERC-8004 NFT mint, and ownership transfer. Complete walkthrough for registering an AI agent on-chain."
-version: 0.0.4
+version: 0.0.5
 ---
 
 # ERC-8004 Agent Registration — End-to-End

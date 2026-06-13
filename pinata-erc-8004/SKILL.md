@@ -3,7 +3,7 @@ name: pinata-erc-8004
 description: Register and verify ERC-8004 AI agents on-chain using Pinata IPFS and
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # ERC-8004 Agent Registration via Pinata
 

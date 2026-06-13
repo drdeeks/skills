@@ -3,7 +3,7 @@ name: health
 description: Health, wellness, and biometric integration skills — BCI wearables, neurofeedback,
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 Health, wellness, and biometric integration skills — BCI wearables, neurofeedback, sleep tracking, and cognitive state monitoring.
 

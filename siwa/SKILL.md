@@ -1,7 +1,7 @@
 ---
 name: siwa
 description: "SIWA (Sign-In With Agent) authentication for ERC-8004 registered agents — enables decentralized identity verification and agent authorization"
-version: 0.2.1
+version: 0.2.2
 license: MIT
 metadata:
   openclaw:

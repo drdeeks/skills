@@ -2,7 +2,7 @@
 name: creative
 description: |
   Creative content generation — ASCII art, hand-drawn style diagrams, and visual design tools.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Creative

@@ -8,7 +8,7 @@ metadata:
     - sessions
     - persistence
     - context
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Sessions

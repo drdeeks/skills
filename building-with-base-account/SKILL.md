@@ -2,7 +2,7 @@
 name: building-with-base-account
 description: Integrates Base Account SDK for authentication and payments. Covers Sign
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Building with Base Account
 

@@ -1,7 +1,7 @@
 ---
 name: endaoment
 description: Donate to charities onchain via Endaoment. Use when the user wants to donate crypto to charity, make a charitable contribution, give to nonprofits, support a cause, or donate to a 501(c)(3). Supports Base, Ethereum, and Optimism. Handles USDC donations directly or swaps ETH/tokens to USDC automatically.
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Endaoment Charity Donations

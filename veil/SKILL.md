@@ -2,7 +2,7 @@
 name: veil
 description: Privacy and shielded transactions on Base via Veil Cash (veil.cash). Deposit ETH or USDC into private pools, withdraw/transfer privately using ZK proofs. Manage Veil keypairs, check private/queue balances across all pools, and submit deposits via Bankr. Use when the user wants anonymous or private transactions, shielded transfers, or ZK-based privacy on Base.
 metadata: {"clawdbot": {"emoji": "🌪️", "homepage": "https://veil.cash", "requires": {"bins": ["node", "curl", "jq"]}}}
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Veil

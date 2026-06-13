@@ -3,7 +3,7 @@ name: one-three-one-rule
 description: Structured decision-making format for when a task has multiple viable approaches and the user needs a clear recommendation. Produces a concise problem framing, three options with trade-offs, and an actionable plan for the recommended path.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # 1-3-1 Communication Rule
 

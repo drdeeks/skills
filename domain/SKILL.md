@@ -7,7 +7,7 @@ description: |
   Triggers on requests like "find subdomains", "check ssl cert", "whois lookup",
   "is this domain available", "bulk check these domains".
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Domain Intelligence

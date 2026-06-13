@@ -5,7 +5,7 @@ metadata:
   hermes:
     tags: [email, automation, signup, agentmail]
     related_skills: [registering-agent-base-dev, pinata-erc-8004]
-version: 0.0.4
+version: 0.0.5
 ---
 
 # AgentMail Service Signup

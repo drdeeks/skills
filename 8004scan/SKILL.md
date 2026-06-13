@@ -1,7 +1,7 @@
 ---
 name: 8004scan
 description: "Query the 8004scan public API to discover, search, and analyze ERC-8004 agents and validations across supported chains"
-version: 0.0.2
+version: 0.0.3
 license: MIT
 allowed-tools: "Bash(curl:*) Bash(jq:*)"
 metadata:

@@ -1,7 +1,7 @@
 ---
 name: memory-tiering
 description: Automated multi-tiered memory management (HOT, WARM, COLD). Use this skill to organize, prune, and archive context during memory operations or compactions.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Memory Tiering Skill 🧠⚖️

@@ -1,7 +1,7 @@
 ---
 name: zapper
 description: "Zapper API integration — query portfolio balances, transaction history, and DeFi positions across EVM chains"
-version: 0.0.2
+version: 0.0.3
 license: MIT
 metadata:
   openclaw:

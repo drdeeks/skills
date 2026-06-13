@@ -20,7 +20,7 @@ metadata:
   source: https://best-practices.8004scan.io/docs/official-specification/erc-8004-official.html
   spec_type: standards-track
   license: CC0
-version: 0.0.1
+version: 0.0.2
 ---
 
 # 8004 - Trustless Agent Identity Protocol

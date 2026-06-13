@@ -2,7 +2,7 @@
 name: autonomous-ai-agents
 description: |
   Skills for spawning and orchestrating autonomous AI coding agents and multi-agent workflows — running independent agent processes, delegating tasks, and coordinating parallel workstreams.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Autonomous Ai Agents

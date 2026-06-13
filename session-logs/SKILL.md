@@ -2,7 +2,7 @@
 name: session-logs
 description: Search and analyze your own session logs (older/parent conversations) using jq.
 metadata: { "openclaw": { "emoji": "📜", "requires": { "bins": ["jq", "rg"] } } }
-version: 0.0.3
+version: 0.0.4
 ---
 
 # session-logs

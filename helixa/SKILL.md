@@ -9,7 +9,7 @@ metadata:
         "homepage": "https://helixa.xyz",
       },
   }
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Helixa

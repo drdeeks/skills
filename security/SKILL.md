@@ -3,7 +3,7 @@ name: security
 description: "Secrets management, credential handling, and security tooling integrations for agent infrastructure and deployment pipelines."
 license: MIT
 metadata:
-version: 0.0.3
+version: 0.0.4
 ---
 # Security
 

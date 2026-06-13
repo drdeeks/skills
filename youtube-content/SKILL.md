@@ -5,7 +5,7 @@ description: >
   (chapters, summaries, threads, blog posts). Use when the user shares a YouTube
   URL or video link, asks to summarize a video, requests a transcript, or wants
   to extract and reformat content from any YouTube video.
-version: 0.0.3
+version: 0.0.4
 ---
 
 # YouTube Content Tool

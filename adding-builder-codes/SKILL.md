@@ -2,7 +2,7 @@
 name: adding-builder-codes
 description: Integrate Base Builder Codes (ERC-8021) into web3 applications for onchain
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Adding Builder Codes
 

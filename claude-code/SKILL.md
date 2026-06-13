@@ -3,7 +3,7 @@ name: claude-code
 description: Delegate coding tasks to Claude Code (Anthropic's CLI agent). Use for building features, refactoring, PR reviews, and iterative coding. Requires the claude CLI installed.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 ---|--------|
 | `--model <alias>` | Model selection: `sonnet`, `opus`, `haiku`, or full name like `claude-sonnet-4-6` |

@@ -1,7 +1,7 @@
 ---
 name: productivity
 description: Productivity and workspace integration skills — Google Workspace, Linear, Notion, PDF processing, OCR, and PowerPoint creation.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Productivity Skills

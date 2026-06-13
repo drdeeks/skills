@@ -17,7 +17,7 @@ metadata:
     - multi-agent
     - templates
 name: multi-agent-workspace-setup
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Multi-Agent Workspace Setup

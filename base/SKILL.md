@@ -17,7 +17,7 @@ metadata:
     - L2
     - Ethereum
 name: base
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Base Blockchain Skill

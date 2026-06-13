@@ -2,7 +2,7 @@
 name: research
 description: |
   Skills for academic research, paper discovery, literature review, domain reconnaissance, market data, content monitoring, and scientific knowledge retrieval.
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Research

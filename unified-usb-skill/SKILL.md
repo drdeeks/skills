@@ -24,7 +24,7 @@ metadata:
   - disk-images
   - persistence
 name: unified-usb-skill
-version: 0.0.3
+version: 0.0.4
 ---
 
 

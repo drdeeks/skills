@@ -4,7 +4,7 @@ description: "Runs Fortytwo MCP `tools/call` for `ask_fortytwo_prime` through th
 metadata:
   version: "1.0.0"
   mcp-server: fortytwo-mcp
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Fortytwo MCP

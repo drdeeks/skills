@@ -1,7 +1,7 @@
 ---
 name: media
 description: Media creation and management skills — gif search, heartmula audio, songsee music discovery, and YouTube content creation tools.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Media Skills

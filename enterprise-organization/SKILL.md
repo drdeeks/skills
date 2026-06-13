@@ -18,7 +18,7 @@ metadata:
     - semantic-versioning
     - git-control
     - release-management
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Enterprise Organization

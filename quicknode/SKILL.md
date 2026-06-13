@@ -1,7 +1,7 @@
 ---
 name: quicknode
 description: Blockchain RPC and data access via Quicknode. Use when an agent needs to read onchain data (balances, token prices, transaction status, gas estimates, block data) across Base, Ethereum, Polygon, Solana, or Unichain. Supports both API key access and x402 wallet-based pay-per-request access with no account needed. Triggers on mentions of RPC, blockchain data, onchain queries, token balances, gas estimation, block number, transaction receipt, Quicknode, or x402.
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Quicknode: Blockchain Data Access for Agents

@@ -2,7 +2,7 @@
 name: openclaw-hermes-mcp-integration
 description: Deploy OpenClaw multi-agent fleet with hermes-agent brain as MCP server,
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # OpenClaw + Hermes Brain MCP Integration
 

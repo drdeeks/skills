@@ -2,7 +2,7 @@
 name: diagramming
 description: |
   Diagram creation skills for generating visual diagrams, flowcharts, architecture diagrams, and illustrations using tools like Excalidraw.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Diagramming
