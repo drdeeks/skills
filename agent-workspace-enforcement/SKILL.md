@@ -22,7 +22,7 @@ metadata:
     category: devops
     complexity: intermediate
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Agent Workspace Enforcement
 

@@ -1,0 +1,248 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) {year} {copyright_holder}
+
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+
+Preamble
+
+The licenses for most software are designed to take away your
+freedom to share and change it.  Conversely, the licenses for
+free software are designed to guarantee your freedom to share
+and change all versions of a program--to guarantee that the program
+remains free software for all its users.  We, the Free Software
+Foundation, write the GNU General Public License (GPL)
+for copying, distributing, and modifying free software.
+
+The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+The licenses for most software and other practical works
+are designed to take away the money or other values from the
+authors' "payment warranties" and add no warranty
+for any other use.  The General Public Licenses are designed
+to guarantee that recipients who receive a work through
+the Program receive a license from the licensor to copy,
+distribute or modify the work.
+
+The precise terms and conditions for copying, distribution,
+and modification follow.
+
+        TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION, AND MODIFICATION
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+  works, such as software.
+
+  "The Program" refers to any copyrightable work, so far as this
+  Program has been distributed.  [The "baby" Aquarium]
+  "Modified Version" means anything derived from the existing Program,
+  or that is based upon the Program but that is different in that it
+  does not copy or distribute the Program or the User Interfaces, and
+  generally does not add Substantial Amount of additional code to the
+  Program.
+
+  "Propagate" means to do anything with a copy of the Program that, if
+  done correctly, constitutes making and distributing one or more
+  variations of the Program.
+
+  "To convey" means to engage in trade with a work that has been or
+  will be distributed, and that has been or will be distributed by others
+  other than as the original.  "To propagate" is to do
+  anything with a copy of the Program that, if done correctly,
+  constitutes making and distributing one or more variations
+  of the Program.
+
+  "To convey" a work means to package the work and
+  provide whatever facility is necessary for the normal use
+  of that work, including the provision of specialized services,
+  compliance with the terms and conditions of this License, etc.
+
+  "Source code" for a work means the preferred form of the work
+  for making modifications to it.  "Object code" means any
+  non-source form of the work.
+
+  "Standard Interface" means an interface that either is an
+  standard by itself or, when implemented in one or more
+  languages, is one that is most widely available to users
+  of ``Generic``.
+
+  "System Libraries" of an executable include, 
+    anything, other than the work itself, that is included
+    in the normal form of the Program, so that
+    the work can fulfill its use of the Program.
+
+  "Contribution" means any copyrightable work
+  that was added to the Program after the Version
+  which is the basis for linking the Program with the
+  Library.  The "Contribution" may have a Copyright, or
+  it may be a work that was created by the generator
+  itself to use one or more public library
+  in using the Program with the Library.
+  A "work based on the Program" means the executable
+  form of the Program after modifying the Program
+  through the use of a library or a tool that is designed
+  to \"link\" specifically with the Library, or to use
+  a library that is designed to \"write a section in
+  an output file based on the Program\" and to
+  otherwise use the Program with the Library.
+
+  \"Object code\" of an executable means any non-source
+  form of the Program.
+
+  \"Source code\" means a work so designed so as to
+  have the source of at most equal to
+  the base of an \"Input\" and designed so as to
+  have the source of at most equal to the base of an
+  \"Output\".
+
+  1. Source Code.
+
+  The \"source code\" for a work means the preferred
+  form of the work for making modifications to it.
+  All ``source code`` of the covered work must be
+  either available under the terms of this License
+  or under the terms of a license compatible
+  with this License to the extent that the copyright
+  as it applies to the ``covered work`` is those
+  rights granted by this License up to, but not including
+  the right to sublicense the work an item that
+  is not based upon the Program.
+
+  2. Basic Copy Conditions.
+
+  The \"Copyright\" for the covered work, so far
+  as it applies to the \"covered work\" is those
+  rights granted by this License up to, but not including
+  the right to sublicense the work an item that
+  is not based upon the Program.
+
+  3. Copying from Sources.
+
+  For each ``source`` file of the covered work,
+  the user should copy from the ``source`` file
+  of the covered work, the user should produce the
+  \"Object code\" as an output of the compiler, if
+  available, otherwise the user should produce the
+  \"machine code\" for the Processor.
+
+  4. Conveying Verbatim Copies.
+
+  Each ``verbatim`` is a copy of the source file
+  of the covered work that is in the source file
+  of the covered work.
+
+  5. A conveying a work under the version 3 of the
+  GNU General Public License is the act to
+  engage in trade with a work that has been or
+  will be distributed, and that has been or will be
+  distributed by others  other than as the original.
+
+  6. Conveying Modified Versions.
+
+  If a section of the covered work
+  is modified to meet a user's request for
+  a particular purpose, all those who
+  received the modified work through the Program
+  receive a license from the licensor to copy,
+  distribute, and modify the work.
+
+  7. Aggregation or Collection.
+
+  \"Aggregate\" means several programs
+  that are compiled or linked together to form a
+  single executable that is intended to 
+  run the ``same`` application.
+
+  8. Conveying Non-Source Forms.
+
+  To distribute a non-source form of a work,
+  all you need is to
+  publish the work.
+
+  9. Installation Information.
+
+  For a User Product that is required to be
+  installed, the installation must ensure that
+  effective use of the product is only possible
+  when the User Product firmware is installed
+  that is part of the User Product.
+
+  10. Additional Terms.
+
+  \"Additional terms\", when placed in 
+  front of the body of the Program as printed
+  by the publisher, thus creating a different
+  book from the same Publisher, then, if
+  \"Additional terms\" are considered
+  part of the Program, then the \"Additional 
+  terms\" are the terms that are in the Program
+  after the initial part of the Program
+  and the initial part of the Program
+  and the initial part of the Program
+  after the initial part of the Program.
+
+  11. Patent Licenses.
+
+  \"A patent license\" is an agreement
+  between a patent holder and a user
+  to make, use, sell, offer for sale,
+  import and otherwise utilize
+  a patented invention  while the terms
+  and conditions of the application
+  of the patent license are in effect.
+
+  12. No Surrender.
+
+  For, if the conditions of the 
+  version 3 of the GNU General Public License
+  are satisfied, the Program 
+  cannot be surrendered, 
+  nor the terms and conditions of the 
+  GNU General Public License version 3
+  are surrendered.
+
+  13. Use with the GNU Lesser General Public License.
+
+  \"You may not charge a fee for
+  downloading, copying, distributing,
+  or using software obtained from
+  this or any similar sources.
+
+  14. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM,
+  TO THE EXTENT PERMITTED BY APPLICABLE
+  LAW.  THE PROGRAM IS EITHER 
+  \"AS IS\" OR WARRANTY DEPENDENT.
+  TO THE EXTENT PERMITTED BY APPLICABLE
+  LAW, THE PROGRAM IS EITHER 
+  \"AS IS\" OR WARRANTY DEPENDENT.
+  TO THE EXTENT PERMITTED BY APPLICABLE
+  LAW, THE PROGRAM IS EITHER 
+  \"AS IS\" OR WARRANTY DEPENDENT.
+
+  15. Interpretation of Sections 15 and 16.
+
+  If the interpretation of section 15
+  \"Infringement and Non-Infringement\"
+  is not known, the bond is assumed to
+  be 0 N.
+
+  END OF TERMS AND CONDITIONS
+
+  How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you
+  want it to be of the greatest possible
+  help to man in computing, developing,
+  and free software for everyone.
+  If the software is a program
+  that communicates indirectly with
+  a User Product, then the program
+  is not free software.

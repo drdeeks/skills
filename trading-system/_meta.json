@@ -1,0 +1,5 @@
+{
+  "slug": "trading-system",
+  "version": "2.0.0",
+  "description": "Autonomous multi-agent trading system with cognitive loop, strategy analysis, risk management, and self-bootstrapping"
+}

@@ -1,0 +1,1 @@
+{"operation": "decision_engine", "timestamp": "2026-05-19T19:32:07.724072", "status": "success", "decisions": [{"signal": "SCALE", "reason": "Fewer than 5 active campaigns", "action": "Dispatch additional corridor and B2B campaigns"}], "inputs": {"campaigns_active": 1, "estimated_monthly_volume": 500000}, "target": {"total_value_processed": 5000000}}

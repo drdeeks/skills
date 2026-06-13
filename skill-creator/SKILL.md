@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: "Enterprise-grade skill lifecycle manager. Creates, validates, consolidates, and maintains skills with redundancy detection, source verification, and platform-agnostic enforcement. Use when: creating skills, updating skills, auditing skills, consolidating redundant skills, verifying skill accuracy against official sources, or ensuring provider-agnostic operation."
-version: 0.0.7
+version: 0.0.8
 license: MIT
 metadata:
   openclaw:

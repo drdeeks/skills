@@ -1,0 +1,22 @@
+{
+  "name": "threejs-animation",
+  "description": "Universal Three.js animation system with audio-reactivity, keyframes, and performance tuning",
+  "version": "1.1.0",
+  "main": "index.js",
+  "dependencies": {
+    "three": "^0.160.0",
+    "gsap": "^3.12.0",
+    "meyda": "^5.6.0",
+    "web-audio-beat-detector": "^3.0.0"
+  },
+  "opencode": {
+    "entryPoint": "registerAnimationSkill",
+    "compatibleWith": ["opencode", "OpenClaw", "Hermes"],
+    "features": [
+      "audio-reactivity",
+      "keyframe-tracks",
+      "beat-detection",
+      "performance-tuning"
+    ]
+  }
+}
