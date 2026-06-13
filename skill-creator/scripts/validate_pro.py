@@ -631,9 +631,14 @@ def check_metadata_openclaw(skill_dir: Path) -> Tuple[bool, List[str]]:
                 frontmatter[key.strip()] = value.strip()
 
     metadata = frontmatter.get('metadata', {})
-    if not isinstance(metadata, dict):
-        issues.append("Missing or invalid 'metadata' in frontmatter")
-        return False, issues
+    if not isinstance(metadata, dict) or not metadata:
+        # No metadata section — that's fine for standard skills
+        return True, []
+
+    # Only require a harness section for enterprise skills
+    category = str(frontmatter.get('category', '')).lower()
+    if 'enterprise' not in category:
+        return True, []
 
     # Accept openclaw, openai, or any provider-specific section
     valid_harnesses = ['openclaw', 'openai', 'hermes', 'anthropic', 'google', 'mistral', 'harness']
@@ -677,6 +682,38 @@ def check_placeholder_rejection(skill_dir: Path) -> Tuple[bool, List[str]]:
         issues.append("Skill has PLACEHOLDER status — cannot validate placeholder skills")
 
     return len(issues) == 0, issues
+
+
+def _is_enterprise_skill(skill_dir: Path) -> bool:
+    """Detect if a skill declares enterprise category in its frontmatter.
+
+    Enterprise skills must have `category: enterprise` (or similar) in frontmatter.
+    Simply having a Provider Compatibility section does NOT make a skill enterprise.
+    """
+    skill_md = skill_dir / 'SKILL.md'
+    if not skill_md.exists():
+        return False
+
+    content = skill_md.read_text(encoding='utf-8', errors='replace')
+    frontmatter_text, _ = extract_frontmatter(content)
+
+    if frontmatter_text is None:
+        return False
+
+    if yaml is not None:
+        try:
+            frontmatter = yaml.safe_load(frontmatter_text)
+        except:
+            frontmatter = {}
+    else:
+        frontmatter = {}
+        for line in frontmatter_text.splitlines():
+            if ':' in line:
+                key, value = line.split(':', 1)
+                frontmatter[key.strip()] = value.strip()
+
+    category = str(frontmatter.get('category', '')).lower()
+    return 'enterprise' in category
 
 
 def validate_skill_pro(skill_path: Path, check_agnostic: bool = True,
@@ -747,7 +784,13 @@ def validate_skill_pro(skill_path: Path, check_agnostic: bool = True,
     result['checks']['pricing']['issues'] = pricing_issues
     result['checks']['pricing']['warning'] = not pricing_valid
 
-    enterprise_valid, enterprise_issues = check_enterprise_pillars(skill_path)
+    is_enterprise = _is_enterprise_skill(skill_path)
+
+    if is_enterprise:
+        enterprise_valid, enterprise_issues = check_enterprise_pillars(skill_path)
+    else:
+        enterprise_valid, enterprise_issues = True, []
+
     result['checks']['enterprise']['passed'] = enterprise_valid
     result['checks']['enterprise']['issues'] = enterprise_issues
 
