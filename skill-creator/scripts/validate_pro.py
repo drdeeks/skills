@@ -183,6 +183,36 @@ def check_structure(skill_dir: Path) -> Tuple[bool, List[str]]:
     return len(issues) == 0, issues
 
 
+def check_enterprise_structure(skill_dir: Path) -> Tuple[bool, List[str]]:
+    """Check enterprise-grade skill directory structure (3+ scripts, 5+ refs)."""
+    issues = []
+
+    if not (skill_dir / 'SKILL.md').exists():
+        issues.append("Missing SKILL.md")
+
+    scripts_dir = skill_dir / 'scripts'
+    if not scripts_dir.exists():
+        issues.append("Missing scripts/ directory (enterprise requires 3+)")
+    else:
+        script_files = [f for f in scripts_dir.rglob('*') if f.is_file() and f.suffix in ['.py', '.sh', '.js', '.ts']]
+        if len(script_files) < 3:
+            issues.append(f"scripts/ requires at least 3 script files for enterprise (found {len(script_files)})")
+
+    refs_dir = skill_dir / 'references'
+    if not refs_dir.exists():
+        issues.append("Missing references/ directory (enterprise requires 5+)")
+    else:
+        ref_files = [f for f in refs_dir.rglob('*') if f.is_file() and f.suffix in ['.md', '.txt', '.json', '.yaml', '.yml', '.csv']]
+        if len(ref_files) < 5:
+            issues.append(f"references/ requires at least 5 reference files for enterprise (found {len(ref_files)})")
+
+    file_count = sum(1 for _ in skill_dir.rglob('*') if _.is_file())
+    if file_count > 50:
+        issues.append(f"Excessive files ({file_count}). Consider cleanup.")
+
+    return len(issues) == 0, issues
+
+
 def check_content_quality(skill_dir: Path) -> Tuple[bool, List[str]]:
     issues = []
     skill_md = skill_dir / 'SKILL.md'
@@ -259,6 +289,23 @@ def check_content_quality(skill_dir: Path) -> Tuple[bool, List[str]]:
         if s in seen:
             issues.append(f"Duplicate section: '{s}'")
         seen.add(s)
+
+    # Check scripts for hardcoded secrets
+    scripts_dir = skill_dir / 'scripts'
+    if scripts_dir.exists():
+        for sf in scripts_dir.rglob('*'):
+            if sf.is_file() and sf.suffix in ['.py', '.sh', '.js', '.ts']:
+                try:
+                    sc = sf.read_text(encoding='utf-8', errors='replace')
+                    if HARDCODED_SECRETS_PATTERN.search(sc):
+                        issues.append(f"Script '{sf.name}' contains hardcoded secrets")
+                except:
+                    pass
+
+    # Check for stale template files
+    for f in skill_dir.rglob('*'):
+        if f.is_file() and f.name in STALE_TEMPLATE_NAMES:
+            issues.append(f"Stale template file: '{f.name}'")
 
     return len(issues) == 0, issues
 

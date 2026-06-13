@@ -7,7 +7,7 @@ metadata:
     version: "1.0"
     category: development
     complexity: advanced
-version: 0.0.2
+version: 0.0.3
 ---
 # Subagent-Driven Development
 

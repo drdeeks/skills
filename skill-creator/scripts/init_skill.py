@@ -52,6 +52,7 @@ def title_case(name):
 STANDARD_SKILL_MD = """---
 name: {name}
 description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+version: 0.0.1
 ---
 
 # {title}
@@ -75,6 +76,7 @@ description: [TODO: Complete and informative explanation of what the skill does 
 ENTERPRISE_SKILL_MD = '''---
 name: {name}
 description: "[TODO: WHAT this skill does — 1-2 sentences]. Provider-agnostic: works with any LLM backend (OpenAI, Claude, Mistral, Gemini, Hermes, Copilot, or any agent with tool use). Free-first: starts with $0 tools before requiring paid services. Use when: [TODO: specific trigger scenarios and keywords]."
+version: 0.0.1
 ---
 
 # {title}
