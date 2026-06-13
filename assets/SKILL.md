@@ -1,7 +1,7 @@
 ---
 name: assets
 description: "Asset management skill — handles digital asset operations, token metadata, and portfolio tracking across EVM chains"
-version: 0.0.4
+version: 0.0.5
 license: MIT
 metadata:
   openclaw:

@@ -2,7 +2,7 @@
 name: smart-home
 description: |
   Skills for controlling smart home devices — lights, switches, sensors, and home automation systems.
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Smart Home

@@ -2,7 +2,7 @@
 name: multi-agent-telegram-config
 description: |
   Steps to enable/disable Telegram per agent in a multi-agent Hermes setup, ensuring profile segregation and correct gateway configuration.
-version: 0.0.4
+version: 0.0.5
 ---
 
 triggers:

@@ -1,7 +1,7 @@
 ---
 name: audiosurf-visualizer-refactor
 description: "Create immersive, enterprise-grade, audio-reactive 3D visualizers inspired by AudioSurf — neon-drenched racing tracks, beat-synced particle explosions, and procedural environments that dance to any audio source. Provider-agnostic: works with any LLM backend (OpenAI, Claude, Mistral, Gemini, Hermes, Copilot, or any agent with tool use). Free-first: 100% $0 open-source stack (Three.js, React Three Fiber, Web Audio API). Use when: building music visualizers, audio-reactive 3D experiences, beat-synced WebGL games, frequency-driven particle systems, neon racing games, or any project combining real-time audio analysis with 3D graphics."
-version: 0.0.4
+version: 0.0.5
 ---
 
 # AudioSurf Visualizer

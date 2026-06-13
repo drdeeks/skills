@@ -2,7 +2,7 @@
 name: openclaw-hermes-docker
 description: Deploy OpenClaw multi-agent fleet in Docker containers with Hermes agent
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # OpenClaw + Hermes Brain Docker Deployment
 

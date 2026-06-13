@@ -11,7 +11,7 @@ description: 'Autonomous content clipping factory — multi-agent system that cl
   shorts, content factory, content farm, Vugola, Postiz, content rewards, repurpose
   video.'
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Clip Factory
 

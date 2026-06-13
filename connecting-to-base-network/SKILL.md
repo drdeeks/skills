@@ -2,7 +2,7 @@
 name: connecting-to-base-network
 description: Provides Base network configuration including RPC endpoints, chain IDs,
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Connecting to Base Network
 

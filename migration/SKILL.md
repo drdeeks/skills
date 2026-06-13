@@ -5,7 +5,7 @@ description: 'Optional migration workflows for importing user state and customiz
     other agent systems into Hermes Agent.'
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 Optional migration workflows for importing user state and customizations from
 other agent systems into Hermes Agent.

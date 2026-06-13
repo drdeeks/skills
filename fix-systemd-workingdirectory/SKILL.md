@@ -2,7 +2,7 @@
 description: Fix systemd service WorkingDirectory issues when services fail to start
   due to path problems
 name: fix-systemd-workingdirectory
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Fix Systemd Service WorkingDirectory Issues

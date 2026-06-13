@@ -2,7 +2,7 @@
 name: social-media
 description: |
   Skills for interacting with social platforms and social-media workflows — posting, reading, monitoring, and account operations.
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Social Media

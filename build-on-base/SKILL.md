@@ -12,7 +12,7 @@ description: >
   senders, ERC-8021 attribution wiring, base.dev API, register agent, builder code registration;
   (6) Node operation — run Base node, Reth setup, hardware requirements, self-hosted RPC, sync;
   (7) Migrations — migrate OnchainKit, OnchainKitProvider to WagmiProvider, wagmi
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Base Development

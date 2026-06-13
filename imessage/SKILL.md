@@ -10,7 +10,7 @@ metadata:
     - macOS
     - Apple
 name: imessage
-version: 0.0.4
+version: 0.0.5
 ---
 
 # iMessage

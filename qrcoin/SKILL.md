@@ -2,7 +2,7 @@
 name: qrcoin
 description: Interact with QR Coin auctions on Base. Use when the user wants to participate in qrcoin.fun QR code auctions — check auction status, view current bids, create new bids, or contribute to existing bids. QR Coin lets you bid to display URLs on QR codes; the highest bidder's URL gets encoded.
 metadata: {"clawdbot":{"emoji":"📱","homepage":"https://qrcoin.fun","requires":{"bins":["curl","jq"]}}}
-version: 0.0.1
+version: 0.0.2
 ---
 
 # QR Coin Auction

@@ -1,7 +1,7 @@
 ---
 name: remittance-pro-growth-engine
 description: "Autonomous client acquisition and growth engine for Email Remittance Pro — a crypto-to-email remittance service with gift card offramps. Deploys subagents across 10+ campaigns spanning B2C corridors (US→Mexico, UAE→India, US→Philippines, Saudi→Pakistan, UK→Nigeria) and B2B partnerships (DAOs, payroll platforms, freelance platforms, exchanges). Handles lead discovery, pipeline management, multi-channel outreach (Facebook, WhatsApp, Telegram, TikTok, email, governance forums, LinkedIn, Discord), content creation, influencer sourcing, SEO, referral loops, credential bootstrapping, and campaign analytics. Free-first cost strategy with $0 startup. Provider-agnostic — works with any LLM agent runtime. Goal: $5M total value processed through the application. Use when: client acquisition, growth campaigns, outreach, lead generation, market scanning, corridor expansion, partnership development, or any task related to growing Email Remittance Pro's transaction volume."
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Remittance Pro Growth Engine

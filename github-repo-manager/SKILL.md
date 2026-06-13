@@ -7,7 +7,7 @@ metadata:
   tags: ["github", "repository", "license", "automation", "bulk-management"]
   github-api: true
 allowed-tools: "Bash(command:*),WebFetch(url:*),WebSearch(query:*)"
-version: 0.0.4
+version: 0.0.5
 ---
 
 # GitHub Repository Manager

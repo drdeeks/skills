@@ -3,7 +3,7 @@ description: Scan filesystems for "skills" directories, index files into SQLite,
   diff, deduplicate by content hash, and canonicalize by version. Handles large trees,
   symlinks, and node_modules bloat.
 name: filesystem-skill-scanner
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Filesystem Skill Scanner

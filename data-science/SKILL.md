@@ -2,7 +2,7 @@
 name: data-science
 description: |
   Skills for data science workflows — interactive exploration, Jupyter notebooks, data analysis, and visualization.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Data Science

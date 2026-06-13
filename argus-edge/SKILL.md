@@ -5,7 +5,7 @@ description: Argus-style prediction market edge detection and betting strategy. 
   primary (fresh) Polymarket bets. Use for prediction market betting, EV calculation,
   Polymarket strategy, or market making.
 name: argus-edge
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Argus Edge — Prediction Market Betting Engine

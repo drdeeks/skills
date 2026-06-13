@@ -2,7 +2,7 @@
 name: note-taking
 description: |
   Note taking skills, to save information, assist with research, and collab on multi-session planning and information sharing.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Note Taking

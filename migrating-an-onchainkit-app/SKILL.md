@@ -1,7 +1,7 @@
 ---
 name: migrating-an-onchainkit-app
 description: "Migrates apps from @coinbase/onchainkit to standalone wagmi/viem components with zero OnchainKit dependency — automated codemod and migration guide"
-version: 0.0.4
+version: 0.0.5
 license: MIT
 metadata:
   openclaw:

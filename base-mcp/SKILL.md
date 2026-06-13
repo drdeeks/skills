@@ -1,7 +1,7 @@
 ---
 description: "Base MCP — gives your AI assistant access to a Base Account via the Base MCP server (mcp.base.org). Wallet, portfolio, sending, swapping, signing, x402 payments, batched contract calls, and transaction history across supported chains."
 name: base-mcp
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Base MCP

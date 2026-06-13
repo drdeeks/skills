@@ -3,7 +3,7 @@ name: red-teaming
 description: 'Category for skills related to red-teaming. Contains: godmode'
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # Red-teaming Skills Category
 

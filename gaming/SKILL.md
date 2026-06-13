@@ -3,7 +3,7 @@ name: gaming
 description: |
   Skills for setting up, configuring, and managing game servers, modpacks, and gaming-related infrastructure.
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Gaming

@@ -1,7 +1,7 @@
 ---
 name: ens-primary-name
 description: Set your primary ENS name on Base and other L2s. Use when user wants to set their ENS name, configure reverse resolution, set primary name, or make their address resolve to an ENS name. Supports Base, Arbitrum, Optimism, and Ethereum mainnet.
-version: 0.0.1
+version: 0.0.2
 ---
 
 # ENS Primary Name

@@ -16,7 +16,7 @@ metadata:
     - Persona
     - Import
 name: openclaw-migration
-version: 0.0.4
+version: 0.0.5
 ---
 
 # OpenClaw -> Hermes Migration

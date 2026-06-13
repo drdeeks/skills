@@ -1,7 +1,7 @@
 ---
 name: multi-bot-management
 description: Run multiple Telegram bots on the same server without conflicts. Covers token management, separate state/log files, systemd services, and troubleshooting.
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Multi-Bot Management

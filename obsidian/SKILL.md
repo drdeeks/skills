@@ -1,7 +1,7 @@
 ---
 name: obsidian
 description: Read, search, and create notes in the Obsidian vault.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Obsidian Vault

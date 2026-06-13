@@ -3,7 +3,7 @@ name: docker-management
 description: Manage Docker containers, images, volumes, networks, and Compose stacks — lifecycle ops, debugging, cleanup, and Dockerfile optimization.
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # Docker Management
 

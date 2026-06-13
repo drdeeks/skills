@@ -14,7 +14,7 @@ metadata:
       bins:
       - nano-pdf
 name: nano-pdf
-version: 0.0.4
+version: 0.0.5
 ---
 
 # nano-pdf

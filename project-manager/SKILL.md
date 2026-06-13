@@ -11,7 +11,7 @@ metadata:
     - validation
     - changelog
     - performance
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Project Manager - Quality & Execution Layer

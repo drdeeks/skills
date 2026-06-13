@@ -1,7 +1,7 @@
 ---
 name: onchainkit
 description: Build onchain applications with React components and TypeScript utilities from Coinbase's OnchainKit. Use when users want to create crypto wallets, swap tokens, mint NFTs, build payments, display blockchain identities, or develop any onchain app functionality. Supports wallet connection, transaction building, token operations, identity management, and complete onchain app development workflows.
-version: 0.0.1
+version: 0.0.2
 ---
 
 # OnchainKit

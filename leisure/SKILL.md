@@ -3,7 +3,7 @@ name: leisure
 description: 'Category for skills related to leisure. Contains: find-nearby'
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # Leisure Skills Category
 

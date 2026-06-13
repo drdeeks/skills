@@ -1,7 +1,7 @@
 ---
 name: polymarket
 description: "Query Polymarket prediction market data — search markets, get prices, and analyze outcomes via public REST APIs"
-version: 0.0.2
+version: 0.0.3
 license: MIT
 metadata:
   openclaw:

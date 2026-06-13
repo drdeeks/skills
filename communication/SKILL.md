@@ -3,7 +3,7 @@ name: communication
 description: Communication and decision-making frameworks — structured response formats
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 Communication and decision-making frameworks — structured response formats for proposals, trade-off analysis, and stakeholder-ready recommendations.
 

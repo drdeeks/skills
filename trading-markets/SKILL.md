@@ -2,7 +2,7 @@
 name: trading-markets
 description: "Prediction market and trading toolkit. Polymarket API querying, arbitrage detection, Kalshi integration with RSA-PSS auth, Kelly criterion sizing, wallet setup, ERC-8004 agent identity, multi-agent analysis prompts. Covers Polymarket, Kalshi, OpinionLaps, and crypto perps. Triggers: prediction market data, arbitrage detection, Kalshi trading, Kelly sizing, wallet configuration, on-chain agent identity, or multi-agent trading analysis."
 license: MIT
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Trading Markets — Prediction Market & Trading Toolkit

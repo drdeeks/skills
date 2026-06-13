@@ -3,7 +3,7 @@ name: x-twitter
 description: Interact with Twitter/X — read tweets, search, post, like, retweet, and
 license: MIT
 metadata:
-version: 0.0.3
+version: 0.0.4
 ---
 # twitter-openclaw 🐦‍⬛
 

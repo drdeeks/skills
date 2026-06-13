@@ -1,7 +1,7 @@
 ---
 name: skill-scan-validate-resolver
 description: "Scan, validate, and resolve skills across multiple directories. Ensures all skills are agnostic, complete, and compliant with skill-creator standards."
-version: 0.0.7
+version: 0.0.8
 metadata:
   openclaw:
     version: "1.0"

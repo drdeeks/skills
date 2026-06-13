@@ -29,7 +29,7 @@ metadata:
     primaryEnv: EIGHTSCAN_API_KEY
     emoji: "🔗"
     homepage: https://www.8004scan.io/developers/docs
-version: 0.0.4
+version: 0.0.5
 ---
 
 # ERC-8004 — Unified Agent Identity, Discovery & Webhooks Skill

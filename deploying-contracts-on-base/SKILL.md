@@ -2,7 +2,7 @@
 name: deploying-contracts-on-base
 description: Deploys smart contracts to Base using Foundry. Covers forge create commands,
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Deploying Contracts on Base
 

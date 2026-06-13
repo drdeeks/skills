@@ -15,7 +15,7 @@ metadata:
     - color
     - animation
     - accessibility
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Frontend Design - UI/UX Intelligence

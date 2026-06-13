@@ -9,7 +9,7 @@ metadata:
     - skills
     - placeholder
 name: skills
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Skills

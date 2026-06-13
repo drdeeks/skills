@@ -9,7 +9,7 @@ description: |
   Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:"acp"),
   or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print
   --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Coding Agent (bash-first)

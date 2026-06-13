@@ -34,7 +34,7 @@ metadata:
     - agent-allman
     - erc-8004
 name: multi-bot-agent-management
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Multi-Bot Agent Management System

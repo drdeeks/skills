@@ -2,7 +2,7 @@
 name: running-a-base-node
 description: Runs a Base node for production environments. Covers hardware requirements,
 license: MIT
-version: 0.0.3
+version: 0.0.4
 ---
 # Running a Base Node
 

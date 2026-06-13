@@ -8,7 +8,7 @@ description: 'Create, manage, and extend portable Linux USB environments with Ve
   persistent drive, building agent isolation environments, creating bootable USB with
   persistence, managing portable Linux systems, configuring USB-based agent workspaces.'
 license: MIT
-version: 0.0.1
+version: 0.0.2
 ---
 # Portable Linux USB
 

@@ -2,7 +2,7 @@
 name: yoink
 description: Play Yoink, an onchain capture-the-flag game on Base. Yoink the flag from the current holder, check game stats and leaderboards, view player scores, and compete for the trophy. Uses Bankr for transaction execution.
 metadata: {"clawdbot":{"emoji":"🚩","homepage":"https://basescan.org/address/0x4bBFD120d9f352A0BEd7a014bd67913a2007a878","requires":{"bins":["curl","jq"]}}}
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Yoink

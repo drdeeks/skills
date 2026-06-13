@@ -9,7 +9,7 @@ description: |
   smart contracts, (5) any web3/blockchain/onchain development task. NOT for: trading,
   price checking, or portfolio management — use a trading skill for those.
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 
 ----|-----|---------------|

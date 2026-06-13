@@ -2,7 +2,7 @@
 name: mlops
 description: |
   Knowledge and Tools for Machine Learning Operations - tools and frameworks for training, fine-tuning, deploying, and optimizing ML/AI models.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Mlops

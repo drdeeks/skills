@@ -1,7 +1,7 @@
 ---
 name: convert-farcaster-miniapp-to-app
 description: Converts Farcaster miniapp SDK projects into regular Base/web apps. Starts with an interactive quiz to choose between the default regular-app conversion and a narrowly isolated Farcaster surface when something truly needs to remain separate. Handles wagmi connectors, providers, auth, SDK actions, manifest routes, meta tags, dependencies, and read-only preservation.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Convert Farcaster Miniapp to Base App

@@ -3,7 +3,7 @@ name: inference-sh
 description: "Run 150+ AI applications via inference.sh. Image generation, video creation, LLMs, search, 3D, and more through a single API key and unified interface."
 license: MIT
 metadata:
-version: 0.0.4
+version: 0.0.5
 ---
 # inference.sh
 

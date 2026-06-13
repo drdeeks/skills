@@ -2,7 +2,7 @@
 name: hackathon-manager
 description: "Manages hackathon participation, project organization, and submission workflows. Tracks deadlines, team members, and deliverables."
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 # Hackathon Manager
 

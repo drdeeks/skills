@@ -3,7 +3,7 @@ name: gifs
 description: |
   Skills for searching, downloading, and working with GIFs and short-form animated media.
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Gifs

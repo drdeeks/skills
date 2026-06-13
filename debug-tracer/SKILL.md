@@ -1,7 +1,7 @@
 ---
 name: debug-tracer
 description: Systematic upstream/downstream issue tracing for any failure — HTTP errors, load failures, CORS, network, auth, signing, UI state, backend validation. Use when debugging any "load failed", silent error, unexpected response, broken flow, or integration issue. Forces full-path diagnosis before attempting any fix. Prevents blind patching.
-version: 0.0.4
+version: 0.0.5
 ---
 
 # Debug Tracer

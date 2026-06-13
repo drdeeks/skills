@@ -7,7 +7,7 @@ description: >
   Triggers on: "publish signal", "post trade signal", "register provider",
   "subscribe to signals", "copy trade", "bankr signals", "signal feed",
   "trading leaderboard", "read signals", "get top traders".
-version: 0.0.1
+version: 0.0.2
 ---
 
 # Bankr Signals

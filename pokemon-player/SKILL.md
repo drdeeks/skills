@@ -3,7 +3,7 @@ description: Play Pokemon games autonomously via headless emulation. Starts a ga
   server, reads structured game state from RAM, makes strategic decisions, and sends
   button inputs — all from the terminal.
 name: pokemon-player
-version: 0.0.4
+version: 0.0.5
 ---
 # Pokemon Player
 

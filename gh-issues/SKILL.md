@@ -14,7 +14,7 @@ metadata:
       - gh
 name: gh-issues
 license: MIT
-version: 0.0.4
+version: 0.0.5
 ---
 
 # gh-issues — Auto-fix GitHub Issues with Parallel Sub-agents

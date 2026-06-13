@@ -1,11 +1,11 @@
 {
   "skills": {
     "skill-creator": {
-      "current_version": "0.0.6",
-      "previous_version": "0.0.5",
-      "last_packaged": "2026-06-13T04:15:55.520015+00:00",
+      "current_version": "0.0.9",
+      "previous_version": "0.0.8",
+      "last_packaged": "2026-06-13T07:09:49.614365+00:00",
       "files": 25,
-      "size_bytes": 205337,
+      "size_bytes": 206721,
       "history": [
         {
           "version": "0.0.4",
@@ -20,6 +20,11 @@
         {
           "version": "0.0.6",
           "timestamp": "2026-06-13T04:15:55.520015+00:00",
+          "files": 25
+        },
+        {
+          "version": "0.0.9",
+          "timestamp": "2026-06-13T07:09:49.614365+00:00",
           "files": 25
         }
       ]
@@ -39,6 +44,6 @@
       ]
     }
   },
-  "last_packaged": "2026-06-13T05:44:09.760148+00:00",
+  "last_packaged": "2026-06-13T07:10:35.465580+00:00",
   "total_packaged": 0
 }

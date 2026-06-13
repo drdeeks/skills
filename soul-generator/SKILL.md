@@ -1,7 +1,7 @@
 ---
 name: soul-generator
 description: "Generates tailored SOUL.md documents for agents based on their job duties, role requirements, and organizational vibe"
-version: 0.0.3
+version: 0.0.4
 license: MIT
 metadata:
   openclaw:

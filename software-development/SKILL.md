@@ -1,7 +1,7 @@
 ---
 name: software-development
 description: Software development methodology skills — planning, code review, subagent-driven development, debugging, test-driven development, and plan writing.
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Software Development Skills
