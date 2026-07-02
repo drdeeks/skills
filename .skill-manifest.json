@@ -1,0 +1,53 @@
+{
+  "skills": {
+    "enterprise-blueprint": {
+      "current_version": "0.0.6",
+      "previous_version": "0.0.5",
+      "last_packaged": "2026-07-02T21:18:50.703013+00:00",
+      "files": 13,
+      "size_bytes": 156714,
+      "history": [
+        {
+          "version": "0.0.6",
+          "timestamp": "2026-07-02T21:18:50.703013+00:00",
+          "files": 13
+        }
+      ]
+    },
+    "enterprise-blueprint-validation": {
+      "current_version": "0.0.2",
+      "previous_version": "0.0.1",
+      "last_packaged": "2026-07-02T21:25:22.690614+00:00",
+      "files": 11,
+      "size_bytes": 38866,
+      "history": [
+        {
+          "version": "0.0.2",
+          "timestamp": "2026-07-02T21:25:22.690614+00:00",
+          "files": 11
+        }
+      ]
+    },
+    "guardrail-enforcement": {
+      "current_version": "0.1.2",
+      "previous_version": "0.1.1",
+      "last_packaged": "2026-07-02T22:25:56.554972+00:00",
+      "files": 20,
+      "size_bytes": 112534,
+      "history": [
+        {
+          "version": "0.1.1",
+          "timestamp": "2026-07-02T21:34:47.639373+00:00",
+          "files": 13
+        },
+        {
+          "version": "0.1.2",
+          "timestamp": "2026-07-02T22:25:56.554972+00:00",
+          "files": 20
+        }
+      ]
+    }
+  },
+  "last_packaged": "2026-07-02T22:25:56.554972+00:00",
+  "total_packaged": 1
+}
