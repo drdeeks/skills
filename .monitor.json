@@ -1,0 +1,18 @@
+{
+  "watches": [
+    {
+      "name": "skill_version",
+      "condition": {
+        "type": "skill_version",
+        "root": ".",
+        "depth": 1
+      },
+      "action": {
+        "type": "git_commit",
+        "message_template": "{skill_name} version bumped to v{version}",
+        "scope": "skill_dir"
+      }
+    }
+  ],
+  "state_path": ".monitor-state.json"
+}
