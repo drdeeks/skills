@@ -180,10 +180,18 @@ def action_git_commit(action, trip, base_dir, dry_run):
     repo = git_root(Path(trip.get("skill_dir", base_dir)))
     if repo is None:
         return {"action": "git_commit", "status": "failed", "detail": "not a git repository", "message": message}
-    add_target = trip.get("skill_dir") if scope == "skill_dir" else str(repo)
+    if scope == "skill_dir":
+        add_targets = [trip.get("skill_dir")]
+        # Keep the root manifest in lockstep: its entry for this skill records the
+        # very version we're committing, so it travels with the skill's commit.
+        manifest = repo / ".skill-manifest.json"
+        if manifest.is_file():
+            add_targets.append(str(manifest))
+    else:
+        add_targets = [str(repo)]
     if dry_run:
-        return {"action": "git_commit", "status": "planned", "message": message, "add": add_target}
-    subprocess.run(["git", "-C", str(repo), "add", "--", add_target], capture_output=True, text=True)
+        return {"action": "git_commit", "status": "planned", "message": message, "add": add_targets}
+    subprocess.run(["git", "-C", str(repo), "add", "--", *add_targets], capture_output=True, text=True)
     proc = subprocess.run(["git", "-C", str(repo), "commit", "-m", message],
                           capture_output=True, text=True)
     if proc.returncode != 0:
