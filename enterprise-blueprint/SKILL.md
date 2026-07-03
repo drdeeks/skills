@@ -1,6 +1,6 @@
 ---
 name: enterprise-blueprint
-description: "Generate enterprise-grade technical system blueprints paired with synchronized phase-by-phase enforcement checklists. Enforces modular structure, rollback tags, append-only change logs, and agent role assignment across all implementation phases. Provider-agnostic: OpenAI, Claude, Mistral, Gemini, Hermes, or any LLM with tool use. Free-first: $0 Python stdlib toolchain."
+description: "Own the full enterprise-blueprint lifecycle in one skill: generate technical system blueprints, synchronize phase-by-phase enforcement checklists, validate against enterprise rules, and orchestrate tiered phase-gated testing (unit/integration/e2e/playwright) — no hand-off to a second skill required. Enforces modular structure, rollback tags, append-only change logs, and agent role assignment across all implementation phases. Provider-agnostic: OpenAI, Claude, Mistral, Gemini, Hermes, or any LLM with tool use. Free-first: $0 Python stdlib toolchain."
 license: MIT
 metadata:
   tags:
@@ -10,6 +10,8 @@ metadata:
     - planning
     - checklist
     - validation
+    - testing
+    - phase-gating
     - devops
   openclaw:
     tags:
@@ -36,12 +38,12 @@ metadata:
     - hermes
     - copilot
     - any
-version: 0.0.6
+version: 0.0.7
 ---
 
 # Enterprise Blueprint
 
-Unified system for generating, validating, and maintaining enterprise-grade technical blueprints alongside synchronized enforcement checklists, with agent role assignment and progress measurement built in. The blueprint is the law. The checklist is the enforcement.
+Unified system for generating, validating, testing, and maintaining enterprise-grade technical blueprints alongside synchronized enforcement checklists, with agent role assignment and progress measurement built in. **The full lifecycle — generate → validate → test → assign — lives in this single skill; nothing hands off to a separate validation or testing skill to complete.** The blueprint is the law. The checklist is the enforcement.
 
 ## Provider Compatibility
 
@@ -170,6 +172,35 @@ python3 scripts/assign_agents.py ./project --metrics
 
 See [references/agent-roles.md](references/agent-roles.md) for role taxonomy, delegation patterns, load-balancing rules, and measurement framework.
 
+## Workflow: Run Phase-Gated Tests
+
+Testing closes the lifecycle in the same skill that generated the blueprint — a
+phase is not "done" until its tier of tests passes. `test-runner.py` discovers
+`tests/<tier>/` and runs each tier in order (unit → integration → e2e →
+playwright), stopping at the first failing gate.
+
+```bash
+# Run every discovered tier, phase-gated (stop at first failing tier)
+python3 scripts/test-runner.py ./project
+
+# Run a single tier
+python3 scripts/test-runner.py ./project --tier unit
+
+# Preview the plan without executing anything
+python3 scripts/test-runner.py ./project --dry-run
+
+# Machine-readable report for CI / the guardrail gate
+python3 scripts/test-runner.py ./project --json
+```
+
+Each tier is run with whatever runner is present (pytest → unittest → bash
+fallback), so the same command works whether a project ships Python or shell
+tests. A failing gate blocks the corresponding checklist phase from being marked
+complete. See [references/testing-framework.md](references/testing-framework.md)
+for tier discovery and runner selection, [references/phase-gating.md](references/phase-gating.md)
+for how test gates bind to checklist phases, and [references/cli-wiring.md](references/cli-wiring.md)
+for wiring the runner into a pipeline or the guardrail gate.
+
 ## Scripts
 
 | Script | Purpose |
@@ -177,6 +208,7 @@ See [references/agent-roles.md](references/agent-roles.md) for role taxonomy, de
 | `scripts/init_blueprint.py` | Scaffold a new blueprint + checklist pair with full enterprise structure |
 | `scripts/validate_blueprint.py` | Validate a blueprint against enterprise rules; FAIL/WARN/PASS scoring |
 | `scripts/generate_checklist.py` | Generate or sync a granular enforcement checklist from a blueprint |
+| `scripts/test-runner.py` | Orchestrate tiered phase-gated tests (unit/integration/e2e/playwright); pytest→unittest→bash fallback; `--tier`, `--dry-run`, `--json` |
 | `scripts/assign_agents.py` | Manage agent role assignments and report completion metrics |
 
 ## Enforced Output Statistics
@@ -185,7 +217,7 @@ Every script produces structured JSON on completion:
 
 ```json
 {
-  "operation": "init_blueprint | validate | generate_checklist | assign_agents",
+  "operation": "init_blueprint | validate | generate_checklist | test_run | assign_agents",
   "timestamp": "ISO8601",
   "status": "success | failed | dry_run",
   "project": "project-name",
@@ -235,3 +267,6 @@ See [references/enterprise-rules.md](references/enterprise-rules.md) for the ful
 - **Agent role taxonomy, delegation, and measurement**: [references/agent-roles.md](references/agent-roles.md) — Read when assigning agents or analyzing bottlenecks
 - **Phase-type templates for common implementation phases**: [references/phase-templates.md](references/phase-templates.md) — Read when populating a specific phase type for the first time
 - **Enterprise enforcement rules and full error catalog**: [references/enterprise-rules.md](references/enterprise-rules.md) — Read when validating, troubleshooting, or enforcing compliance
+- **Tiered test discovery and runner selection**: [references/testing-framework.md](references/testing-framework.md) — Read when adding tests or configuring the test-runner
+- **Binding test gates to checklist phases**: [references/phase-gating.md](references/phase-gating.md) — Read when a phase must not complete until its tests pass
+- **Wiring the test-runner into a pipeline or the guardrail gate**: [references/cli-wiring.md](references/cli-wiring.md) — Read when automating tests in CI or chaining to guardrail-enforcement
