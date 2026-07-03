@@ -1372,13 +1372,26 @@ install_ventoy() {
     print_info "[3/6] Locating Ventoy package..."
     log "[3/6] Checking local Ventoy tarball: $VENTOY_TARBALL"
     if [[ ! -f "$VENTOY_TARBALL" ]]; then
-        print_error "Local Ventoy tarball not found at: $VENTOY_TARBALL"
-        print_info "How to resolve: Download Ventoy and place it in the repo:"
-        print_info "  mkdir -p $SCRIPT_DIR/volumes/ventoy"
-        print_info "  curl -fSL -o $VENTOY_TARBALL https://github.com/ventoy/Ventoy/releases/download/v${VENTOY_VERSION}/ventoy-${VENTOY_VERSION}-linux.tar.gz"
-        log "ERROR: Tarball not found at $VENTOY_TARBALL"
-        read -p "Press Enter to continue..."
-        return 1
+        # Not bundled by design — fetch it on demand (needs network once).
+        print_info "Ventoy tarball not present — fetching v${VENTOY_VERSION} on demand..."
+        log "Ventoy tarball absent; attempting on-demand fetch to $VENTOY_TARBALL"
+        local ventoy_url="https://github.com/ventoy/Ventoy/releases/download/v${VENTOY_VERSION}/ventoy-${VENTOY_VERSION}-linux.tar.gz"
+        run_or_dry mkdir -p "$(dirname "$VENTOY_TARBALL")"
+        if command -v curl >/dev/null 2>&1; then
+            run_or_dry curl -fSL -o "$VENTOY_TARBALL" "$ventoy_url"
+        elif command -v wget >/dev/null 2>&1; then
+            run_or_dry wget -O "$VENTOY_TARBALL" "$ventoy_url"
+        fi
+        if [[ "$DRY_RUN" != "1" ]] && { [[ ! -f "$VENTOY_TARBALL" ]] || ! tar -tzf "$VENTOY_TARBALL" >/dev/null 2>&1; }; then
+            [[ -f "$VENTOY_TARBALL" ]] && rm -f "$VENTOY_TARBALL"
+            print_error "Could not fetch Ventoy (offline?). Fetch it once, then re-run:"
+            print_info "  scripts/fetch-ventoy.sh --version ${VENTOY_VERSION}"
+            print_info "  (or) curl -fSL -o $VENTOY_TARBALL $ventoy_url"
+            log "ERROR: on-demand Ventoy fetch failed"
+            read -p "Press Enter to continue..."
+            return 1
+        fi
+        print_success "Fetched Ventoy v${VENTOY_VERSION}"
     fi
     print_success "Found: $(basename "$VENTOY_TARBALL") ($(du -h "$VENTOY_TARBALL" | cut -f1))"
 

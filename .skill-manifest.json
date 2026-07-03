@@ -44,17 +44,22 @@
       ]
     },
     "portable-usb-manager": {
-      "current_version": "2.0.8",
-      "previous_version": null,
-      "last_packaged": "2026-07-03T03:22:24.100321+00:00",
-      "files": 100,
-      "size_bytes": 21354287,
+      "current_version": "2.0.9",
+      "previous_version": "2.0.8",
+      "last_packaged": "2026-07-03T03:53:59.980195+00:00",
+      "files": 101,
+      "size_bytes": 1382341,
       "history": [
         {
           "version": "2.0.8",
           "timestamp": "2026-07-03T03:22:24.100321+00:00",
           "files": 100,
           "note": "imported from Hemlock shared/skills into canonical source of truth"
+        },
+        {
+          "version": "2.0.9",
+          "timestamp": "2026-07-03T03:53:59.980195+00:00",
+          "files": 101
         }
       ]
     },
@@ -89,6 +94,6 @@
       ]
     }
   },
-  "last_packaged": "2026-07-03T03:36:28.932414+00:00",
-  "total_packaged": 5
+  "last_packaged": "2026-07-03T03:53:59.980195+00:00",
+  "total_packaged": 1
 }
