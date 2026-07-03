@@ -3,3 +3,6 @@ __pycache__/
 .monitor-state.json
 .loop.lock
 *.egg-info/
+
+# Fetched on demand by portable-usb-manager/scripts/fetch-ventoy.sh — never commit the blob
+ventoy-*-linux.tar.gz
