@@ -179,11 +179,17 @@ Rollback is `git revert`/`git checkout` of the relevant version commit — clean
 
 ## Daily auto-update inside the container
 
-This repository is the upstream for a **daily skills sync** baked into the Hemlock runtime. Each day the container:
+This repository is the upstream for a **daily skills sync** baked into the Hemlock runtime (`docker/skills-auto-update.sh`). Each day the container:
 
-1. Fetches the latest from this repo (network-only; no host coupling).
-2. Version-checks each skill against what it currently has.
-3. Refreshes the read-only skills seed / `/skills` database with anything new or updated.
+1. Fetches the latest from this repo into a container-internal clone (network-only; no host coupling; fully fail-soft when offline).
+2. Version-checks each skill against what it currently has, deciding by content (`rsync --checksum`), so a same-length bump such as `0.1.0 → 0.2.0` is never skipped.
+3. Refreshes the `/skills` database with anything new or updated, copied in as **real files** (never symlinks).
+
+Three invariants make the sync safe to run unattended:
+
+- **Control artifacts are never clobbered.** `.git`, `.monitor.json`, `.monitor-state.json`, `.loop.lock`, `.loop-log.jsonl`, `.gate.json` and `__pycache__` are excluded from every sync, so local watcher/gate state and git history survive an upstream pull.
+- **Control artifacts are root-only.** After every cycle the updater re-asserts `root:root`, mode `600` on those files (the script itself `755`), so guardrail state cannot be tampered with by a non-root process inside the container.
+- **The updater is self-healing.** It runs under a supervisor that restarts the update loop on any unexpected exit. It stops **only** on an explicit stop (the `--stop` flag, raised by the entrypoint at container shutdown) — never by simply dying and staying dead.
 
 The result is a **consistently current skill database** that every agent and crew references — new and updated skills propagate to the whole fleet within a day, automatically, while the guardrail's version tracking makes each day's delta auditable and reversible.
 
