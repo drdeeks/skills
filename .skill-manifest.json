@@ -51,8 +51,53 @@
           "files": 20
         }
       ]
+    },
+    "portable-usb-manager": {
+      "current_version": "2.0.8",
+      "previous_version": null,
+      "last_packaged": "2026-07-03T03:22:24.100321+00:00",
+      "files": 100,
+      "size_bytes": 21354287,
+      "history": [
+        {
+          "version": "2.0.8",
+          "timestamp": "2026-07-03T03:22:24.100321+00:00",
+          "files": 100,
+          "note": "imported from Hemlock shared/skills into canonical source of truth"
+        }
+      ]
+    },
+    "skill-creator": {
+      "current_version": "3.0.8",
+      "previous_version": null,
+      "last_packaged": "2026-07-03T03:22:24.100321+00:00",
+      "files": 32,
+      "size_bytes": 269546,
+      "history": [
+        {
+          "version": "3.0.8",
+          "timestamp": "2026-07-03T03:22:24.100321+00:00",
+          "files": 32,
+          "note": "imported from Hemlock shared/skills into canonical source of truth"
+        }
+      ]
+    },
+    "skill-installer": {
+      "current_version": "1.0.11",
+      "previous_version": null,
+      "last_packaged": "2026-07-03T03:22:24.100321+00:00",
+      "files": 13,
+      "size_bytes": 116729,
+      "history": [
+        {
+          "version": "1.0.11",
+          "timestamp": "2026-07-03T03:22:24.100321+00:00",
+          "files": 13,
+          "note": "imported from Hemlock shared/skills into canonical source of truth"
+        }
+      ]
     }
   },
-  "last_packaged": "2026-07-02T22:27:08.998892+00:00",
-  "total_packaged": 1
+  "last_packaged": "2026-07-03T03:22:24.100321+00:00",
+  "total_packaged": 6
 }
