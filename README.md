@@ -197,11 +197,13 @@ The result is a **consistently current skill database** that every agent and cre
 
 | Skill | Version | Tier | Purpose |
 |---|---|---|---|
-| [`enterprise-blueprint`](enterprise-blueprint/) | 0.0.6 | enterprise | Generate enterprise system blueprints paired with synchronized phase-gated enforcement checklists and agent role assignment. |
-| [`enterprise-blueprint-validation`](enterprise-blueprint-validation/) | 0.0.2 | enterprise | Validate blueprints, generate phase-gated checklists, and orchestrate tiered testing (unit/integration/e2e/playwright). |
+| [`enterprise-blueprint`](enterprise-blueprint/) | 0.0.7 | enterprise | The full blueprint lifecycle in one skill: generate blueprints, sync phase-gated enforcement checklists, validate against enterprise rules, orchestrate tiered testing (unit/integration/e2e/playwright), and assign/track agents. |
 | [`guardrail-enforcement`](guardrail-enforcement/) | 0.1.3 | enterprise | The enforcer: version watcher + auto-commit, workflow gate + signed audit log, advisory locks, and manifest verification. |
+| [`skill-creator`](skill-creator/) | 3.0.8 | enterprise | The creator: the enforced 11-step authoring/enhancement pipeline (validate → auto-fix → re-validate → test → package → extract-verify) that every skill in this repo passes through. |
+| [`skill-installer`](skill-installer/) | 1.0.11 | basic | The installer: verifies structure and installs a finalized `.skill` into a project, agent workspace, or crew without mutating the upstream skill. |
+| [`portable-usb-manager`](portable-usb-manager/) | 2.0.8 | enterprise | Provision and manage portable, bootable Linux/compute USB systems offline (bundles Ventoy). |
 
-*The `skill-creator` (creator) and `skill-installer` (installer) toolchain is currently baked into the Hemlock image's `shared/skills` and migrates into this repo as each is re-validated through the loop.*
+*Consolidation note: `enterprise-blueprint-validation` was merged into `enterprise-blueprint` at v0.0.7 — its unique `test-runner.py` and testing references moved in, its duplicate `validate_blueprint.py` / `generate_checklist.py` stubs discarded in favor of the fuller originals. A skill must complete its own lifecycle (generate → validate → test) without handing off to a second skill. The retired skill is preserved under `archives/`.*
 
 ## Tags &amp; tooling metadata
 
