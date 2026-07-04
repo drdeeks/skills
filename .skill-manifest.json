@@ -85,20 +85,25 @@
     },
     "skill-installer": {
       "current_version": "1.0.11",
-      "previous_version": null,
-      "last_packaged": "2026-07-03T03:22:24.100321+00:00",
-      "files": 13,
-      "size_bytes": 116729,
+      "previous_version": "1.0.11",
+      "last_packaged": "2026-07-04T14:26:50.717675+00:00",
+      "files": 14,
+      "size_bytes": 121697,
       "history": [
         {
           "version": "1.0.11",
           "timestamp": "2026-07-03T03:22:24.100321+00:00",
           "files": 13,
           "note": "imported from Hemlock shared/skills into canonical source of truth"
+        },
+        {
+          "version": "1.0.11",
+          "timestamp": "2026-07-04T14:26:50.717675+00:00",
+          "files": 14
         }
       ]
     }
   },
-  "last_packaged": "2026-07-04T14:13:41.318204+00:00",
-  "total_packaged": 0
+  "last_packaged": "2026-07-04T14:26:50.717675+00:00",
+  "total_packaged": 1
 }
