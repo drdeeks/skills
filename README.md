@@ -216,6 +216,33 @@ Skills are discoverable through layered tags in `metadata`:
 
 All scripts are pure Python stdlib or POSIX shell, run on Python 3.8+, and emit structured JSON with a `cost` block (`{"tier": 0, "amount_usd": 0.0, "service": "local"}`) so usage is measurable and free by default.
 
+### Provider tags — install-time remap, repo-side auto-strip
+
+**This repository ships STANDARD tags only** (`metadata.tags`). Provider tag blocks
+(`metadata.hermes.tags`, `metadata.openclaw.tags`, `metadata.openai.tags`) are **install-time
+state**, managed automatically at both ends of the lifecycle:
+
+| Stage | What happens | Done by |
+|-------|-------------|---------|
+| Install / seed / enhance in a harness | Canonical tags are **copied** into the detected provider's block so the harness promotes the skill | `skill_enhance.py` remap step (auto-detects `HERMES_*` / `OPENCLAW_*` / `OPENAI_*` env; `--provider` overrides) and the runtime's first-start seeder |
+| Repack / update in-harness | Provider blocks are **kept** — the skill stays picked up | packer never touches them |
+| Commit to any skills repo | Provider blocks are **auto-stripped and the commit amended** — the repo returns to standard | self-contained post-commit gate hook |
+
+The gate hook is **transmitted by every install**: `skill-installer` bakes it in
+(`scripts/gate_hook.py`) and silently places it at the target — live in `.git/hooks/post-commit`
+when a repo exists, dormant at `.githooks/post-commit` when one doesn't (wired on the next
+install or `git init`). A pre-existing foreign hook is never replaced, only chained after.
+The hook's strip logic is fully inlined — it depends on nothing but `python3` (+`pyyaml`).
+Nothing is ever converted back by hand. Details: `skill-creator/references/provider-tag-remapping.md`.
+
+### Self-reliant enforcement
+
+`skill-creator`'s enhance pipeline carries its own **built-in chain enforcer**
+(`scripts/chain.py`) — no external skill required. [`loop-enforcer`](loop-enforcer/) remains the
+universal, programmable version of the same concept for any other project (as
+[`guardrail-enforcement`](guardrail-enforcement/) is for repo integrity); set
+`LOOP_ENFORCER_ROOT` to explicitly delegate enhance to it.
+
 ## Adding or updating a skill
 
 ```bash
