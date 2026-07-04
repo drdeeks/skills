@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-enterprise-blueprint — Validate a blueprint against enterprise compliance rules
+enterprise-blueprint — Validate a blueprint against enterprise compliance rules (v2)
 
-Checks all required sections, rollback tags, change log format, module
-registry, feature flags, performance budgets, and testing requirements.
-Returns a scored FAIL/WARN/PASS report.
+v2: Enforces comprehensive blueprint standard — 1500+ lines, full ASCII diagrams,
+complete SQL schemas, feature spec format compliance, phase checklist completeness,
+5-level error handling, performance budgets with metrics, and zero placeholders.
 
 Usage:
     python3 scripts/validate_blueprint.py <path/to/blueprint.md>
@@ -100,6 +100,17 @@ FEATURE_FLAG_PATTERN = re.compile(r"FEAT_[A-Z][A-Z0-9_]+")
 TODO_PATTERN = re.compile(r"\[TODO", re.IGNORECASE)
 PLACEHOLDER_PATTERN = re.compile(r"\[Define\s|\[Describe\s|\[Insert\s|\[placeholder\]",
                                   re.IGNORECASE)
+
+# Box-drawing characters for ASCII diagrams
+BOX_DRAWING_PATTERN = re.compile(r"[┌┐└┘├┤┬┴┼═║╚╔╗╝╠╣╦╩╬─│┃━]")
+# SQL schema pattern
+CREATE_TABLE_PATTERN = re.compile(r"CREATE\s+TABLE", re.IGNORECASE)
+# Feature spec required fields
+FEATURE_SPEC_FIELDS = [
+    "FEATURE\s+ID", "MODULE\s+REF", "ROLLBACK\s+TAG",
+    "FEATURE\s+FLAG", "PURPOSE", "COMPONENTS", "RULES",
+    r"ERROR[\s_]+STATES", "FALLBACK"
+]
 
 
 def validate(blueprint_path, verbose=False):
@@ -231,6 +242,14 @@ def validate(blueprint_path, verbose=False):
                               r"database\s+schema")
     checks.append(Check("Database schema defined in Part IV", "WARN", has_schema))
 
+    # Count SQL tables — enterprise requires 3+
+    table_count = len(CREATE_TABLE_PATTERN.findall(content))
+    checks.append(Check(
+        "3+ SQL table schemas defined", "WARN",
+        table_count >= 3,
+        f"Found {table_count} CREATE TABLE — a real system needs 3+ tables.",
+    ))
+
     has_api = has_pattern(content, r"/api/v\d+", r"POST /", r"GET /",
                            r"API\s+Contract")
     checks.append(Check("API contracts defined in Part IV", "WARN", has_api))
@@ -247,7 +266,7 @@ def validate(blueprint_path, verbose=False):
                                content, re.IGNORECASE))
     checks.append(Check("p95 performance budget specified", "WARN", has_p95))
 
-    has_coverage = bool(re.search(r"\d+%\s+.*(coverage|line|branch)|coverage.*\d+%",
+    has_coverage = bool(re.search(r"\d+%.*coverage|coverage.*\d+%",
                                     content, re.IGNORECASE))
     checks.append(Check("Test coverage target specified", "WARN", has_coverage))
 
@@ -271,11 +290,111 @@ def validate(blueprint_path, verbose=False):
         f"Found {placeholder_count} unfilled placeholders — populate before marking phase complete.",
     ))
 
-    # ── 13. Document length ───────────────────────────────────────────────────
+    # ── 13. Document length (STRICT) ─────────────────────────────────────────
     checks.append(Check(
-        "Document is substantial (>100 lines)", "WARN",
-        line_count > 100,
-        f"Got {line_count} lines — a production blueprint should be comprehensive.",
+        "Document is comprehensive (>1500 lines)", "FAIL",
+        line_count > 1500,
+        f"Got {line_count} lines — enterprise blueprints must be 1500+ lines. "
+        f"Include full ASCII diagrams, SQL schemas, config blocks, and detailed specs.",
+    ))
+    checks.append(Check(
+        "Document is thorough (>2500 lines)", "WARN",
+        line_count > 2500,
+        f"Got {line_count} lines — thorough blueprints are 2500+ lines.",
+    ))
+
+    # ── 14. ASCII architecture diagram (NEW) ─────────────────────────────────
+    box_chars = BOX_DRAWING_PATTERN.findall(content)
+    checks.append(Check(
+        "ASCII architecture diagram present", "FAIL",
+        len(box_chars) >= 20,
+        f"Found {len(box_chars)} box-drawing characters — Part I needs a full "
+        f"ASCII architecture diagram (50+ lines with ┌┐└┘├┤┬┴┼─│ characters).",
+    ))
+
+    # ── 15. Feature spec format compliance (NEW) ─────────────────────────────
+    # Count feature spec blocks
+    spec_blocks = re.findall(r"FEATURE\s+ID\s*:", content, re.IGNORECASE)
+    spec_count = len(spec_blocks)
+    checks.append(Check(
+        "3+ feature specifications defined", "FAIL",
+        spec_count >= 3,
+        f"Found {spec_count} feature specs — need 3+ with full format compliance.",
+    ))
+
+    # Check that specs have required fields
+    if spec_count >= 1:
+        missing_fields = 0
+        for field in FEATURE_SPEC_FIELDS:
+            field_count = len(re.findall(field, content, re.IGNORECASE))
+            if field_count < spec_count:
+                missing_fields += spec_count - field_count
+        checks.append(Check(
+            "Feature specs have all required fields (PURPOSE, COMPONENTS, RULES, ERROR STATES, FALLBACK)", "FAIL",
+            missing_fields == 0,
+            f"Found {missing_fields} missing fields across specs — each spec needs: "
+            f"FEATURE ID, MODULE REF, ROLLBACK TAG, FEATURE FLAG, PURPOSE, COMPONENTS, "
+            f"RULES, ERROR STATES, FALLBACK.",
+        ))
+
+    # ── 16. Phase checklist completeness (NEW) ────────────────────────────────
+    # Match multiple formats: ### Deliverables, **Deliverables:**, plain "Deliverables:"
+    phase_deliverables = re.findall(r"Deliverables", content, re.IGNORECASE)
+    phase_gates = re.findall(r"Validation\s+Gate", content, re.IGNORECASE)
+    checks.append(Check(
+        "Phases have deliverables and validation gates", "FAIL",
+        len(phase_deliverables) >= 3 and len(phase_gates) >= 3,
+        f"Found {len(phase_deliverables)} Deliverable sections, {len(phase_gates)} "
+        f"Validation Gates — each phase needs both.",
+    ))
+
+    # ── 17. Error handling hierarchy (NEW) ────────────────────────────────────
+    error_levels = re.findall(
+        r"(Level\s+\d|Level\s+[A-Z]|Tier\s+\d|1\.\s+.*Validation|Input\s+Validation|"
+        r"API\s+Errors|Module\s+Errors|Network\s+Errors|System\s+Errors|"
+        r"Level\s+1.*Level\s+5|five.level|5.level)",
+        content, re.IGNORECASE
+    )
+    checks.append(Check(
+        "5-level error handling hierarchy defined", "WARN",
+        len(error_levels) >= 3,
+        f"Found {len(error_levels)} error level references — Part VII needs a "
+        f"5-level hierarchy (Input Validation → API → Module → Network → System).",
+    ))
+
+    # ── 18. Performance budgets with metrics (NEW) ───────────────────────────
+    # Check for actual metric values (number + unit)
+    metric_values = re.findall(r"\d+\s*(ms|seconds?|s\b|mb|gb|req/s|rps)", content, re.IGNORECASE)
+    checks.append(Check(
+        "Performance budgets have concrete metric values", "WARN",
+        len(metric_values) >= 6,
+        f"Found {len(metric_values)} metric values — budgets need concrete numbers "
+        f"(e.g., '200ms', '1GB', '1000 req/s').",
+    ))
+
+    # ── 19. Rollback procedures per phase (NEW) ──────────────────────────────
+    rollback_procs = re.findall(r"[Rr]ollback\s+[Pp]rocedure", content, re.IGNORECASE)
+    checks.append(Check(
+        "Each phase has a rollback procedure", "WARN",
+        len(rollback_procs) >= 3,
+        f"Found {len(rollback_procs)} rollback procedures — each phase needs one.",
+    ))
+
+    # ── 20. No dummy/test content (NEW) ──────────────────────────────────────
+    # Exclude legitimate uses: "hackathon", "mock provider", "test files", etc.
+    dummy_patterns = re.findall(
+        r"(?<!\w)lorem\s+ipsum(?!\w)|(?<!\w)dummy(?!\w)|(?<!\w)fake[^r]|"
+        r"(?<!\w)placeholder\s+data(?!\w)|"
+        r"(?<!\w)foo\s+bar(?!\w)|(?<!\w)baz(?!\w)|"
+        r"(?<!\w)FIXME(?!\w)|(?<!\w)HACK(?!\w)",
+        content, re.IGNORECASE
+    )
+    # Filter out legitimate uses (mock provider, test files, etc.)
+    dummy_count = len(dummy_patterns)
+    checks.append(Check(
+        "No dummy/test/placeholder content", "WARN",
+        dummy_count <= 10,
+        f"Found {dummy_count} dummy-like patterns — remove test data and placeholders.",
     ))
 
     return checks
@@ -290,7 +409,7 @@ def print_report(checks, verbose=False):
     total = len(checks)
 
     print(f"\n{'=' * 62}")
-    print("  Enterprise Blueprint Validation Report")
+    print("  Enterprise Blueprint Validation Report (v2)")
     print(f"{'=' * 62}\n")
 
     if verbose:

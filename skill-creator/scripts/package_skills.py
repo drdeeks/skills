@@ -27,6 +27,27 @@ except ModuleNotFoundError:
     yaml = None
 
 
+# ── Guardrail-system artifacts: MUST survive packaging ────────────────────────
+# The validator declares these skill-root files "never moved, never deleted"
+# (validate.py GUARDRAIL_ARTIFACTS). The .loop-log.jsonl hash-chain lives INSIDE
+# the guard/loop skill and is its traceability record, so the packer must ship
+# it (and its gate/monitor configs) rather than strip it as a dotfile. Import the
+# validator's set so the two can't drift; a local copy is only an import fallback.
+try:
+    _pkg_dir = str(Path(__file__).resolve().parent)
+    if _pkg_dir not in sys.path:
+        sys.path.insert(0, _pkg_dir)
+    from validate import GUARDRAIL_ARTIFACTS as _GUARDRAIL_ARTIFACTS
+except Exception:
+    _GUARDRAIL_ARTIFACTS = {
+        ".loop-log.jsonl", ".gate.json", ".loop.lock",
+        ".monitor.json", ".autowatch.json",
+    }
+# A transient lock must not ship (a packaged lock makes a fresh install look busy).
+TRANSIENT_GUARDRAIL = {".loop.lock"}
+PACKAGED_GUARDRAIL_ARTIFACTS = set(_GUARDRAIL_ARTIFACTS) - TRANSIENT_GUARDRAIL
+
+
 class SkillPackager:
     def __init__(self, skills_root: Path, output_dir: Optional[Path] = None):
         self.skills_root = skills_root.resolve()
@@ -156,6 +177,13 @@ class SkillPackager:
 
     def should_include(self, file_path: Path, skill_dir: Path) -> bool:
         """Determine if file should be included in package."""
+        # Guardrail-system artifacts at the skill ROOT are preserved verbatim —
+        # this beats the blanket dotfile strip below so a guard/loop skill's own
+        # .loop-log.jsonl hash-chain (its traceability record) ships inside the
+        # archive. Root-only, mirroring validate.py's GUARDRAIL_ARTIFACTS contract.
+        if file_path.parent == skill_dir and file_path.name in PACKAGED_GUARDRAIL_ARTIFACTS:
+            return True
+
         excluded_dirs = {
             ".git", "__pycache__", ".pytest_cache", ".mypy_cache",
             ".tox", "node_modules", ".venv", "venv", "dist", "build",

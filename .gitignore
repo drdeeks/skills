@@ -1,8 +1,28 @@
+# ── Python caches / build artifacts ──────────────────────────────────────────
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Guardrail / monitor LOCAL state (regenerated per machine) ─────────────────
 .monitor-state.json
 .loop.lock
-*.egg-info/
+# NOTE: .loop-log.jsonl (the gate's hash-chained audit trail) and .gate.json
+# (gate config) are intentionally TRACKED — they are the traceability record.
+# .monitor.json and .skill-manifest.json are likewise tracked on purpose.
 
-# Fetched on demand by portable-usb-manager/scripts/fetch-ventoy.sh — never commit the blob
+# ── Superseded skills: preserved on disk, kept OUT of the pushed repo ─────────
+archived/
+
+# ── Editor / OS junk ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Fetched on demand by portable-usb-manager (never commit the blob) ─────────
 ventoy-*-linux.tar.gz

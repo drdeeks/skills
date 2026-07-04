@@ -180,18 +180,20 @@ Only these keys are allowed at the top level. Extras trigger a FAIL.
 
 Every script emits structured JSON with `operation`, `timestamp`, `status`, `skill`, and `details`. Every script is directly invokable, and `skill_enhance.py` sequences the full 11-step pipeline by calling each script as an ordinary subprocess.
 
-### `scripts/validate.py` — Validator (read-only)
+### `scripts/skill_enhance.py` — Pipeline Orchestrator WITH CHAIN ENFORCEMENT
 
 ```bash
 # Enterprise (default) — strict counts: 3+ scripts, 5+ refs, 7+ tags
-python3 scripts/validate.py /path/to/skill/
+python3 scripts/skill_enhance.py create --name my-skill --tier enterprise
 
 # Basic — lighter counts: 2+ scripts, 3+ refs, 5+ tags
-python3 scripts/validate.py /path/to/skill/ --basic
+python3 scripts/skill_enhance.py create --name my-skill --tier basic
 
-# JSON output for downstream tooling
-python3 scripts/validate.py /path/to/skill/ --json
+# Update existing skill through enforced pipeline
+python3 scripts/skill_enhance.py update --path ./my-skill
 ```
+
+**CHAIN ENFORCEMENT:** Every pipeline gate (scaffold → frontmatter → scripts → refs → validate → auto_fix → re_validate → test → verify_sources → package → extract_verify) is a LOCKED chain step managed by loop-enforcer. Temp chain workdir auto-created/deleted. Cannot proceed until current step verified + completed. Skill root stays CLEAN — no `.chain` or `.chain-steps` dirs left behind.
 
 Purely read-only — never mutates. Structural fixes live in `auto_fix.py`.
 

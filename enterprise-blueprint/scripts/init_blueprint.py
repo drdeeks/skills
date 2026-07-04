@@ -306,6 +306,36 @@ def generate_blueprint(project_name, phases):
     return "\n".join(parts) + "\n"
 
 
+def generate_changelog(project_name, phases):
+    """Generate standalone CHANGELOG.md from blueprint's changelog section."""
+    d = today()
+    parts = []
+    parts.append(f"# {project_name} — CHANGELOG")
+    parts.append("")
+    parts.append("> This file is the append-only change log. No entry may be modified or deleted.")
+    parts.append("> All entries must follow the format defined in blueprint.md Part V.")
+    parts.append("")
+    parts.append("---")
+    parts.append("")
+    parts.append("## CL-000 — Document Initialization")
+    parts.append("")
+    parts.append("```")
+    parts.append(f"Date        : {d}")
+    parts.append("Contributor : [author]")
+    parts.append("Modules     : [MOD-001]")
+    parts.append("Section Tags: [[PHASE-0-v1]]")
+    parts.append("Files Changed: [blueprint.md, checklist.md, CHANGELOG.md]")
+    parts.append(f"Description : Initial blueprint created via enterprise-blueprint skill.")
+    parts.append(f"              Project: {project_name}. All sections pre-populated with")
+    parts.append("              required enterprise structure awaiting content population.")
+    parts.append("Tests Passing: none — pre-build")
+    parts.append("Phase       : PHASE-0")
+    parts.append("Rollback Ref: N/A — initial document creation")
+    parts.append("```")
+    parts.append("")
+    return "\n".join(parts) + "\n"
+
+
 # ── Checklist generation ───────────────────────────────────────────────────────
 
 def checklist_phase_section(i, phase):
@@ -453,6 +483,7 @@ def main():
     output_dir = Path(args.path)
     blueprint_path = output_dir / "blueprint.md"
     checklist_path = output_dir / "checklist.md"
+    changelog_path = output_dir / "CHANGELOG.md"
     metadata_path = output_dir / "project.json"
 
     status = "dry_run" if args.dry_run else "success"
@@ -467,6 +498,9 @@ def main():
             checklist_path.write_text(
                 generate_checklist(args.project_name, phases), encoding="utf-8"
             )
+            changelog_path.write_text(
+                generate_changelog(args.project_name, phases), encoding="utf-8"
+            )
             metadata = {
                 "project": args.project_name,
                 "slug": slugify(args.project_name),
@@ -475,6 +509,7 @@ def main():
                 "created_at": started,
                 "blueprint": str(blueprint_path),
                 "checklist": str(checklist_path),
+                "changelog": str(changelog_path),
                 "assignments": str(output_dir / "assignments.json"),
             }
             metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
@@ -494,7 +529,7 @@ def main():
             "dry_run": args.dry_run,
             "files_created": (
                 [] if args.dry_run
-                else [str(blueprint_path), str(checklist_path), str(metadata_path)]
+                else [str(blueprint_path), str(checklist_path), str(changelog_path), str(metadata_path)]
             ),
         },
         "cost": {"tier": 0, "amount_usd": 0.0, "service": "local"},
@@ -509,12 +544,14 @@ def main():
             print("[DRY RUN] Would create:")
             print(f"  {blueprint_path}")
             print(f"  {checklist_path}")
+            print(f"  {changelog_path}")
             print(f"  {metadata_path}")
             print(f"  Phases ({len(phases)}): {', '.join(phases)}")
         elif status == "success":
             print(f"[OK] Blueprint initialized: {output_dir}")
             print(f"  blueprint.md  → {blueprint_path}")
             print(f"  checklist.md  → {checklist_path}")
+            print(f"  CHANGELOG.md  → {changelog_path}")
             print(f"  project.json  → {metadata_path}")
         else:
             print(f"[ERROR] {error}")
