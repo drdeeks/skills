@@ -74,54 +74,47 @@ the fix guidance.
 |---|---|---|
 | blueprint.md exists and is readable | File present and UTF-8 readable | Create via `init_blueprint.py` or check path |
 | Version number in header | `Version N.N` in first 500 chars | Add `## Version 1.0` to document header |
-| READ FIRST preamble | Authority statement in first 1000 chars | Add the READ FIRST blockquote from the standard template |
-| PART I present | `# PART I` heading exists | Add the System Overview part |
-| PART II present | `# PART II` heading exists | Add the Module Registry part |
-| PART III present | `# PART III` heading exists | Add the Specifications part |
-| PART IV present | `# PART IV` heading exists | Add the Data Architecture part |
-| PART V present | `# PART V` heading exists | Add the Change Control part |
-| PART VI present | `# PART VI` heading exists | Add the Implementation Checklist part |
-| PART VII present | `# PART VII` heading exists | Add the Quality Standards part |
+| READ FIRST preamble | Authority statement in first 1000 chars | Add the READ FIRST blockquote |
+| PART I–VII present | All 7 `# PART N` headings exist | Add all required parts |
 | At least 1 PHASE tag | `[PHASE-N-v1]` exists | Add phase tags to implementation phases |
 | Vision Statement | Section 1.1 present | Add a 1.1 Vision Statement subsection |
 | Module ID column | `Module ID` in registry table | Add the four-column registry table |
-| Change Log entry format | `Date :` or `YYYY` pattern in change log | Add the CL entry format block to Part V |
-| Contributor Rules | `Contributor Rules` heading | Add the six contributor rules to Part V |
 | CHANGE LOG section | `# CHANGE LOG` heading | Add the change log section after Part VII |
-| At least one CL entry | `## CL-` heading | Add the initialization CL-000 entry |
+| At least one CL entry | `## CL-` heading | Add the initialization CL-001 entry |
 | Migration naming convention | `YYYYMMDD` pattern | Add migration naming rule to Part V |
 | At least 1 module (MOD-NNN) | `MOD-NNN` in content | Populate the module registry |
-| At least 1 feature flag | `FEAT_` pattern | Add feature flags to module registry |
-| Error Handling Standards | `Error Handling Standards` heading | Add the five-level error hierarchy to Part VII |
-| Testing Requirements | `Testing Requirements` heading | Add coverage targets to Part VII |
-| Performance Budgets | `Performance Budgets` heading | Add metric budgets table to Part VII |
+| At least 1 feature flag | `FEAT_[A-Z]` pattern | Add feature flags (must start with letter after FEAT_) |
+| Document >1500 lines | Line count check | Enterprise blueprints must be 1500+ lines |
+| ASCII architecture diagram | 20+ box-drawing characters (┌┐└┘├┤┬┴┼─│) | Add 50+ line ASCII diagram to Part I |
+| 3+ feature specifications | 3+ `FEATURE ID:` blocks | Add feature specs with full format |
+| Feature spec format compliance | All required fields present in each spec | Each spec needs: ID, REF, TAG, FLAG, PURPOSE, COMPONENTS, RULES, ERROR STATES, FALLBACK |
+| Phase deliverables + gates | 3+ Deliverable sections AND 3+ Validation Gates | Every phase needs both deliverables and a validation gate |
 
 ### WARN — Should Fix Before Staging
 
 | Check | What It Validates | Fix |
 |---|---|---|
-| Date in header | `Generated YYYY-MM-DD` in first 500 chars | Add the generation date to the header |
-| Table of contents | TOC block present | Add the standard TABLE OF CONTENTS code block |
-| 6+ section rollback tags | Six or more `[TAG-vN]` patterns | Add rollback tags to all major sections |
-| SYS-OVERVIEW tag | `SYS-OVERVIEW` in a tag | Add `[SYS-OVERVIEW-v1]` to Part I |
-| MODULE-REGISTRY tag | `MODULE-REGISTRY` in a tag | Add `[MODULE-REGISTRY-v1]` to Part II |
-| SPECS tag | `SPECS` in a tag | Add `[SPECS-v1]` to Part III |
-| DATA-ARCH tag | `DATA-ARCH` in a tag | Add `[DATA-ARCH-v1]` to Part IV |
-| CHANGE-CONTROL tag | `CHANGE-CONTROL` in a tag | Add `[CHANGE-CONTROL-v1]` to Part V |
-| QUALITY tag | `QUALITY` in a tag | Add `[QUALITY-v1]` to Part VII |
+| Date in header | `Generated YYYY-MM-DD` in first 500 chars | Add the generation date |
+| Table of contents | TOC block present | Add the standard TABLE OF CONTENTS |
+| 6+ section rollback tags | Six or more `[TAG-vN]` patterns | Add rollback tags to all sections |
+| Required rollback tags | SYS-OVERVIEW, MODULE-REGISTRY, SPECS, DATA-ARCH, CHANGE-CONTROL, QUALITY | Add all reserved tag stems |
 | 3+ modules defined | Three or more `MOD-NNN` patterns | Define all planned modules |
 | 3+ feature flags | Three or more `FEAT_` patterns | Add flags for all modules |
-| Append-only rule stated | `append-only` or `permanent` text | Add the append-only statement to the change log section |
-| Database schema present | `CREATE TABLE` or `PRIMARY KEY` | Add SQL schemas to Part IV |
+| Append-only rule stated | `append-only` or `permanent` text | Add to change log section |
+| 3+ SQL table schemas | 3+ `CREATE TABLE` statements | Add SQL schemas to Part IV |
 | API contracts present | `/api/v` or `POST /` pattern | Add endpoint list to Part IV |
-| p95 budget specified | `p95` or `percentile` pattern | Add p95 target to performance budgets table |
-| Test coverage target | `coverage` percentage pattern | Add coverage % target to testing requirements |
-| Circuit breaker policy | `circuit breaker` or `exponential backoff` | Add retry/circuit breaker to error handling standards |
-| Architecture section | Section with `architecture` in title | Add the 1.2 High-Level Architecture subsection |
-| Tech Stack section | `tech stack` heading | Add the 1.3 Tech Stack subsection with rationale table |
-| No [TODO] markers | Zero `[TODO` occurrences | Replace all placeholder markers with real content |
-| ≤5 unfilled placeholders | Fewer than 6 `[Define`/`[Describe` patterns | Populate the blueprint before marking phases complete |
-| Document substantial | > 100 lines | Add missing content — a short blueprint is an incomplete blueprint |
+| p95 budget specified | `p95` or `percentile` pattern | Add p95 target to budgets |
+| Test coverage target | `coverage` percentage pattern | Add coverage % target |
+| Circuit breaker policy | `circuit breaker` or `exponential backoff` | Add retry/circuit breaker |
+| Architecture section | Section with `architecture` in title | Add 1.2 High-Level Architecture |
+| Tech Stack section | `tech stack` heading | Add 1.3 Tech Stack with rationale table |
+| 5-level error hierarchy | 3+ error level references | Add 5-level hierarchy to Part VII |
+| Concrete performance metrics | 6+ metric values with units (ms, GB, req/s) | Add concrete numbers to budgets |
+| Rollback procedures per phase | 3+ rollback procedure references | Add rollback procedure to each phase |
+| No [TODO] markers | Zero `[TODO` occurrences | Replace with real content |
+| ≤5 unfilled placeholders | Fewer than 6 `[Define`/`[Describe` patterns | Populate before marking phase complete |
+| Document thorough | > 2500 lines | Add more detail for thorough coverage |
+| No dummy content | ≤10 dummy patterns (lorem ipsum, foo, bar, etc.) | Remove test data and placeholders |
 
 ---
 

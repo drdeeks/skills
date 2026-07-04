@@ -36,7 +36,7 @@ metadata:
     - hermes
     - copilot
     - any
-version: 0.1.3
+version: 0.1.4
 ---
 
 # Guardrail Enforcement
@@ -212,6 +212,23 @@ Every Python script emits structured JSON on completion:
   the audit trail that verification will surface.
 - **`--dry-run` everywhere** — rehearse a full gate run before it mutates state or
   writes a log entry.
+
+## Gate state & hash store (`scripts/gate_status.py`)
+
+The gate's audit trail lives in **`.loop-log.jsonl`** at this skill's root — that single
+JSONL file is where **every** HMAC-signed, hash-chained gate entry is stored. Each line
+chains to the previous line's `entry_hash`, so insertion, deletion, or reordering is
+detectable. The signing secret is generated `0600` under `~/.config/gate/hmac.key` and is
+**never** placed in the `.skill` archive or committed.
+
+- **Start / re-run the gate**: `python3 scripts/setup.py . --yes --loop-command '[...]'`
+  to write `.gate.json`, then `python3 scripts/gate.py --config .gate.json` to run it and
+  append a signed entry.
+- **Verify honestly**: `python3 scripts/gate_status.py` reports, without claiming anything
+  it did not check — whether the gate is configured, whether `.loop-log.jsonl` exists and
+  where it is, its entry count, and whether the chain actually verifies (it shells out to
+  `verify_log.py` with the secret). Exit 0 only when the log is present AND the chain is
+  intact.
 
 ## Key References
 

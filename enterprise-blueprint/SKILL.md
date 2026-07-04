@@ -1,6 +1,6 @@
 ---
 name: enterprise-blueprint
-description: "Own the full enterprise-blueprint lifecycle in one skill: generate technical system blueprints, synchronize phase-by-phase enforcement checklists, validate against enterprise rules, and orchestrate tiered phase-gated testing (unit/integration/e2e/playwright) — no hand-off to a second skill required. Enforces modular structure, rollback tags, append-only change logs, and agent role assignment across all implementation phases. Provider-agnostic: OpenAI, Claude, Mistral, Gemini, Hermes, or any LLM with tool use. Free-first: $0 Python stdlib toolchain."
+description: "Enterprise blueprint skill with integrated enforcement and checklist-driven execution. Generates blueprint.md + checklist.md + CHANGELOG.md with full enterprise structure. Validates against 58+ enterprise rules. Integrates loop-enforcer chain for sequential phase enforcement where checklist is the single source of truth. No hand-off to separate skills required — complete lifecycle in one skill."
 license: MIT
 metadata:
   tags:
@@ -38,7 +38,7 @@ metadata:
     - hermes
     - copilot
     - any
-version: 0.0.7
+version: 0.1.0
 ---
 
 # Enterprise Blueprint
@@ -133,7 +133,7 @@ python3 scripts/validate_blueprint.py ./project/blueprint.md --verbose
 python3 scripts/validate_blueprint.py ./project/blueprint.md --json
 ```
 
-The validator checks all enterprise rules: required parts, rollback tags on every section, change log presence and format, module registry completeness, feature flag coverage, performance budgets, and testing requirements. See [references/enterprise-rules.md](references/enterprise-rules.md) for the full rule set and fix guidance.
+The validator checks all enterprise rules: required parts, rollback tags on every section, change log presence and format, module registry completeness, feature flag coverage, performance budgets, and testing requirements. **Rating thresholds**: ENTERPRISE GRADE (0 FAIL, 0 WARN) → PRODUCTION READY (0 FAIL, 1-4 WARN) → NEEDS HARDENING (0 FAIL, 5-9 WARN) → INCOMPLETE (1-3 FAIL) → NOT ENTERPRISE GRADE (4+ FAIL). See [references/enterprise-rules.md](references/enterprise-rules.md) for the full rule set and fix guidance.
 
 ## Workflow: Generate or Sync the Checklist
 
@@ -260,7 +260,51 @@ See [references/enterprise-rules.md](references/enterprise-rules.md) for the ful
 | `docx` | Generate a Word document from blueprint | When delivering to external stakeholders |
 | `frontend-design` | Interactive checklist web UI | When teams need browser-based tracking |
 
-## Key References
+## Pitfalls
+
+**NEVER delete, destroy, or nuke existing source code, demos, tests, or project files.** The blueprint's contributor rules (Part V) say "append only — no entry may be modified, deleted, or replaced." This applies to ALL project files, not just change log entries. When building on top of an existing project: ADD new files, EXPAND existing files, APPEND to content. NEVER run `rm -rf` on src/, tests/, demo.js, or any directory containing work. "Trash is always greater than purged." If you need to restructure, move files — don't delete them. Git commit before touching anything. The enterprise blueprint IS the guardrail — follow it WITHOUT being asked.
+
+**Feature flags MUST start with a letter after `FEAT_`.** The validator regex is `FEAT_[A-Z][A-Z0-9_]+` — flags like `FEAT_001_AGENT` FAIL because `0` doesn't match `[A-Z]`. Correct: `FEAT_AGENT_SIMULATION`. Wrong: `FEAT_001_AGENT_SIMULATION`.
+
+**Subagents improvise non-standard headers.** When delegating blueprint writing, provide the EXACT header template or the subagent will invent its own format (missing Version, READ FIRST preamble, TOC). The header MUST be:
+```
+# PROJECT_NAME — ENTERPRISE BLUEPRINT
+## Version 1.0 | Document Class: MASTER SPECIFICATION
+### Generated: YYYY-MM-DD
+
+> **READ FIRST — DOCUMENT AUTHORITY**
+> This document is the single source of truth for...
+```
+
+**CL entries need `## CL-NNN` headings, not just code blocks.** The validator regex requires `##\s+CL-\d+` as a markdown heading. Entries buried inside a code block without the heading pattern don't count. Format:
+```
+## CL-001
+```
+Date        : ...
+```
+```
+
+**Blueprints under 1500 lines are almost always incomplete.** Enterprise-grade blueprints with full SQL schemas, ASCII diagrams, feature specs, and checklists typically run 2000-3000 lines. If validation shows many WARN items and the file is short, the content is thin — not just missing headers.
+
+**Always scaffold with `init_blueprint.py` first, never write from scratch.** The script generates the correct Part structure, rollback tags, and section headers. Writing a blueprint manually risks missing required sections that the validator catches as FAIL.
+
+**Match depth to the reference standard.** Users expect blueprints with: 50+ line ASCII architecture diagrams, full SQL CREATE TABLE statements (not descriptions), complete API contract tables, 5-8 components per feature with 5-8 testable rules each, and 3-5 error states with user-facing messages AND system behavior. Minimal outlines fail the "no placeholders" requirement.
+
+**Validator v2 enforces 58 checks — stricter than v1.** New FAIL-class checks: document >1500 lines, ASCII architecture diagram (20+ box-drawing chars), 3+ feature specs with all 9 required fields, phase deliverables + validation gates. New WARN-class checks: 3+ SQL tables, 5-level error hierarchy, concrete performance metrics (6+ with units), rollback procedures per phase, >2500 lines for "thorough" rating.
+
+**Feature spec field names use UNDERSCORES, not spaces.** Specs commonly use `ERROR_STATES:` (with underscore) in code blocks, but the validator regex `ERROR[\s_]+STATES` accepts both. When writing specs, use the format that matches your existing convention — both `ERROR STATES` and `ERROR_STATES` pass validation.
+
+**Validator regexes are case-sensitive unless `re.IGNORECASE` is set.** The rollback procedure check uses `[Rr]ollback\s+[Pp]rocedure` with `re.IGNORECASE`, so `ROLLBACK PROCEDURE:`, `rollback procedure`, and `Rollback Procedure` all match. Always pass `re.IGNORECASE` when building content-matching regexes for blueprints.
+
+**Deliverables/Gates appear in multiple formats.** Some blueprints use `### Deliverables` (h3 heading), others use `**Detailed Deliverables:**` (bold), others use plain `Deliverables:` in tables. The validator matches the word `Deliverables` and `Validation Gate` regardless of surrounding formatting. Don't assume a single format.
+
+**Reserved rollback tag stems are mandatory.** Every blueprint must contain tags with these stems: `SYS-OVERVIEW`, `MODULE-REGISTRY`, `SPECS`, `DATA-ARCH`, `CHANGE-CONTROL`, `QUALITY`. Add them as blockquotes after each Part heading: `> **Rollback Tag:** \`[TAG-STEM-v1]\``.
+
+**Dummy content regex excludes legitimate uses.** The validator does NOT flag "hackathon" (contains "hack"), "MockDashScopeProvider" (contains "mock"), or "test files" as dummy content. Only true placeholders like `lorem ipsum`, `foo bar`, `FIXME` are flagged. Don't waste time removing legitimate technical terms.
+
+## Overlapping Skills
+
+**`enterprise-blueprint-validation`** (devops category) is a strict subset of this skill — it covers validation, checklist generation, and testing but with an older validator (pre-v2) and hardcoded `hemlock` CLI commands. The curator should consolidate it into this skill and delete the standalone validation skill. All its functionality is now covered here with the v2 validator (58 checks).
 
 - **Blueprint compliance standard and required sections**: [references/blueprint-standard.md](references/blueprint-standard.md) — Read when building, auditing, or amending a blueprint
 - **Checklist generation patterns and item anatomy**: [references/checklist-patterns.md](references/checklist-patterns.md) — Read when writing, generating, or syncing checklist items
