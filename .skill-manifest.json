@@ -49,11 +49,11 @@
       ]
     },
     "portable-usb-manager": {
-      "current_version": "2.0.9",
-      "previous_version": "2.0.8",
-      "last_packaged": "2026-07-03T03:53:59.980195+00:00",
-      "files": 101,
-      "size_bytes": 1382341,
+      "current_version": "2.0.12",
+      "previous_version": "2.0.11",
+      "last_packaged": "2026-07-09T21:59:03.023898+00:00",
+      "files": 122,
+      "size_bytes": 1472956,
       "history": [
         {
           "version": "2.0.8",
@@ -65,6 +65,11 @@
           "version": "2.0.9",
           "timestamp": "2026-07-03T03:53:59.980195+00:00",
           "files": 101
+        },
+        {
+          "version": "2.0.12",
+          "timestamp": "2026-07-09T21:59:03.023898+00:00",
+          "files": 122
         }
       ]
     },
@@ -157,6 +162,6 @@
       ]
     }
   },
-  "last_packaged": "2026-07-09T18:59:29.499738+00:00",
-  "total_packaged": 0
+  "last_packaged": "2026-07-09T21:59:03.023898+00:00",
+  "total_packaged": 1
 }
