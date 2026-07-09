@@ -94,7 +94,7 @@ if len(sys.argv) > 1 and sys.argv[1] in ("--help", "-h"):
 
 ## Hardcoded Paths
 
-The validator FAILS on hardcoded paths like `$HOME/...` in scripts and references.
+The validator FAILS on hardcoded paths like `/home/<user>/...` in scripts and references.
 
 **Fix:** Replace with placeholders:
 - `$HOME/qwen-cloud-2026` → `${WORKSPACE_ROOT}/qwen-cloud-2026`

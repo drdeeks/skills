@@ -7,5 +7,5 @@ agent-attributed documents, semantic indexing, and structured communication.
 """
 
 __skill__ = "autonomous-crew"
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 __all__ = ["__skill__", "__version__"]

@@ -6,7 +6,7 @@ description: Integrate agent identity architecture as the first layer in autonom
   Includes knowledge sharing system with dual-mode workspaces, agent-attributed documents,
   semantic indexing, and structured agent communication. Enterprise-grade with skill-creator
   validation.
-version: 1.2.1
+version: 1.2.2
 license: MIT
 metadata:
   category: devops
@@ -320,8 +320,8 @@ Validates workspace structure matches identity requirements. Runs as part of too
 | `scripts/crew-manager.py` | Create crews with blueprint enforcement, identity layer, and model configuration |
 | `scripts/spawn-crew-agents.py` | Spawn all agents from blueprint.json |
 | `scripts/start-crew-enforcers.py` | Start enforcer daemons for all agents in crew |
-| `scripts/task-dispatcher.py` | Dispatch kanban tasks to agents based on chain state |
-| `scripts/task-poller.py` | Agent-side task poller (polls kanban, executes work) |
+| `scripts/task-dispatcher.py` | Sync kanban with chain state; unlock + round-robin-assign ALL active-phase subtasks to agents |
+| `scripts/task-poller.py` | Per-PROJECT poller (never per-crew): queries tasks by project id, drives the agent runtime, verifies deliverables, advances the chain for EVERY phase |
 | `scripts/generate-tasks-from-checklist.py` | Generate granular kanban tasks from checklist.md |
 | `scripts/progress-monitor.py` | Monitor project health, tests, API, chain progress |
 | `scripts/enforcer_daemon.py` | Per-agent enforcer daemon (identity, habits, constitution) |
@@ -397,6 +397,17 @@ Validates workspace structure matches identity requirements. Runs as part of too
 - `references/crew-enforcer-registry.md` — Enforcer registry operations
 - `references/chain-enforcement-integration.md` — Chain enforcement integration with kanban/loop-enforcer
 - `references/skill-creator-validation.md` — Enterprise skill validation workflow with skill_enhance.py
+
+### Dispatcher/Poller Execution Model (verified 2026-07-09)
+- `references/task-dispatcher-poller.md` — The execution model: dispatcher sync/unlock/assign, per-project poller contract
+- `references/dispatcher-poller-orchestration.md` — Orchestration walkthrough of the dispatcher + poller pair
+- `references/poller-chain-fix.md` — v1.1.15 fix: chain advance for ALL phases (not just Phase 0)
+- `references/chain-enforcement-poller-fix.md` — Chain-enforcement integration on the poller side
+- `references/session-2026-07-09-crew-poller-execution-stall.md` — Session: the assignee-query stall (query by project, never crew name)
+- `references/status-reporting-and-kanban-query.md` — Status reporting + correct kanban query patterns
+- `references/federation-tv-integration.md` — Federation TV integration for crew visibility
+- `references/federation-tv-command-center.md` — TV command-center wiring
+- `references/templates/agent-model-map.json` — Agent→model mapping template consumed by the poller runtime
 
 ### Operational References (sessions, lessons, providers)
 - `references/blueprint-enforcement-philosophy.md` — Why enforcement lives in the blueprint layer

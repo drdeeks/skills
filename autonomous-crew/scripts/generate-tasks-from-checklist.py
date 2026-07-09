@@ -4,8 +4,8 @@ Generate Kanban tasks from project checklist.md files
 Parses the detailed deliverables and validation gates from each phase
 """
 
-import re
 import os
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -37,7 +37,7 @@ def parse_checklist(project_dir):
     
     lines = content.split('\n')
     for i, line in enumerate(lines):
-        # Check for phase header - support both "## Phase N: Title" and "## Phase N — Title"
+        # Check for phase header - support both "## Phase N — Title" and "## Phase N: Title"
         phase_match = re.match(r'^## Phase (\d+)[:—\s]+\s*([^\n]+)', line)
         if phase_match:
             phase_num = int(phase_match.group(1))
@@ -45,7 +45,7 @@ def parse_checklist(project_dir):
             current_phase = phase_num
             continue
         
-        # Also handle "### Phase Validation Gate" as a marker
+        # Also handle "### Phase Validation Gate" as phase boundary
         if re.match(r'^### Phase Validation Gate', line):
             current_phase = None
             continue
@@ -166,14 +166,7 @@ def sync_to_kanban(tasks):
     print(f"Synced {len(tasks)} tasks to kanban")
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(description="Generate Kanban tasks from project checklist.md files")
-    parser.add_argument("--help", action="help", help="Show this help message and exit")
-    parser.add_argument("--dry-run", action="store_true", help="Generate tasks but don't sync to kanban")
-    parser.add_argument("--project", action="append", help="Project to process (can be used multiple times)")
-    args = parser.parse_args()
-    
-    projects = args.project if args.project else ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
+    projects = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
     
     print("Parsing checklists...")
     tasks = generate_kanban_tasks(projects)
@@ -183,10 +176,6 @@ def main():
         print(f"  {task['id']}: {task['title'][:60]} ({task['status']})")
     if len(tasks) > 10:
         print(f"  ... and {len(tasks) - 10} more")
-    
-    if args.dry_run:
-        print("\n[DRY RUN] Not syncing to kanban")
-        return
     
     print("\nSyncing to kanban...")
     sync_to_kanban(tasks)
