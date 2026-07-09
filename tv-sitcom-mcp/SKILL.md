@@ -1,37 +1,41 @@
 ---
 name: tv-sitcom-mcp
-description: "MCP server exposing the agent TV room as an external API. Provides real-time agent/room/feed access for any company integrating agent TV into their business."
-version: 1.0.2
+description: MCP server exposing the agent TV room as an external API. Provides real-time
+  agent/room/feed access for any company integrating agent TV into their business.
+version: 1.1.1
 license: MIT
 metadata:
   category: devops
   tags:
-    - mcp
-    - tv-room
-    - agent-monitoring
-    - external-api
-    - federation
-    - real-time
-    - production-ready
+  - monitoring
+  - live-data
+  - mcp
+  - tv-room
+  - agent-monitoring
+  - external-api
+  - federation
   depends_on:
-    - autonomous-crew
-    - autonomous-crew
+  - autonomous-crew-integration
+  - crew-knowledge-system
   provides:
-    - tv-room-mcp
-    - agent-feed-api
-    - room-status-api
-    - project-summary-api
-    - system-status-api
+  - tv-room-mcp
+  - agent-feed-api
+  - room-status-api
+  - project-summary-api
+  - system-status-api
   compatible_with:
-    - openclaw-gateway
-    - hermes-agent
-    - any-mcp-client
+  - openclaw-gateway
+  - hermes-agent
+  - any-mcp-client
 ---
+
 # TV Sitcom Show MCP Server
 
 ## Overview
 
-Exposes the agent TV room as an MCP (Model Context Protocol) server. Any company can connect via standard MCP clients to get real-time agent feeds, room status, project summaries, and system health.
+Exposes the agent TV room as an MCP (Model Context Protocol) server. Any company can connect via standard MCP clients to get **real-time** agent feeds, room status, project summaries, and system health — backed by the live Hemlock Enterprise Federation Gateway (port 41207).
+
+**Data is live:** All tools query the federation REST API (`/api/agents`, `/api/rooms`, `/health`) and WebSocket feed. No synthetic/mock data.
 
 ## Architecture
 
@@ -47,124 +51,77 @@ Exposes the agent TV room as an MCP (Model Context Protocol) server. Any company
 │                          ▼                                        │
 │              ┌─────────────────────────┐                         │
 │              │      MCP Transport      │                         │
-│              │  (HTTP / WebSocket)     │                         │
+│              │  (Streamable-HTTP/WS)   │                         │
 │              └───────────┬─────────────┘                         │
 └──────────────────────────┼──────────────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    AUTONOMOUS CREW ENTERPRISE                    │
+│              TV Sitcom Show MCP Server (41208)                  │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │              TV Sitcom Show MCP Server                   │   │
-│  │  Port: 41208 | Host: 0.0.0.0 | Transport: Streamable-HTTP│   │
+│  │  FastMCP + FederationClient → Federation Gateway (41207) │   │
 │  └─────────────────────────────────────────────────────────┘   │
-│                          │                                      │
-│                          ▼                                      │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │              Federation Gateway (Port 41207)             │   │
-│  │  5 Projects | 15 Rooms | 175 Agents | Real-time WebSocket│   │
-│  └─────────────────────────────────────────────────────────┘   │
+└──────────────────────────┼──────────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Hemlock Enterprise Federation Gateway              │
+│  5 Projects | 5+ Rooms | 20+ Agents | Real-time WebSocket      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## MCP Tools
 
 | Tool | Description | Parameters |
 |------|-------------|------------|
-| `get_all_rooms` | All production rooms across 5 projects | — |
+| `get_all_rooms` | All production rooms across 5 projects with agent counts | — |
 | `get_room` | Detailed room view with all agents | `room_id: string` |
-| `get_tv_feed` | Live agent activity feed | `limit?`, `project?`, `priority?` |
+| `get_tv_feed` | Live agent activity feed (registration + heartbeats) | `limit?`, `project?`, `priority?` |
 | `get_agent` | Agent profile by ID | `agent_id: string` |
-| `get_project_summary` | Project stats | `project: string` |
+| `get_project_summary` | Project stats (rooms, agents, utilization) | `project: string` |
 | `get_system_status` | Global health & stats | — |
 | `search_agents` | Search by name/role/project | `query: string` |
+| `register_agent` | Register new agent with federation | `project_id`, `agent_id`, `name`, `role`, `capabilities?` |
 
 ## MCP Resources
 
 | Resource | Description |
 |----------|-------------|
-| `config://projects` | Project definitions (name, emoji, color) |
-| `config://rooms` | Room configuration schema |
+| `config://projects` | Project metadata (name, emoji, color) |
+| `config://rooms` | Room schema (max 35/room, 5 projects) |
+| `status://federation` | Live federation health |
 
-## Connection
+## Scripts
 
-```bash
-# Start server
-python3 scripts/tv_mcp_server.py
+| Script | Purpose |
+|--------|---------|
+| `scripts/tv_mcp_server.py` | Main MCP server (FastMCP + live federation client) |
+| `scripts/start-tv-mcp.sh` | Production launcher (waits for federation, seeds agents) |
+| `scripts/test_tv_mcp.py` | Validation suite (federation client, room manager, MCP tools) |
 
-# Or with custom config
-TV_MCP_PORT=41208 TV_VAULT_PATH=/path/to/vault python3 scripts/tv_mcp_server.py
-```
+## References
 
-### MCP Client Config (Claude Desktop)
-```json
-{
-  "mcpServers": {
-    "tv-sitcom": {
-      "command": "python3",
-      "args": ["/path/to/scripts/tv_mcp_server.py"],
-      "env": {
-        "TV_MCP_PORT": "41208",
-        "TV_VAULT_PATH": "/path/to/vault"
-      }
-    }
-  }
-}
-```
-
-### MCP Client Config (Any HTTP Client)
-```python
-import httpx
-
-client = httpx.Client(base_url="http://localhost:41208")
-# Tools called via POST /mcp/tools/call
-```
-
-## TV Feed Format
-
-```json
-{
-  "timestamp": "2026-07-05T12:00:00Z",
-  "event_type": "agent_registered",
-  "agent_id": "MN-01",
-  "agent_name": "Scribe",
-  "project": "mnemosyne",
-  "message": "joined the production",
-  "priority": "high"
-}
-```
-
-## Project Definitions
-
-| Project | Emoji | Color | Track |
-|---------|-------|-------|-------|
-| mnemosyne | 🧠 | #3b82f6 | MemoryAgent |
-| agora | 🏛️ | #f59e0b | Agent Society |
-| aires | 🎬 | #a855f7 | AI Showrunner |
-| autopilot | ⚙️ | #22c55e | Autopilot Agent |
-| edgewalker | ⚡ | #ef4444 | EdgeAgent |
-
-## Room Structure
-
-- **Max 35 agents per room** (overflow to production rooms)
-- **3 rooms per project** (1 main + 2 production)
-- **5 projects × 3 rooms = 15 total rooms**
-- **175 agent capacity** (35 × 5 main rooms)
+| Document | Description |
+|----------|-------------|
+| `references/architecture.md` | Data flow, tool→endpoint mapping |
+| `references/api-reference.md` | Full federation REST + WS API |
+| `references/integration.md` | External org integration guide |
+| `references/deployment.md` | Docker, systemd, env vars |
+| `references/mcp-protocol.md` | MCP compliance, tools, resources, notifications |
+| `references/troubleshooting.md` | Common issues & fixes |
 
 ## External Integration Examples
 
-### Dashboard Integration
+### Dashboard via MCP (Python)
+
 ```python
-import httpx
+from mcp.client import Client
 
 async def get_live_feed():
-    async with httpx.AsyncClient(base_url="http://hemlock:41208") as client:
-        response = await client.post("/mcp/tools/call", json={
-            "name": "get_tv_feed",
-            "arguments": {"limit": 100, "priority": "high"}
-        })
-        return response.json()
+    async with Client("http://localhost:41208/mcp") as client:
+        return await client.call_tool("get_tv_feed", {"limit": 100, "priority": "high"})
 ```
 
 ### Alerting System
+
 ```python
 async def check_critical_errors():
     feed = await get_tv_feed(priority="high", limit=50)
@@ -173,27 +130,74 @@ async def check_critical_errors():
         await send_alert(errors)
 ```
 
+### Direct REST (No MCP)
+
+```bash
+# Federation health
+curl http://federation:41207/health
+
+# All agents
+curl http://federation:41207/api/agents
+
+# Register agent
+curl -X POST http://federation:41207/api/agents/register \
+  -H 'Content-Type: application/json' \
+  -d '{"projectId":"my-project","agentId":"my-agent","name":"My Agent","role":"worker"}'
+
+# WebSocket real-time
+ws = new WebSocket('ws://federation:41207/ws?projectId=my-project')
+ws.onmessage = (e) => console.log(JSON.parse(e.data))
+```
+
+## Multi-Org Deployment
+
+Each organization gets their own `projectId` namespace. Projects are isolated — agents in project A never see project B's rooms or feeds. The federation gateway enforces this at the registry level.
+
 ## Deployment
 
-```yaml
-# docker-compose.yml
-services:
-  tv-mcp:
-    image: python:3.12-slim
-    ports:
-      - "41208:41208"
-    volumes:
-      - ./memory:${WORKSPACE_ROOT}/qwen-cloud-2026/memory
-    command: python3 scripts/tv_mcp_server.py
-    environment:
-      - TV_MCP_PORT=41208
-      - TV_VAULT_PATH=${WORKSPACE_ROOT}/qwen-cloud-2026/memory
+### Docker
+
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 41208
+CMD ["python", "scripts/tv_mcp_server.py", "--federation", "http://federation:41207"]
 ```
+
+### Systemd
+
+```ini
+[Unit]
+Description=TV Sitcom MCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=agent
+WorkingDirectory=/opt/tv-sitcom-mcp
+ExecStart=/opt/tv-sitcom-mcp/.venv/bin/python scripts/tv_mcp_server.py --federation http://localhost:41207
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TV_MCP_PORT` | 41208 | MCP server port |
+| `TV_MCP_HOST` | 0.0.0.0 | Bind host |
+| `FEDERATION_URL` | http://localhost:41207 | Federation gateway |
 
 ## Security
 
 - No authentication built-in (add reverse proxy for auth)
-- Read-only API (no mutating operations)
+- Read-mostly API (`register_agent` is the only mutating operation)
 - Rate limit at reverse proxy level
 - Internal network only by default
 
@@ -204,13 +208,13 @@ services:
 | Free | $0/mo | Python 3.12+ stdlib + fastmcp (pip install) |
 | Paid | None required | — |
 
-## File Index (validator-complete)
+## Verification
 
-- `references/api-reference.md` — TV Sitcom MCP — API Reference
-- `references/architecture-overview.md` — TV Sitcom MCP — Architecture Overview
-- `references/deployment-guide.md` — TV Sitcom MCP — Deployment Guide
-- `references/integration-guide.md` — TV Sitcom MCP — Integration Guide
-- `references/troubleshooting-guide.md` — TV Sitcom MCP — Troubleshooting Guide
-- `scripts/get_agent_feed.py` — TV Sitcom MCP - Agent Feed Script
-- `scripts/get_room_status.py` — TV Sitcom MCP - Room Status Script
-- `scripts/test_connection.py` — TV Sitcom MCP - Client Test Script
+Run the test suite against a live federation:
+
+```bash
+cd ${TV_VAULT_PATH:-/home/ubuntu}/.hermes/skills/devops/tv-sitcom-mcp
+python3 scripts/test_tv_mcp.py
+```
+
+Expected: all tests pass against the 20 real agents across 5 projects.

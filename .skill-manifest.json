@@ -122,8 +122,22 @@
           "files": 14
         }
       ]
+    },
+    "tv-sitcom-mcp": {
+      "current_version": "1.1.1",
+      "previous_version": "1.1.1",
+      "last_packaged": "2026-07-09T15:14:57.012083+00:00",
+      "files": 10,
+      "size_bytes": 38046,
+      "history": [
+        {
+          "version": "1.1.1",
+          "timestamp": "2026-07-09T15:14:57.012083+00:00",
+          "files": 10
+        }
+      ]
     }
   },
-  "last_packaged": "2026-07-09T15:08:54.512240+00:00",
-  "total_packaged": 0
+  "last_packaged": "2026-07-09T15:14:57.012083+00:00",
+  "total_packaged": 1
 }
