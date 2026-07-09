@@ -195,29 +195,26 @@ The result is a **consistently current skill database** that every agent and cre
 
 ## Skill catalog
 
-All 17 pass the enterprise-strict validator (2026-07-08 sweep: 17/17).
+All 14 pass the enterprise-strict validator with zero warnings (2026-07-09 sweep: 14/14).
 
 | Skill | Version | Purpose |
 |---|---|---|
-| [`agent-identity-architecture`](agent-identity-architecture/) | 1.0.6 | Agent identity as the first architectural layer: constitution at t=0, internalized habits, enforcer daemon, memory curator. |
-| [`agent-wake-up`](agent-wake-up/) | 1.0.6 | Agent wake-up/bootstrap orchestration: health check, kanban status, crew/project dispatch, self-heal. |
-| [`autonomous-crew-integration`](autonomous-crew-integration/) | 1.1.10 | Crew lifecycle: init from blueprint, agent creation, phase validators, kanban-to-chain wiring, self-healing loop. |
-| [`crew-knowledge-system`](crew-knowledge-system/) | 1.0.3 | Crew knowledge sharing: dual-mode workspaces, agent-attributed docs, semantic indexing, structured comms. |
-| [`enterprise-blueprint`](enterprise-blueprint/) | 0.1.1 | Full blueprint lifecycle in one skill: generate, sync phase-gated checklists, validate, tiered testing, agent assignment. |
-| [`enterprise-organization`](enterprise-organization/) | 0.1.1 | Workspace/organization enforcement: modular file tree, security hardening, task-list validation, zero-stub policy, semver releases, git control. |
+| [`agent-identity-architecture`](agent-identity-architecture/) | 1.0.12 | Agent identity as the first architectural layer: constitution at t=0, internalized habits, enforcer daemon, memory curator. |
+| [`autonomous-crew`](autonomous-crew/) | 1.2.0 | Crew lifecycle: init from blueprint, agent creation, phase validators, kanban-to-chain wiring, self-healing loop. Absorbed `crew-knowledge-system` (dual-mode knowledge workspaces, agent-attributed docs, semantic indexing, structured comms). |
+| [`enterprise-blueprint`](enterprise-blueprint/) | 1.0.1 | Full blueprint lifecycle in one skill: generate, sync phase-gated checklists, validate, tiered testing, agent assignment. |
+| [`enterprise-organization`](enterprise-organization/) | 0.1.2 | Workspace/organization enforcement: modular file tree, security hardening, task-list validation, zero-stub policy, semver releases, git control. |
 | [`guardrail-enforcement`](guardrail-enforcement/) | 0.1.4 | The enforcer: version watcher + auto-commit, workflow gate + signed audit log, advisory locks, manifest verification. |
 | [`hackathon-manager`](hackathon-manager/) | 0.1.1 | Hackathon participation end to end: project tracking, model-to-role mapping, kanban sequencing, submission readiness checks. |
-| [`hemlock-minimal`](hemlock-minimal/) | 0.1.1 | The single-container minimal runtime: build/launch scripts, volume isolation, health doctor, export/import modes. |
 | [`kanban-orchestrator`](kanban-orchestrator/) | 3.1.4 | Kanban task decomposition, multi-agent routing, worker lifecycle, progress monitoring. |
 | [`knowledge-indexer`](knowledge-indexer/) | 0.0.6 | Documentation/knowledge-base indexing with full-text search, link management, incremental + scheduled updates. |
-| [`loop-enforcer`](loop-enforcer/) | 1.0.10 | Sequential dependency chains: locked steps, verify-before-complete, audit + migration tooling, additive-only doctrine. |
+| [`loop-enforcer`](loop-enforcer/) | 1.0.12 | Sequential dependency chains: locked steps, verify-before-complete, audit + migration tooling, additive-only doctrine. |
 | [`portable-usb-manager`](portable-usb-manager/) | 2.0.10 | Provision and manage portable, bootable Linux/compute USB systems offline (Ventoy, persistence, automount, bash-config payloads). Absorbed `unified-usb-skill`. |
-| [`skill-creator`](skill-creator/) | 3.0.10 | The creator: the enforced 11-gate authoring/enhancement pipeline (validate → auto-fix → re-validate → test → package → extract-verify) with built-in chain + provider tag remap. |
-| [`skill-installer`](skill-installer/) | 1.0.14 | The installer: verifies and installs finalized `.skill`s without mutating upstream; silently transmits the tag-normalizing gate hook. |
+| [`skill-creator`](skill-creator/) | 3.0.11 | The creator: the enforced 11-gate authoring/enhancement pipeline (validate → auto-fix → re-validate → test → package → extract-verify) with built-in chain + provider tag remap. |
+| [`skill-installer`](skill-installer/) | 1.0.15 | The installer: verifies and installs finalized `.skill`s without mutating upstream; silently transmits the tag-normalizing gate hook. |
 | [`tool-enforcement`](tool-enforcement/) | 1.1.1 | Runtime plugin + audit scripts: required tool kit, permission rules (restrictive-chmod prohibition), workspace path enforcement. |
-| [`tv-sitcom-mcp`](tv-sitcom-mcp/) | 1.0.1 | MCP server exposing the agent TV room (rooms/feeds/status) as an external API. |
+| [`tv-sitcom-mcp`](tv-sitcom-mcp/) | 1.1.1 | MCP server exposing the agent TV room (rooms/feeds/status) as an external API. |
 
-*Consolidation notes: `enterprise-blueprint-validation` merged into `enterprise-blueprint` (v0.0.7); `unified-usb-skill` merged into `portable-usb-manager` (v2.0.10) — unique references, the usb-automount payload, project-manager checklists, and the portable bash-config template moved in; the older forked scripts were discarded in favor of the hardened originals. Retired skills are preserved under `archives/` and the source drop under `_incoming-docs/`.*
+*Consolidation notes: `crew-knowledge-system` merged into `autonomous-crew` (v1.2.0, renamed from `autonomous-crew-integration`) — knowledge scripts generalized to `knowledge-*.sh`, workspace templates under `references/templates/knowledge/`. `agent-wake-up` and `hemlock-minimal` retired as skills (their function belongs to the runtime, not the skill layer). `enterprise-blueprint-validation` merged into `enterprise-blueprint` (v0.0.7); `unified-usb-skill` merged into `portable-usb-manager` (v2.0.10). Retired content is preserved in git history and the local `.trash`.*
 
 ## Tags &amp; tooling metadata
 
