@@ -38,7 +38,7 @@ python3 ~/agent-toolkit-v14/skills/skill-creator/scripts/skill_enhance.py update
 ## Platform-Agnostic Path Requirements
 
 **NEVER use hardcoded paths in skills:**
-- ❌ `/home/ubuntu/...`
+- ❌ `${WORKSPACE_ROOT}/...`
 - ❌ `/root/...`
 - ❌ `/Users/...`
 
@@ -94,7 +94,7 @@ metadata:
 ```
 ✗ [FAIL] Hardcoded path in script — scripts/chain_enforce.py:10
 ```
-**Fix:** Replace `/home/ubuntu/qwen-cloud-2026` with `<WORKSPACE_ROOT>/qwen-cloud-2026`
+**Fix:** Replace `${WORKSPACE_ROOT}/qwen-cloud-2026` with `<WORKSPACE_ROOT>/qwen-cloud-2026`
 
 ### 2. Unexpected Frontmatter Keys
 ```
