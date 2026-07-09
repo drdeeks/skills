@@ -124,6 +124,51 @@ class EnterpriseOrg:
         }
         return self.results
 
+    def organize(self, action: str, path: str = "", days: int = 30, force: bool = False) -> Dict:
+        """File organization and decluttering."""
+        self.results["operation"] = "organize"
+        
+        organizer_script = self.scripts_dir / "file-organizer.sh"
+        
+        if action == "init":
+            cmd = ["bash", str(organizer_script), "init", "--workspace", str(self.workspace)]
+        elif action == "trash":
+            if not path:
+                return {"status": "failed", "error": "path required for trash"}
+            cmd = ["bash", str(organizer_script), "trash", path, "--workspace", str(self.workspace)]
+        elif action == "restore":
+            if not path:
+                return {"status": "failed", "error": "trash name required for restore"}
+            cmd = ["bash", str(organizer_script), "restore", path, "--workspace", str(self.workspace)]
+        elif action == "scan":
+            cmd = ["bash", str(organizer_script), "scan", "--workspace", str(self.workspace)]
+        elif action == "validate-docs":
+            cmd = ["bash", str(organizer_script), "validate-docs", "--workspace", str(self.workspace)]
+        elif action == "cleanup":
+            cmd = ["bash", str(organizer_script), "cleanup", "--workspace", str(self.workspace), "--days", str(days)]
+        elif action == "status":
+            cmd = ["bash", str(organizer_script), "status", "--workspace", str(self.workspace)]
+        else:
+            return {"status": "failed", "error": f"Unknown organize action: {action}"}
+        
+        if force:
+            cmd.append("--force")
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            self.results["details"] = {
+                "action": action,
+                "output": result.stdout,
+                "error": result.stderr if result.returncode != 0 else None
+            }
+            if result.returncode != 0:
+                self.results["status"] = "failed"
+        except Exception as e:
+            self.results["status"] = "failed"
+            self.results["details"] = {"error": str(e)}
+        
+        return self.results
+
     def audit(self, report_path: Optional[str] = None) -> Dict:
         """Full enterprise audit with detailed report."""
         self.results["operation"] = "audit"
@@ -761,7 +806,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 def main():
     parser = argparse.ArgumentParser(description="Enterprise Organization Manager")
-    parser.add_argument("command", choices=["init", "validate", "enforce", "audit", "changelog", "phase", "version", "git", "release"], help="Command to run")
+    parser.add_argument("command", choices=["init", "validate", "enforce", "audit", "changelog", "phase", "version", "git", "release", "organize"], help="Command to run")
     parser.add_argument("--workspace", default=".", help="Workspace path")
     parser.add_argument("--project", help="Project name (for init)")
     parser.add_argument("--role", choices=["hermes", "titan", "avery", "allman"], default="hermes", help="Agent role (for init)")
@@ -816,6 +861,12 @@ def main():
     parser.add_argument("--bump", choices=["major", "minor", "patch"], default="patch", help="Release bump type")
     parser.add_argument("--release-message", help="Release message")
     parser.add_argument("--no-push", action="store_true", help="Don't push")
+    # Organize args
+    parser.add_argument("--organize-action", dest="organize_action", 
+                        choices=["init", "trash", "restore", "scan", "validate-docs", "cleanup", "status"],
+                        help="Organize action")
+    parser.add_argument("--organize-path", dest="organize_path", help="Path for trash/restore")
+    parser.add_argument("--days", type=int, default=30, help="Days for cleanup")
 
     args = parser.parse_args()
 
@@ -926,6 +977,15 @@ def main():
         result = org.git(args.git_action, **git_kwargs)
     elif args.command == "release":
         result = org.release(args.bump, args.release_message, not args.no_push)
+    elif args.command == "organize":
+        if not args.organize_action:
+            parser.error("--organize-action required for organize (init, trash, restore, scan, validate-docs, cleanup, status)")
+        result = org.organize(
+            args.organize_action,
+            path=args.organize_path or "",
+            days=args.days,
+            force=args.force
+        )
     else:
         parser.error(f"Unknown command: {args.command}")
 
