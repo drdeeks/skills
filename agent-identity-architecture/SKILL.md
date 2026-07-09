@@ -12,7 +12,7 @@ description: 'Define, deploy, and enforce agent identity as the first architectu
   hash integrity tracking, completion gated by identity reflection, memory pipeline
   daily to weekly to long-term plus knowledge-index, auto-remediation of missing directories
   and permissions.'
-version: 1.0.12
+version: 1.0.13
 license: MIT
 metadata:
   category: devops
@@ -33,7 +33,7 @@ metadata:
   - loop-enforcer
   - soul-generator
   - agent-memory
-  - autonomous-crew-integration
+  - autonomous-crew
 ---
 
 # Agent Identity Architecture
@@ -494,7 +494,7 @@ Every script produces structured JSON on completion:
 | loop-enforcer | Task completion gated by identity reflection |
 | soul-generator | SOUL.md initialized from constitution |
 | agent-memory | Memory pipeline curates identity-aligned patterns |
-| autonomous-crew-integration | Crew agents inherit identity as Layer 1; phase gates via habits |
+| autonomous-crew | Crew agents inherit identity as Layer 1; phase gates via habits |
 
 ## Scripts & References
 
@@ -505,3 +505,15 @@ Every script produces structured JSON on completion:
 ---
 
 **This is the first architectural layer. Everything else — tools, reasoning, planning, memory, skills — sits on top of it.**
+
+## File Index (validator-complete)
+
+- `references/enterprise-validation-patterns.md` — Enterprise Skill Validation Patterns
+- `references/free-first-strategy.md` — Free-First Cost Strategy
+- `references/genesis-working.md` — genesis working
+- `references/provider-compatibility.md` — Provider Compatibility Matrix
+- `references/workspace-layout.md` — Agent Workspace Layout — Standard Structure
+- `scripts/__init__.py` — package marker
+- `scripts/identity-hook.py` — Universal tool execution hook for agent identity layer.
+- `scripts/memory_curator.py` — Daily to weekly to long-term memory pipeline.
+- `scripts/start-agent.sh` — Start the synthesis-1 agent + enforcer

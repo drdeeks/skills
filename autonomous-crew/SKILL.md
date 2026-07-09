@@ -1,12 +1,12 @@
 ---
-name: autonomous-crew-integration
+name: autonomous-crew
 description: Integrate agent identity architecture as the first layer in autonomous
   crew orchestration. Hardwires identity constitution (Layer 1, loaded at t=0), internalized
   habits, enforcer daemon, and memory pipeline into every crew agent at creation time.
   Includes knowledge sharing system with dual-mode workspaces, agent-attributed documents,
   semantic indexing, and structured agent communication. Enterprise-grade with skill-creator
   validation.
-version: 1.1.19
+version: 1.2.0
 license: MIT
 metadata:
   category: devops
@@ -306,28 +306,33 @@ Validates workspace structure matches identity requirements. Runs as part of too
 ### Core Scripts
 | Script | Purpose |
 |--------|---------|
-| `create-crew-agent.sh` | Create crew agent with full identity layer |
-| `init-crew.py` | Initialize autonomous crew workspace |
-| `init-crew-from-blueprint.py` | Full blueprint→crew pipeline |
-| `verify-crew-identity.sh` | Verify all agents have operational identity |
-| `crew-heartbeat.sh` | Aggregate heartbeat status |
-| `install-identity-skill.py` | Install agent-identity-architecture |
-| `create-blueprint-chain.py` | Create loop-enforcer chain from blueprint |
-| `generate-phase-validators.py` | Generate phase validator scripts |
-| `wire-kanban-to-chain.py` | Wire kanban tasks to chain steps |
-| `chain_enforce.py` | Chain enforcement helper for kanban workers (check/complete/status) |
-| `self-healing-loop.py` | Run integrity checks (constitution, chain, memory, habits) |
-| `crew-manager.py` | Create crews with blueprint enforcement, identity layer, and model configuration |
-| `spawn-crew-agents.py` | Spawn all agents from blueprint.json |
-| `start-crew-enforcers.py` | Start enforcer daemons for all agents in crew |
-| `task-dispatcher.py` | Dispatch kanban tasks to agents based on chain state |
-| `task-poller.py` | Agent-side task poller (polls kanban, executes work) |
-| `generate-tasks-from-checklist.py` | Generate granular kanban tasks from checklist.md |
-| `progress-monitor.py` | Monitor project health, tests, API, chain progress |
-| `enforcer_daemon.py` | Per-agent enforcer daemon (identity, habits, constitution) |
-| `agent_runtime.py` | Agent runtime loop (identity, habits, memory, skills) |
-| `memory_curator.py` | Memory pipeline (short/long term, semantic index) |
-| `start-agent.sh` | Agent startup script (validates workspace, starts runtime) |
+| `scripts/create-crew-agent.sh` | Create crew agent with full identity layer |
+| `scripts/init-crew.py` | Initialize autonomous crew workspace |
+| `scripts/init-crew-from-blueprint.py` | Full blueprint→crew pipeline |
+| `scripts/verify-crew-identity.sh` | Verify all agents have operational identity |
+| `scripts/crew-heartbeat.sh` | Aggregate heartbeat status |
+| `scripts/install-identity-skill.py` | Install agent-identity-architecture |
+| `scripts/create-blueprint-chain.py` | Create loop-enforcer chain from blueprint |
+| `scripts/generate-phase-validators.py` | Generate phase validator scripts |
+| `scripts/wire-kanban-to-chain.py` | Wire kanban tasks to chain steps |
+| `scripts/chain_enforce.py` | Chain enforcement helper for kanban workers (check/complete/status) |
+| `scripts/self-healing-loop.py` | Run integrity checks (constitution, chain, memory, habits) |
+| `scripts/crew-manager.py` | Create crews with blueprint enforcement, identity layer, and model configuration |
+| `scripts/spawn-crew-agents.py` | Spawn all agents from blueprint.json |
+| `scripts/start-crew-enforcers.py` | Start enforcer daemons for all agents in crew |
+| `scripts/task-dispatcher.py` | Dispatch kanban tasks to agents based on chain state |
+| `scripts/task-poller.py` | Agent-side task poller (polls kanban, executes work) |
+| `scripts/generate-tasks-from-checklist.py` | Generate granular kanban tasks from checklist.md |
+| `scripts/progress-monitor.py` | Monitor project health, tests, API, chain progress |
+| `scripts/enforcer_daemon.py` | Per-agent enforcer daemon (identity, habits, constitution) |
+| `scripts/agent_runtime.py` | Agent runtime loop (identity, habits, memory, skills) |
+| `scripts/memory_curator.py` | Memory pipeline (short/long term, semantic index) |
+| `scripts/start-agent.sh` | Agent startup script (validates workspace, starts runtime) |
+
+| `scripts/init-dev-crew.sh` | Initialize development crew workspace (ephemeral, shared) |
+| `scripts/init-prod-crew.sh` | Initialize production crew workspace (persistent, per-agent) |
+| `scripts/test_functional.py` | Functional test suite for the crew pipeline |
+| `scripts/__init__.py` | Package marker for python imports |
 
 ### Blueprint Scripts
 | Script | Purpose |
@@ -339,17 +344,17 @@ Validates workspace structure matches identity requirements. Runs as part of too
 ### Transition Scripts
 | Script | Purpose |
 |--------|---------|
-| `transition-crew.py` | Dev↔Prod migration preserving all data |
-| `duplicate-crew.py` | Selective fork with new IDs |
-| `crew-config-manager.py` | Active crew configs, pointers |
+| `scripts/transition-crew.py` | Dev↔Prod migration preserving all data |
+| `scripts/duplicate-crew.py` | Selective fork with new IDs |
+| `scripts/crew-config-manager.py` | Active crew configs, pointers |
 
 ### Knowledge Scripts
 | Script | Purpose | Standalone | Crew |
 |--------|---------|------------|------|
-| `knowledge-indexer.sh` | Index/search knowledge base | ✅ | ✅ |
-| `knowledge-comm.sh` | Agent communication protocol | ✅ | ✅ |
-| `knowledge-doc.sh` | Create formatted documents | ✅ | ✅ |
-| `knowledge-sync.sh` | Sync knowledge across agents | ❌ | ✅ |
+| `scripts/knowledge-indexer.sh` | Index/search knowledge base | ✅ | ✅ |
+| `scripts/knowledge-comm.sh` | Agent communication protocol | ✅ | ✅ |
+| `scripts/knowledge-doc.sh` | Create formatted documents | ✅ | ✅ |
+| `scripts/knowledge-sync.sh` | Sync knowledge across agents | ❌ | ✅ |
 
 ### Templates
 - `references/templates/crew/` — Constitution, habits, agent config, phases, memory, builder code, agent types, enforcer registry
@@ -392,6 +397,24 @@ Validates workspace structure matches identity requirements. Runs as part of too
 - `references/crew-enforcer-registry.md` — Enforcer registry operations
 - `references/chain-enforcement-integration.md` — Chain enforcement integration with kanban/loop-enforcer
 - `references/skill-creator-validation.md` — Enterprise skill validation workflow with skill_enhance.py
+
+### Operational References (sessions, lessons, providers)
+- `references/blueprint-enforcement-philosophy.md` — Why enforcement lives in the blueprint layer
+- `references/chain-enforcement-crew-integration.md` — Chain enforcement wired into crew lifecycle
+- `references/chain-reset-procedure.md` — Safe chain reset procedure
+- `references/enterprise-validation-pitfalls.md` — Validation pitfalls observed in production
+- `references/model-quota-and-blueprint-json.md` — Model quota handling + blueprint.json notes
+- `references/provider-configuration.md` — Provider configuration walkthrough
+- `references/providers-and-model-config.md` — Providers + model config reference
+- `references/self-healing-and-monitoring-setup.md` — Self-healing and monitoring setup
+- `references/self-healing-progress-monitor.md` — Progress monitor design
+- `references/session-2026-07-09-chain-location-and-sync.md` — Session: chain location + sync
+- `references/session-2026-07-09-dispatcher-poller-sync-fix.md` — Session: dispatcher/poller sync fix
+- `references/session-2026-07-09-mnemosyne-phase1-implementation.md` — Session: memory phase 1
+- `references/session-2026-07-09-self-healing-vs-crew-work.md` — Session: self-healing vs crew work
+- `references/chain-state-fix-and-production-verification.md` — Chain state fix + production verification
+- `references/lessons/configurable-models.md` — Lesson: configurable models
+- `references/lessons/skill-update-workflow.md` — Lesson: skill update workflow
 
 ### Knowledge References
 - `references/templates/knowledge/category-schema.md` — Category/tag taxonomy for knowledge documents

@@ -1,7 +1,7 @@
 ---
 name: enterprise-blueprint
 description: Parse, validate, and generate execution checklists from enterprise project blueprints. Provides 58+ validation rules, phase-gated workflow planning, and CI/CD integration. Use when creating project blueprints, validating blueprint structure, generating execution checklists, or planning multi-phase enterprise workflows. Triggers on 'blueprint', 'enterprise blueprint', 'project blueprint', 'blueprint validation', 'checklist generation', 'phase planning'.
-version: 1.0.1
+version: 1.0.2
 license: MIT
 metadata:
   category: project-planning
@@ -106,3 +106,21 @@ python3 scripts/init_blueprint.py "My Project" --path ./output/project-name
 - `references/blueprint-structure.md` — Blueprint structure standards
 - `references/checklist-patterns.md` — Checklist generation patterns
 - `references/hackathon-blueprint-lessons.md` — Best practices and lessons learned
+
+## File Index (validator-complete)
+
+- `references/agent-roles.md` — Agent Roles Reference
+- `references/blueprint-standard.md` — Blueprint Standard Reference (v2)
+- `references/cli-wiring.md` — CLI Wiring Reference
+- `references/critical-file-protection.md` — Critical File Protection
+- `references/lessons/chain-enforcement-lessons.md` — Lessons Learned — Enterprise Blueprint Chain Enforcement
+- `references/phase-gating.md` — Phase Gating Reference
+- `references/safety-practices.md` — Safety Practices
+- `references/testing-framework.md` — Testing Framework Reference
+- `references/validation-rules.md` — Validation Rules Reference
+- `scripts/assign_agents.py` — enterprise-blueprint — Assign agent roles and track implementation metrics
+- `scripts/blueprint_validator.py` — Validator for blueprint chain steps.
+- `scripts/enforce_blueprint.py` — enterprise-blueprint — Chain enforcement for blueprint lifecycle.
+- `scripts/generate_checklist.py` — Generate execution checklists from enterprise blueprints.
+- `scripts/test-runner.py` — Phase-Gated Test Orchestrator
+- `scripts/validate_blueprint.py` — Blueprint Validation Script

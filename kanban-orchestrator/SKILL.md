@@ -4,7 +4,7 @@ description: Decomposition playbook + anti-temptation rules for an orchestrator 
   routing work through Kanban. The "don't do the work yourself" rule and the basic
   lifecycle are auto-injected into every kanban worker's system prompt; this skill
   is the deeper playbook when you're specifically playing the orchestrator role.
-version: 3.1.4
+version: 3.1.5
 license: MIT
 metadata:
   openclaw:
@@ -36,7 +36,7 @@ metadata:
 
 ## Profiles are user-configured — not a fixed roster
 
-Hermes setups vary widely. Some users run a single profile that does everything; some run a small fleet (`docker-worker`, `cron-worker`); some run a curated specialist team they've named themselves. There is **no default specialist roster** — the orchestrator skill does not know what profiles exist on this machine.
+Hemlock setups vary widely. Some users run a single profile that does everything; some run a small fleet (`docker-worker`, `cron-worker`); some run a curated specialist team they've named themselves. There is **no default specialist roster** — the orchestrator skill does not know what profiles exist on this machine.
 
 Before fanning out, you must ground the decomposition in the profiles that actually exist. The dispatcher silently fails to spawn unknown assignee names — it doesn't autocorrect, doesn't suggest, doesn't fall back. So a card assigned to `researcher` on a setup that only has `docker-worker` just sits in `ready` forever.
 
@@ -321,3 +321,12 @@ When a worker profile keeps crashing, hallucinating, or getting blocked by its o
 3. **Change profile model** — the dashboard prints a copy-paste hint for `hermes -p <profile> model` since profile config lives on disk; edit it in a terminal, then Reclaim to retry with the new model.
 
 Hallucination warnings appear on tasks where a worker's `kanban_complete(created_cards=[...])` claim included card ids that don't exist or weren't created by the worker's profile (the gate blocks the completion), or where the free-form summary references `t_<hex>` ids that don't resolve (advisory prose scan, non-blocking). Both produce audit events that persist even after recovery actions — the trail stays for debugging.
+
+## File Index (validator-complete)
+
+- `references/kanban-emergency-procedures.md` — Kanban Cleanup & Emergency Procedures (Session 2026-07-04)
+- `references/multi-agent-routing-guide.md` — Kanban Orchestrator — Multi-Agent Routing Guide
+- `references/task-decomposition-patterns.md` — Kanban Orchestrator — Task Decomposition Patterns
+- `scripts/decompose_task.py` — Kanban Orchestrator - Decompose Task Script
+- `scripts/monitor_progress.py` — Kanban Orchestrator - Monitor Progress Script
+- `scripts/route_tasks.py` — Kanban Orchestrator - Route Tasks Script
