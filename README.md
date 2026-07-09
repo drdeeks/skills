@@ -208,7 +208,7 @@ All 14 pass the enterprise-strict validator with zero warnings (2026-07-09 sweep
 | [`kanban-orchestrator`](kanban-orchestrator/) | 3.1.4 | Kanban task decomposition, multi-agent routing, worker lifecycle, progress monitoring. |
 | [`knowledge-indexer`](knowledge-indexer/) | 0.0.6 | Documentation/knowledge-base indexing with full-text search, link management, incremental + scheduled updates. |
 | [`loop-enforcer`](loop-enforcer/) | 1.0.12 | Sequential dependency chains: locked steps, verify-before-complete, audit + migration tooling, additive-only doctrine. |
-| [`portable-usb-manager`](portable-usb-manager/) | 2.1.0 | Provision and manage portable, bootable Linux/compute USB systems offline (Ventoy, persistence, automount, bash-config payloads). Absorbed `unified-usb-skill`. |
+| [`portable-usb-manager`](portable-usb-manager/) | 2.0.12 | Provision and manage portable, bootable Linux/compute USB systems offline (Ventoy, persistence, automount, bash-config payloads). Absorbed `unified-usb-skill`. |
 | [`skill-creator`](skill-creator/) | 3.0.11 | The creator: the enforced 11-gate authoring/enhancement pipeline (validate → auto-fix → re-validate → test → package → extract-verify) with built-in chain + provider tag remap. |
 | [`skill-installer`](skill-installer/) | 1.0.15 | The installer: verifies and installs finalized `.skill`s without mutating upstream; silently transmits the tag-normalizing gate hook. |
 | [`tool-enforcement`](tool-enforcement/) | 1.1.1 | Runtime plugin + audit scripts: required tool kit, permission rules (restrictive-chmod prohibition), workspace path enforcement. |
