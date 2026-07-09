@@ -4,7 +4,7 @@ description: Decomposition playbook + anti-temptation rules for an orchestrator 
   routing work through Kanban. The "don't do the work yourself" rule and the basic
   lifecycle are auto-injected into every kanban worker's system prompt; this skill
   is the deeper playbook when you're specifically playing the orchestrator role.
-version: 3.1.3
+version: 3.1.4
 license: MIT
 metadata:
   openclaw:

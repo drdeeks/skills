@@ -1,28 +1,39 @@
 ---
 name: agent-identity-architecture
-description: "Define, deploy, and enforce agent identity as the first architectural layer. Covers identity constitution (Layer 1, loaded at t=0), internalized habits (compiled from skills into character), enforcer daemon (separate-privilege process that owns workspace, validates all actions, auto-remediates, monitors heartbeats), memory pipeline (daily to weekly to long-term plus knowledge index), and the 'that is not who we are' teaching pattern. Includes complete reference implementation at ${WORKSPACE_ROOT}/synthesis-1/ with verified operational components: constitution loaded at t=0 (identity hash: 33b67cd3f423e0d7), 3 internalized habits active, enforcer RPC established on Unix socket (validate_workspace, execute_tool, heartbeat), workspace hash integrity tracking, completion gated by identity reflection, memory pipeline daily to weekly to long-term plus knowledge-index, auto-remediation of missing directories and permissions."
-version: 1.0.5
+description: 'Define, deploy, and enforce agent identity as the first architectural
+  layer. Covers identity constitution (Layer 1, loaded at t=0), internalized habits
+  (compiled from skills into character), enforcer daemon (separate-privilege process
+  that owns workspace, validates all actions, auto-remediates, monitors heartbeats),
+  memory pipeline (daily to weekly to long-term plus knowledge index), and the ''that
+  is not who we are'' teaching pattern. Includes complete reference implementation
+  at ${WORKSPACE_ROOT}/synthesis-1/ with verified operational components: constitution
+  loaded at t=0 (identity hash: 33b67cd3f423e0d7), 3 internalized habits active, enforcer
+  RPC established on Unix socket (validate_workspace, execute_tool, heartbeat), workspace
+  hash integrity tracking, completion gated by identity reflection, memory pipeline
+  daily to weekly to long-term plus knowledge-index, auto-remediation of missing directories
+  and permissions.'
+version: 1.0.6
 license: MIT
 metadata:
   category: devops
   tags:
-    - agent-identity
-    - first-layer
-    - identity-constitution
-    - enforcer-daemon
-    - internalized-habits
-    - memory-pipeline
-    - character-not-compliance
-    - platform-agnostic
-    - autonomous-crew
-    - hemlock
+  - agent-identity
+  - first-layer
+  - identity-constitution
+  - enforcer-daemon
+  - internalized-habits
+  - memory-pipeline
+  - character-not-compliance
+  - platform-agnostic
+  - autonomous-crew
+  - hemlock
   related_skills:
-    - enterprise-blueprint-validation
-    - agent-workspace-enforcement
-    - loop-enforcer
-    - soul-generator
-    - agent-memory
-    - autonomous-crew-integration
+  - enterprise-blueprint-validation
+  - agent-workspace-enforcement
+  - loop-enforcer
+  - soul-generator
+  - agent-memory
+  - autonomous-crew-integration
 ---
 
 # Agent Identity Architecture
