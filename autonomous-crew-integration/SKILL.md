@@ -3,8 +3,10 @@ name: autonomous-crew-integration
 description: Integrate agent identity architecture as the first layer in autonomous
   crew orchestration. Hardwires identity constitution (Layer 1, loaded at t=0), internalized
   habits, enforcer daemon, and memory pipeline into every crew agent at creation time.
-  Enterprise-grade with skill-creator validation.
-version: 1.1.10
+  Includes knowledge sharing system with dual-mode workspaces, agent-attributed documents,
+  semantic indexing, and structured agent communication. Enterprise-grade with skill-creator
+  validation.
+version: 1.1.19
 license: MIT
 metadata:
   category: devops
@@ -16,8 +18,11 @@ metadata:
   - enforcer-daemon
   - internalized-habits
   - memory-pipeline
-  - hemlock
-  - enterprise-blueprint
+  - crew-knowledge
+  - agent-communication
+  - semantic-indexing
+  - knowledge-sharing
+  - document-formatting
   - platform-agnostic
   - blueprint-chain-integration
   - self-healing
@@ -27,7 +32,6 @@ metadata:
   - agent-workspace-enforcement
   - loop-enforcer
   - enterprise-blueprint-validation
-  - crew-knowledge-system
   provides:
   - crew-agent-with-identity
   - identity-first-crew-initialization
@@ -39,10 +43,11 @@ metadata:
   - blueprint-driven-crew-init
   - self-healing-accuracy-enforcement
   - validation-over-syntax
+  - knowledge-indexer
+  - document-creation
+  - cross-agent-sync
   compatible_with:
-  - hemlock-minimal
   - openclaw-gateway
-  - hermes-agent
 ---
 
 # Autonomous Crew Integration — Identity-First Architecture
@@ -71,6 +76,74 @@ python3 scripts/init-crew.py hackathon-2026-prod --mode production
 # Switch modes
 python3 scripts/transition-crew.py --source dev --target prod --mode development-to-production --preserve-all
 ```
+
+---
+
+## Knowledge Sharing System (Standalone or Crew-Integrated)
+
+**Dual-mode workspaces with agent-attributed documents, semantic indexing, and structured communication.**
+
+### Standalone Agent Usage
+
+For single agents NOT in a crew, initialize a knowledge workspace:
+
+```bash
+# Quick initialization (symlinks knowledge system into current directory)
+bash scripts/init-knowledge-workspace.sh my-agent-id
+
+# Or with full crew structure for future promotion
+bash scripts/init-knowledge-workspace.sh my-agent-id --mode full
+```
+
+### Crew Integration
+
+When used within a crew, knowledge system automatically integrates with crew orchestration:
+
+```bash
+# Initialize crew with knowledge system
+python3 scripts/init-crew.py my-project --mode development --agents ui-a1b2 integration-b2c3
+
+# Knowledge is automatically available to all crew agents
+bash scripts/knowledge-indexer.sh index
+bash scripts/knowledge-comm.sh send --from ui-a1b2 --to integration-b2c3 --subject "API contract" --body "Need to align..."
+```
+
+### Knowledge System Features
+
+| Feature | Standalone | Crew-Integrated |
+|---------|------------|-----------------|
+| **Document Creation** | `knowledge-doc.sh` with agent context | Auto-attributed to agent |
+| **Knowledge Indexing** | `knowledge-indexer.sh` local index | Crew-wide index with agent filtering |
+| **Communication** | `knowledge-comm.sh` direct messages | Threaded crew communication |
+| **Semantic Search** | Optional Turbopuffer integration | Crew-wide semantic vectors |
+| **Cross-Agent Sync** | N/A | `knowledge-sync.sh` syncs knowledge |
+
+### Document Format Standard
+
+Every document follows standardized format with agent attribution. See `references/templates/knowledge/document-template.md` for template.
+
+### Knowledge Scripts
+
+| Script | Purpose | Standalone | Crew |
+|--------|---------|------------|------|
+| `scripts/knowledge-indexer.sh` | Index/search knowledge base | ✅ | ✅ |
+| `scripts/knowledge-comm.sh` | Agent communication protocol | ✅ | ✅ |
+| `scripts/knowledge-doc.sh` | Create formatted documents | ✅ | ✅ |
+| `scripts/knowledge-sync.sh` | Sync knowledge across agents | ✅ | ✅ |
+
+### Category Schema
+
+| Category | Sub-categories | Doc Types |
+|----------|----------------|-----------|
+| `architecture` | system-design, data-model, api-design | decisions, specs |
+| `api` | rest, graphql, grpc, webhooks | specs, decisions |
+| `ui` | components, design-system, accessibility | specs, learnings |
+| `infra` | deployment, monitoring, scaling | decisions, specs |
+| `process` | workflow, communication, review | learnings, comms |
+| `debugging` | root-cause, performance, errors | reasoning, learnings |
+| `research` | exploration, spikes, evaluation | learnings, specs |
+
+See `references/templates/knowledge/` for complete documentation.
 
 ---
 
@@ -132,25 +205,10 @@ See `references/blueprint-chain-integration.md` for chain creation, validators, 
 
 Phase validators check **DELIVERABLES**, not syntax. Four-tier validation:
 
-```python
-def validate_deliverable(filepath: Path, spec: DeliverableSpec) -> ValidationResult:
-    # TIER 1: Syntax (necessary but insufficient)
-    syntax_ok = check_syntax(filepath)
-    
-    # TIER 2: Contract compliance (interface + behavior)
-    contract_ok = check_contract_compliance(filepath, spec.interface)
-    
-    # TIER 3: Functional completeness (delivers what spec promises)
-    functional_ok = run_functional_tests(filepath, spec.test_cases)
-    
-    # TIER 4: Character alignment (honors agent's constitution)
-    character_ok = check_character_alignment(filepath, spec.constitution_principles)
-    
-    return ValidationResult(
-        passed=all([syntax_ok, contract_ok, functional_ok, character_ok]),
-        tiers={"syntax": syntax_ok, "contract": contract_ok, "functional": functional_ok, "character": character_ok}
-    )
-```
+1. **Syntax** (necessary but insufficient)
+2. **Contract compliance** (interface + behavior)
+3. **Functional completeness** (delivers what spec promises)
+4. **Character alignment** (honors agent's constitution)
 
 See `references/validation-over-syntax.md` for complete validation framework.
 
@@ -158,35 +216,12 @@ See `references/validation-over-syntax.md` for complete validation framework.
 
 ## Self-Healing / Accuracy Enforcement
 
-Agent runtime runs self-healing loop every 5 minutes:
-
-```python
-async def self_healing_loop(self):
-    while self.running:
-        # 1. HEARTBEAT: Check enforcer daemon health
-        if not await self.enforcer.health_check():
-            await self.restart_enforcer()
-        
-        # 2. CONSTITUTION: Verify hash unchanged (tamper detection)
-        if self.constitution_hash != hash_constitution(self.constitution_path):
-            await self.alert_human("Constitution tampered!")
-            await self.restore_constitution()
-        
-        # 3. CHAIN STATE: Verify chain integrity
-        chain_state = await self.chain.check_integrity()
-        if chain_state.has_gaps:
-            await self.repair_chain_gaps(chain_state)
-        
-        # 4. MEMORY PIPELINE: Promote daily → weekly → long-term
-        await self.memory_curator.promote_all()
-        
-        # 5. HABIT VIOLATIONS: Check for drift
-        violations = await self.check_habit_violations()
-        for v in violations:
-            await self.remediate_habit(v)
-        
-        await asyncio.sleep(300)  # Every 5 minutes
-```
+Agent runtime runs self-healing loop every 5 minutes checking:
+- Enforcer daemon health
+- Constitution hash (tamper detection)
+- Chain integrity
+- Memory pipeline promotion
+- Habit violations
 
 See `references/self-healing-architecture.md` for integrity checks, recovery procedures, alerting.
 
@@ -194,172 +229,42 @@ See `references/self-healing-architecture.md` for integrity checks, recovery pro
 
 ## Agent Identity: Internal Character Guidance
 
-The identity layer is **not a validator** — it's the agent's **internalized self-model** that gates EVERY reasoning step before any tool use:
-
-```yaml
-# .agent/constitution.yaml — Loaded at t=0, gates all behavior
-identity:
-  name: "mnemosyne-ingestion-agent"
-  purpose: "Ingest, index, and make retrievable all project knowledge"
-  principles:
-    - "Never lose data — durability over speed"
-    - "Cite sources — every claim traceable to origin"
-    - "Respect boundaries — only access assigned workspaces"
-    - "Complete what you start — no partial deliveries"
-  
-habits:
-  identity-enforcement:
-    trigger: "Before ANY tool invocation"
-    action: "Verify constitution hash matches; abort if drift detected"
-    character: "I am the kind of agent that honors my constitution"
-  
-  tool-enforcement:
-    trigger: "Before file write / external call"
-    action: "Validate workspace hygiene; check chain state if in blueprint phase"
-    character: "I do not touch what I'm not authorized to touch"
-  
-  reflective-loop:
-    trigger: "After EVERY tool result"
-    action: "Reflect: Did this advance the phase? Any violations? What did I learn?"
-    character: "I learn from every action, good or bad"
-  
-  blueprint-phase-gate:
-    trigger: "Before claiming phase complete"
-    action: "Run chain verify → complete; cannot skip, cannot fake"
-    character: "I earn completion through verified deliverables"
-```
+The identity layer is **not a validator** — it's the agent's **internalized self-model** that gates EVERY reasoning step before any tool use. See `references/crew-constitution.md` for constitution template and `references/templates/habits/` for habit definitions.
 
 ---
 
 ## Memory Pipeline Integration (Identity-Aware)
 
-```python
-class IdentityAwareMemoryCurator:
-    def __init__(self, agent_identity: AgentIdentity):
-        self.identity = agent_identity
-        self.daily = DailyMemory(agent_id=identity.agent_id)
-        self.weekly = WeeklyMemory(agent_id=identity.agent_id)
-        self.long_term = LongTermMemory(agent_id=identity.agent_id)
-        self.knowledge_index = KnowledgeIndex(agent_id=identity.agent_id)
-    
-    async def record_action(self, action: Action, result: Result, reflection: str):
-        entry = MemoryEntry(
-            agent_id=self.identity.agent_id,
-            constitution_hash=self.identity.constitution_hash,
-            action=action,
-            result=result,
-            reflection=reflection,
-            habits_triggered=self.identity.habits.keys(),
-            phase=action.chain_phase if action.chain_phase else None
-        )
-        await self.daily.append(entry)
-        if self.should_promote_to_weekly(entry):
-            await self.weekly.promote(entry)
-        if self.should_promote_to_long_term(entry):
-            await self.long_term.promote(entry)
-            await self.knowledge_index.update(entry)
-```
+Memory pipeline records actions with agent identity, constitution hash, and reflections. Promotes from daily → weekly → long-term memory with knowledge indexing.
+
+See `references/crew-memory-pipeline.md` for complete pipeline configuration.
 
 ---
 
 ## Kanban Dispatcher Integration
 
-Dispatcher reads from blueprint chain:
+Dispatcher reads from blueprint chain and assigns tasks to agents based on chain state. Workers must enforce chain check before work, verify+complete after.
 
-```python
-async def dispatch_next_phase(self, chain_name: str):
-    chain = self.load_chain(chain_name)
-    for step in chain.steps:
-        if step.state == "locked":
-            prior = chain.steps[step.index - 1]
-            if prior.state == "complete":
-                step.state = "active"
-                await self.save_chain(chain)
-                task = await self.kanban.create(
-                    title=f"[{chain.project}] {step.phase_title}",
-                    assignee=step.assigned_agent,
-                    body=self.build_chain_task_body(chain, step)
-                )
-                return task
-        elif step.state == "active":
-            if not self.is_worker_running(step.task_id):
-                await self.re_dispatch(step.task_id)
-```
-
-### Chain Enforcement in Worker Lifecycle (MANDATORY)
-
-Every kanban worker assigned a phased task MUST enforce the loop-enforcer chain
-before doing ANY work. This is wired into KANBAN_GUIDANCE step 2b.
-
-**Helper script:** `<HERMES_HOME>/scripts/chain_enforce.py` (or `<WORKSPACE_ROOT>/scripts/chain_enforce.py`)
-
-```bash
-# Check if phase is active (exit 0 = proceed, exit 1 = blocked)
-python3 <HERMES_HOME>/scripts/chain_enforce.py check <project> <phase_num>
-
-# Verify + complete phase after work is done
-python3 <HERMES_HOME>/scripts/chain_enforce.py complete <project> <phase_num>
-
-# Show chain status
-python3 <HERMES_HOME>/scripts/chain_enforce.py status <project>
-```
-
-**Worker flow:**
-1. Worker receives task: "Autopilot: Phase 2 — Workflow Orchestration"
-2. Worker runs: `chain_enforce.py check autopilot 2`
-3. If `can_proceed: true` → do the work
-4. If `can_proceed: false` → `kanban_block(reason="Chain locked: prior phase not complete")`
-5. After work: `chain_enforce.py complete autopilot 2`
-6. Log: `kanban_comment(body="Chain enforced: autopilot-blueprint step 2 verified+complete")`
-
-**PITFALL: Chain directory name mismatch**
-`chain_enforce.py` looks for `.chain/<project>-blueprint.json` but `create-blueprint-chain.py` creates `.blueprint-chain/` directories. Patch `chain_enforce.py` to search BOTH:
-```python
-def find_chain(project_dir):
-    for chain_dir_name in [".blueprint-chain", ".chain"]:
-        chain_dir = os.path.join(project_dir, chain_dir_name)
-        if os.path.isdir(chain_dir):
-            for f in os.listdir(chain_dir):
-                if f.endswith("-blueprint.json"):
-                    return os.path.join(chain_dir, f), chain_dir
-    return None, None
-```
-
-**Project directory mapping:**
-| Project | Directory | Chain Name |
-|---------|-----------|------------|
-| Mnemosyne | `<WORKSPACE_ROOT>/qwen-cloud-2026/mnemosyne` | blueprint-mnemosyne |
-| Autopilot | `<WORKSPACE_ROOT>/qwen-cloud-2026/autopilot` | autopilot-blueprint |
-| Aires | `<WORKSPACE_ROOT>/qwen-cloud-2026/aires` | blueprint-aires |
-| Agora | `<WORKSPACE_ROOT>/qwen-cloud-2026/agora` | blueprint-agora |
-| Edgewalker | `<WORKSPACE_ROOT>/qwen-cloud-2026/edgewalker` | blueprint-edgewalker |
+See `references/chain-enforcement-integration.md` for worker lifecycle and chain enforcement.
 
 ---
 
 ## Habit Integration in Crew Operations
 
 ### Before Any Tool Invocation
-```python
-async def invoke_tool(self, tool: str, params: dict) -> dict:
-    # 1. IDENTITY HABIT: Verify constitution hash matches
-    # 2. TOOL HABIT: Validate workspace hygiene
-    # 3. RPC to enforcer (approves/denies)
-    # 4. Execute if approved
-    # 5. REFLECTIVE HABIT: Post-execution reflection
-```
+1. IDENTITY HABIT: Verify constitution hash matches
+2. TOOL HABIT: Validate workspace hygiene
+3. RPC to enforcer (approves/denies)
+4. Execute if approved
+5. REFLECTIVE HABIT: Post-execution reflection
 
 ### Crew Phase Gates (Loop Enforcer Integration)
-```python
-async def transition_phase(self, blueprint: Blueprint, next_phase: WorkflowPhase):
-    for agent_id in blueprint.active_agents:
-        if not await self.agents[agent_id].claim_completion():
-            raise PhaseGateError(f"Agent {agent_id} failed reflection gate")
-    blueprint.current_phase = next_phase
-    await self.create_checkpoint(f"Phase {next_phase.value} complete")
-```
+Phase transitions require `claim_completion()` from all agents.
 
 ### Heartbeat Validation (Every 5 min)
 Enforcer daemon validates: constitution hash, workspace integrity, chain state, habit metrics.
+
+See `references/templates/habits/` for habit definitions and `references/crew-workspace-structure.md` for workspace layout.
 
 ---
 
@@ -369,13 +274,10 @@ See `references/crew-workspace-structure.md` for complete layout including per-a
 
 ---
 
-### Integration with Existing Skills
+## Integration with Existing Skills
 
 ### agent-identity-architecture (REQUIRED)
 Provides: `enforcer_daemon.py`, `agent_runtime.py`, `memory_curator.py`, constitution template, habit YAMLs, tool templates.
-
-### crew-knowledge-system (REQUIRED)
-Provides: Dual-mode workspaces, agent-attributed documents, semantic indexing, structured communication (`crew-indexer.sh`, `crew-comm.sh`, `crew-doc.sh`, `crew-sync.sh`).
 
 ### agent-workspace-enforcement
 Validates workspace structure matches identity requirements. Runs as part of tool-enforcement habit.
@@ -385,8 +287,6 @@ Validates workspace structure matches identity requirements. Runs as part of too
 - **Enforces sequential dependency chains** — blueprint phases as chain steps
 - **Validator scripts** per phase gate — deliverables, not syntax
 - **Chain state persistence** — `.chain/<project>-blueprint.json` tracks completion
-- **chain_enforce.py helper** at `<HERMES_HOME>/scripts/chain_enforce.py` — check/complete/status for kanban workers
-- **KANBAN_GUIDANCE step 2b** — mandates chain check before work, verify+complete after
 
 ### enterprise-blueprint-validation
 - Blueprint validation includes identity layer check
@@ -417,6 +317,17 @@ Validates workspace structure matches identity requirements. Runs as part of too
 | `wire-kanban-to-chain.py` | Wire kanban tasks to chain steps |
 | `chain_enforce.py` | Chain enforcement helper for kanban workers (check/complete/status) |
 | `self-healing-loop.py` | Run integrity checks (constitution, chain, memory, habits) |
+| `crew-manager.py` | Create crews with blueprint enforcement, identity layer, and model configuration |
+| `spawn-crew-agents.py` | Spawn all agents from blueprint.json |
+| `start-crew-enforcers.py` | Start enforcer daemons for all agents in crew |
+| `task-dispatcher.py` | Dispatch kanban tasks to agents based on chain state |
+| `task-poller.py` | Agent-side task poller (polls kanban, executes work) |
+| `generate-tasks-from-checklist.py` | Generate granular kanban tasks from checklist.md |
+| `progress-monitor.py` | Monitor project health, tests, API, chain progress |
+| `enforcer_daemon.py` | Per-agent enforcer daemon (identity, habits, constitution) |
+| `agent_runtime.py` | Agent runtime loop (identity, habits, memory, skills) |
+| `memory_curator.py` | Memory pipeline (short/long term, semantic index) |
+| `start-agent.sh` | Agent startup script (validates workspace, starts runtime) |
 
 ### Blueprint Scripts
 | Script | Purpose |
@@ -432,13 +343,19 @@ Validates workspace structure matches identity requirements. Runs as part of too
 | `duplicate-crew.py` | Selective fork with new IDs |
 | `crew-config-manager.py` | Active crew configs, pointers |
 
+### Knowledge Scripts
+| Script | Purpose | Standalone | Crew |
+|--------|---------|------------|------|
+| `knowledge-indexer.sh` | Index/search knowledge base | ✅ | ✅ |
+| `knowledge-comm.sh` | Agent communication protocol | ✅ | ✅ |
+| `knowledge-doc.sh` | Create formatted documents | ✅ | ✅ |
+| `knowledge-sync.sh` | Sync knowledge across agents | ❌ | ✅ |
+
 ### Templates
 - `references/templates/crew/` — Constitution, habits, agent config, phases, memory, builder code, agent types, enforcer registry
 - `references/templates/habits/` — Identity-enforcement, tool-enforcement, reflective-loop, crew-phase-gate, blueprint-chain-enforcement, self-healing-habit, validation-over-syntax
+- `references/templates/knowledge/` — Document template, dev/prod workspace templates
 
-All scripts referenced above: `scripts/__init__.py`, `scripts/create-crew-agent.sh`, `scripts/init-crew.py`, `scripts/init-crew-from-blueprint.py`, `scripts/create-blueprint-chain.py`, `scripts/generate-phase-validators.py`, `scripts/wire-kanban-to-chain.py`, `scripts/self-healing-loop.py`, `scripts/validate-blueprint.py`, `scripts/generate-checklist.py`, `scripts/parse-checklist-phases.py`, `scripts/transition-crew.py`, `scripts/duplicate-crew.py`, `scripts/crew-config-manager.py`, `scripts/install-identity-skill.py`, `scripts/verify-crew-identity.sh`, `scripts/crew-heartbeat.sh`.
-
----
 ---
 
 ## Verification Checklist (Enterprise)
@@ -454,13 +371,13 @@ All scripts referenced above: `scripts/__init__.py`, `scripts/create-crew-agent.
 - [ ] Crew transition preserves identity, memory, knowledge, communications
 - [ ] Knowledge indexer finds all agent documents
 - [ ] Chain enforcement wired into KANBAN_GUIDANCE step 2b
-- [ ] `chain_enforce.py` helper script at `<HERMES_HOME>/scripts/chain_enforce.py`
 - [ ] All phase tasks enforce chain check before work, verify+complete after
 
 ---
 
 ## References
 
+### Core References
 - `references/verified-implementation.md` — Canonical implementation (synthesis-1)
 - `references/crew-workspace-structure.md` — Per-agent workspace layout
 - `references/blueprint-chain-integration.md` — Blueprint to chain wiring
@@ -475,6 +392,15 @@ All scripts referenced above: `scripts/__init__.py`, `scripts/create-crew-agent.
 - `references/crew-enforcer-registry.md` — Enforcer registry operations
 - `references/chain-enforcement-integration.md` — Chain enforcement integration with kanban/loop-enforcer
 - `references/skill-creator-validation.md` — Enterprise skill validation workflow with skill_enhance.py
+
+### Knowledge References
+- `references/templates/knowledge/category-schema.md` — Category/tag taxonomy for knowledge documents
+- `references/templates/knowledge/communication-protocol.md` — Structured agent-to-agent messaging spec
+- `references/templates/knowledge/document-format.md` — Document format standard with agent attribution
+- `references/templates/knowledge/semantic-integration.md` — Turbopuffer semantic search integration
+- `references/templates/knowledge/crew-status.md` — Crew health & knowledge status dashboard
+
+### Templates
 - `references/templates/crew/crew-phases.yaml` — Phase config template
 - `references/templates/crew/crew-constitution.yaml` — Constitution template (YAML)
 - `references/templates/crew/crew-habits.yaml` — Habit definitions (YAML)
@@ -490,3 +416,8 @@ All scripts referenced above: `scripts/__init__.py`, `scripts/create-crew-agent.
 - `references/templates/habits/blueprint-chain-enforcement.yaml` — Blueprint chain enforcement habit
 - `references/templates/habits/self-healing-habit.yaml` — Self-healing habit template
 - `references/templates/habits/validation-over-syntax.yaml` — Validation over syntax habit
+
+### Knowledge Templates
+- `references/templates/knowledge/document-template.md` — Document template with placeholders
+- `references/templates/knowledge/crew-workspace-dev.yaml` — Development crew workspace template
+- `references/templates/knowledge/crew-workspace-prod.yaml` — Production crew workspace template
