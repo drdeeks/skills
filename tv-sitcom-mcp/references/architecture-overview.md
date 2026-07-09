@@ -84,13 +84,13 @@ Core server handling all MCP requests:
 
 ### 4. Federation Gateway
 
-Connects to the Hermes agent ecosystem:
+Connects to the Hemlock agent ecosystem:
 
 - **Agent Registry**: Tracks all registered agents
 - **Room Manager**: Creates and manages TV rooms
 - **Project Manager**: Coordinates multi-agent projects
 
-### 5. Hermes Agents
+### 5. Hemlock agents
 
 The actual agents generating content:
 
