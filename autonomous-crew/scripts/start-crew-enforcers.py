@@ -11,41 +11,50 @@ import time
 from pathlib import Path
 
 def start_enforcer(agent_workspace, agent_id):
-    """Start enforcer daemon for an agent"""
-    enforcer_script = agent_workspace / "enforcer_daemon.py"
-    if not enforcer_script.exists():
-        print(f"  ✗ {agent_id}: enforcer_daemon.py not found")
-        return False
+    """Start enforcer daemon for a single agent"""
+    pid_file = agent_workspace / ".agent" / "enforcer.pid"
     
-    runtime_dir = Path(os.environ.get("XDG_RUNTIME_DIR", "/run/user/" + str(os.getuid())))
+    # Check if already running
+    if pid_file.exists():
+        try:
+            pid = int(pid_file.read_text().strip())
+            os.kill(pid, 0)
+            print(f"  {agent_id}: Enforcer already running (PID {pid})")
+            return True
+        except:
+            pass  # Stale PID file
+    
+    # Start enforcer
+    enforcer_script = Path.home() / ".hermes" / "skills" / "devops" / "agent-identity-architecture" / "scripts" / "enforcer_daemon.py"
+    
     env = os.environ.copy()
+    env["WORKSPACE_ROOT"] = str(agent_workspace)
     env["AGENT_ID"] = agent_id
-    env["AGENT_WORKSPACE"] = str(agent_workspace)
-    env["WORKSPACE_ROOT"] = str(agent_workspace.parent.parent)
-    env["ENFORCER_SOCKET_DIR"] = str(runtime_dir / "agent-enforcer")
-    env["ENFORCER_LOG_DIR"] = str(Path.home() / "var" / "log" / "agent-enforcer")
+    env["HERMES_HOME"] = str(Path.home() / ".hermes")
     
-    # Start with nohup to detach from parent
-    log_file = agent_workspace / ".agent" / "logs" / "enforcer.log"
-    log_file.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(log_file, "a") as f:
+    try:
         proc = subprocess.Popen(
-            ["python3", str(enforcer_script), agent_id],
+            [sys.executable, str(enforcer_script)],
             cwd=agent_workspace,
             env=env,
-            stdout=f,
-            stderr=subprocess.STDOUT,
-            start_new_session=True  # Detach from parent
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True
         )
-    
-    # Save PID
-    pid_file = agent_workspace / ".agent" / "enforcer.pid"
-    with open(pid_file, "w") as f:
-        f.write(str(proc.pid))
-    
-    print(f"  ✓ {agent_id}: enforcer started (PID: {proc.pid})")
-    return True
+        
+        # Wait briefly and check PID
+        time.sleep(0.5)
+        if proc.poll() is None:
+            pid_file.parent.mkdir(parents=True, exist_ok=True)
+            pid_file.write_text(str(proc.pid))
+            print(f"  {agent_id}: Enforcer started (PID {proc.pid})")
+            return True
+        else:
+            print(f"  {agent_id}: Enforcer failed to start")
+            return False
+    except Exception as e:
+        print(f"  {agent_id}: Enforcer start error: {e}")
+        return False
 
 def main():
     if len(sys.argv) < 3:
@@ -57,35 +66,17 @@ def main():
     
     agents_dir = project_dir / "agents"
     if not agents_dir.exists():
-        print(f"Agents directory not found: {agents_dir}")
-        sys.exit(1)
+        print(f"No agents directory: {agents_dir}")
+        return
     
-    print(f"Starting enforcers for {crew_name}...")
+    print(f"Starting enforcers for {crew_name} in {project_dir}")
     
     for agent_dir in agents_dir.iterdir():
         if agent_dir.is_dir():
             agent_id = agent_dir.name
             start_enforcer(agent_dir, agent_id)
-            time.sleep(0.5)  # Stagger startup
     
-    print("All enforcers started!")
-    
-    # Show status
-    print("\nStatus:")
-    for agent_dir in agents_dir.iterdir():
-        if agent_dir.is_dir():
-            pid_file = agent_dir / ".agent" / "enforcer.pid"
-            if pid_file.exists():
-                with open(pid_file) as f:
-                    pid = f.read().strip()
-                # Check if process is alive
-                try:
-                    os.kill(int(pid), 0)
-                    print(f"  ✓ {agent_dir.name}: PID {pid} (running)")
-                except:
-                    print(f"  ✗ {agent_dir.name}: PID {pid} (dead)")
-            else:
-                print(f"  ? {agent_dir.name}: no PID file")
+    print("Enforcer startup complete")
 
 if __name__ == "__main__":
     main()

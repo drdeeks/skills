@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime, timezone
 
-WORKSPACE = os.environ.get("WORKSPACE_ROOT", str(Path.home() / "qwen-cloud-2026"))
+WORKSPACE = os.environ.get("WORKSPACE_ROOT", str(__import__("pathlib").Path.home() / "qwen-cloud-2026"))
 PROJECTS = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
 
 def now_iso():
