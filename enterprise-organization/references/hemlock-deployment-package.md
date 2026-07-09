@@ -47,7 +47,7 @@ hemlock-minimal/
 ├── docker/                     # OpenClaw runtime (embedded)
 │   ├── hermes-agent/           # Hermes agent source
 │   └── openclaw-runtime/       # OpenClaw gateway runtime
-└── .hermes/                    # Hermes skills registry
+└── .hermes/                    # skills registry
     └── skills/                 # 350+ additional skills
 ```
 
@@ -83,7 +83,7 @@ OpenClaw Gateway (PID 1, port 18789)
     ├── Channel Adapters: Telegram, iMessage (via SSH)
     ├── MCP Provider: spawns stdio servers
             ↓
-Hermes Agent Runtime (Cognition Plane)
+Hemlock agent runtime (Cognition Plane)
     ├── AIAgent Loop, Memory, Tools
     └── MCP Server (stdio) → mcp_bridge.py
             ↓
@@ -207,10 +207,10 @@ curl http://localhost:18789/health
 ### USB
 ```bash
 # Create
-./scripts/create-usb-image.sh /media/usb/hemlock-deploy
+./scripts/create-usb-image.sh ${USB_MOUNT}/hemlock-deploy
 
 # Deploy on target
-cd /media/usb/hemlock-deploy && sudo ./deploy.sh
+cd ${USB_MOUNT}/hemlock-deploy && sudo ./deploy.sh
 ```
 
 ### Tests

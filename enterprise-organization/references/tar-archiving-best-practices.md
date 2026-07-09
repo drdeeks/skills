@@ -51,7 +51,7 @@ tar -czf package.tar.gz -C /tmp/staging project-name
 
 ### Source Structure
 ```
-/home/ubuntu/hemlock-minimal/
+$HOME/hemlock-minimal/
 ├── docker-compose.yml          # Outer root files
 ├── Dockerfile.runtime          # Outer root files
 ├── entrypoint.sh               # Outer root files

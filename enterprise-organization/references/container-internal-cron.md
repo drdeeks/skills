@@ -29,7 +29,7 @@ if ! command -v cron &> /dev/null; then
 fi
 
 # Create crontab entry for daily pull at 2 AM
-CRON_JOB="0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
+CRON_JOB="0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
 
 # Check if already in crontab
 if ! crontab -l 2>/dev/null | grep -q "pull-drdeeks-daily.sh"; then
@@ -51,7 +51,7 @@ echo "Container initialization complete - drdeeks daily pull scheduled"
 
 set -e
 
-SKILLS_DIR="/home/ubuntu/hemlock-minimal/hemlock-minimal/skills/drdeeks"
+SKILLS_DIR="$HOME/hemlock-minimal/hemlock-minimal/skills/drdeeks"
 LOG_FILE="/var/log/drdeeks-pull.log"
 
 echo "[$(date)] Starting drdeeks skills pull" >> $LOG_FILE
@@ -77,7 +77,7 @@ echo "[$(date)] drdeeks skills update finished" >> $LOG_FILE
 # ============================================================================
 # CONTAINER INITIALIZATION
 # ============================================================================
-/home/ubuntu/hemlock-minimal/scripts/container-init.sh
+$HOME/hemlock-minimal/scripts/container-init.sh
 
 # ============================================================================
 # GATEWAY INITIALIZATION (Hemlock Gateway)

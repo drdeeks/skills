@@ -176,7 +176,7 @@ python3 scripts/security_hardening.py --workspace /path --fix
 
 ```
 .secrets/
-├── hermes/              # Hermes agent credentials
+├── hermes/              # agent credentials
 │   ├── config.yaml      # Encrypted or restricted
 │   └── api-keys/        # API keys per service
 ├── titan/               # Titan trading credentials

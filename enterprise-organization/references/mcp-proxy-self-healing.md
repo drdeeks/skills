@@ -13,7 +13,7 @@ MCP Proxy Manager (Python aiohttp)
          ↓
 OpenClaw Gateway MCP Loopback (random port: 41000-42000)
          ↓
-MCP Bridge (stdio) → Hermes Agent Runtime
+MCP Bridge (stdio) → Hemlock agent runtime
 ```
 
 ### Port Allocation
@@ -139,7 +139,7 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/ubuntu/hemlock-minimal/scripts/mcp_proxy_manager.py
+ExecStart=/usr/bin/python3 $HOME/hemlock-minimal/scripts/mcp_proxy_manager.py
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
@@ -155,7 +155,7 @@ WantedBy=multi-user.target
 # ============================================================================
 # CONTAINER INITIALIZATION
 # ============================================================================
-/home/ubuntu/hemlock-minimal/scripts/container-init.sh
+$HOME/hemlock-minimal/scripts/container-init.sh
 
 # ============================================================================
 # GATEWAY INITIALIZATION (Hemlock Gateway)
@@ -175,7 +175,7 @@ if ! command -v cron &> /dev/null; then
 fi
 
 # Create crontab entry for daily pull at 2 AM
-CRON_JOB="0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
+CRON_JOB="0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
 
 if ! crontab -l 2>/dev/null | grep -q "pull-drdeeks-daily.sh"; then
     (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -

@@ -44,7 +44,7 @@ tar -czf package.tar.gz \
 **Wrong** (what I did repeatedly):
 ```bash
 # WRONG - multiple -C flags create conflicting paths
-tar -czf package.tar.gz -C /staging hemlock-minimal -C /home/ubuntu/file.txt
+tar -czf package.tar.gz -C /staging hemlock-minimal -C $HOME/file.txt
 ```
 
 ### 4. Skill Patch Persistence
@@ -88,7 +88,7 @@ service cron start
 
 ```bash
 # pull-drdeeks-daily.sh (runs daily at 2 AM)
-SKILLS_DIR="/home/ubuntu/hemlock-minimal/skills/drdeeks"
+SKILLS_DIR="$HOME/hemlock-minimal/skills/drdeeks"
 if [ -d "$SKILLS_DIR/.git" ]; then
     git -C "$SKILLS_DIR" pull origin main
 else

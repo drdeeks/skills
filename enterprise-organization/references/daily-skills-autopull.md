@@ -11,7 +11,7 @@ Container (PID 1: OpenClaw Gateway)
 ├── MCP loopback server (random port)
 ├── cron daemon (started by container-init.sh)
 │   └── Daily job: 0 2 * * * /scripts/pull-drdeeks-daily.sh
-└── Skills directory: /home/ubuntu/hemlock-minimal/hemlock-minimal/skills/drdeeks/
+└── Skills directory: $HOME/hemlock-minimal/hemlock-minimal/skills/drdeeks/
     ├── 131 .skill files (from drdeeks/skills repo)
     ├── .git/ (for git operations)
     └── ... (skills extracted from .skill files)
@@ -27,7 +27,7 @@ Container (PID 1: OpenClaw Gateway)
 
 set -e
 
-SKILLS_DIR="/home/ubuntu/hemlock-minimal/hemlock-minimal/skills/drdeeks"
+SKILLS_DIR="$HOME/hemlock-minimal/hemlock-minimal/skills/drdeeks"
 LOG_FILE="/var/log/drdeeks-pull.log"
 
 echo "[$(date)] Starting drdeeks skills pull" >> $LOG_FILE
@@ -49,7 +49,7 @@ echo "[$(date)] drdeeks skills update finished" >> $LOG_FILE
 
 ### 2. Cron Entry (in container-init.sh)
 ```bash
-CRON_JOB="0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
+CRON_JOB="0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
 
 if ! crontab -l 2>/dev/null | grep -q "pull-drdeeks-daily.sh"; then
     (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
@@ -73,7 +73,7 @@ service cron start 2>/dev/null || cron
 
 ## Crontab Entry
 ```
-0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1
+0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1
 ```
 Runs daily at 2:00 AM UTC.
 
@@ -165,5 +165,5 @@ tail -f /var/log/drdeeks-pull.log
 tail -f /var/log/drdeeks-cron.log
 
 # Check skills updated
-ls -la /home/ubuntu/hemlock-minimal/hemlock-minimal/skills/drdeeks/
+ls -la $HOME/hemlock-minimal/hemlock-minimal/skills/drdeeks/
 ```

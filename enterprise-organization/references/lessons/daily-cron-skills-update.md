@@ -7,7 +7,7 @@
 # Keeps skills up to date on the portable USB
 
 set -e
-SKILLS_DIR="/home/ubuntu/hemlock-minimal/hemlock-minimal/skills/drdeeks"
+SKILLS_DIR="$HOME/hemlock-minimal/hemlock-minimal/skills/drdeeks"
 LOG_FILE="/var/log/drdeeks-pull.log"
 
 echo "[$(date)] Starting drdeeks skills pull" >> $LOG_FILE
@@ -24,7 +24,7 @@ echo "[$(date)] drdeeks skills update finished" >> $LOG_FILE
 
 ### Crontab Entry (Inside Container)
 ```bash
-0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1
+0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1
 ```
 
 ### Container Init Script
@@ -38,7 +38,7 @@ if ! command -v cron &> /dev/null; then
 fi
 
 # Add daily pull to crontab
-CRON_JOB="0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
+CRON_JOB="0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1"
 if ! crontab -l 2>/dev/null | grep -q "pull-drdeeks-daily.sh"; then
     (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
 fi

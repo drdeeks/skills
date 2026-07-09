@@ -6,7 +6,7 @@ Hemlock Minimal includes a complete Ventoy-compatible USB deployment package. Ve
 ## USB Structure
 
 ```
-/media/usb/hemlock-deploy/
+${USB_MOUNT}/hemlock-deploy/
 ├── hemlock-images.tar              # docker save: base + runtime images
 ├── volumes/
 │   ├── hemlock-gateway.tar.gz      # Gateway config + token
@@ -35,8 +35,8 @@ Hemlock Minimal includes a complete Ventoy-compatible USB deployment package. Ve
 
 ```bash
 # On builder machine (where Hemlock is running)
-cd /home/ubuntu/hemlock-minimal
-./scripts/create-usb-image.sh /media/usb/hemlock-deploy
+cd $HOME/hemlock-minimal
+./scripts/create-usb-image.sh ${USB_MOUNT}/hemlock-deploy
 ```
 
 ## deploy.sh (Auto-generated)
@@ -63,8 +63,8 @@ if [[ -n "${IMRSG_REMOTE_HOST}" ]]; then
 exec ssh -T "$IMRSG_REMOTE_HOST" imsg "$@"
 EOF
     chmod +x /workspace/scripts/imsg-ssh
-    mkdir -p /home/agent/.ssh
-    touch /home/agent/.ssh/known_hosts
+    mkdir -p $HOME/.ssh
+    touch $HOME/.ssh/known_hosts
 fi
 
 # 4. Deploy
@@ -111,7 +111,7 @@ OpenClaw Gateway (PID 1, Control Plane)
     ├── Channel Adapters: Telegram, iMessage (via SSH), etc.
     ├── MCP Provider: spawns stdio servers
             ↓
-Hermes Agent Runtime (Cognition Plane) — ONLY as MCP servers
+Hemlock agent runtime (Cognition Plane) — ONLY as MCP servers
     ├── AIAgent Loop, Memory, Tools
     └── MCP Server (stdio)
             ↓
