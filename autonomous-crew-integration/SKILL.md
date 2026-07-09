@@ -4,7 +4,7 @@ description: Integrate agent identity architecture as the first layer in autonom
   crew orchestration. Hardwires identity constitution (Layer 1, loaded at t=0), internalized
   habits, enforcer daemon, and memory pipeline into every crew agent at creation time.
   Enterprise-grade with skill-creator validation.
-version: 1.1.8
+version: 1.1.10
 license: MIT
 metadata:
   category: devops

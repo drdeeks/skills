@@ -1,38 +1,40 @@
 ---
 name: crew-knowledge-system
-description: "Crew knowledge sharing system with dual-mode workspaces (development/production), agent-attributed document formatting, semantic indexing, and structured agent communication. Integrates with autonomous-crew-integration and agent-identity-architecture."
-version: 1.0.2
+description: Crew knowledge sharing system with dual-mode workspaces (development/production),
+  agent-attributed document formatting, semantic indexing, and structured agent communication.
+  Integrates with autonomous-crew-integration and agent-identity-architecture.
+version: 1.0.3
 license: MIT
 metadata:
   category: devops
   tags:
-    - crew-knowledge
-    - agent-communication
-    - semantic-indexing
-    - development-crew
-    - production-crew
-    - knowledge-sharing
-    - document-formatting
-    - autonomous-crew
-    - hemlock
-    - enterprise-blueprint
+  - crew-knowledge
+  - agent-communication
+  - semantic-indexing
+  - development-crew
+  - production-crew
+  - knowledge-sharing
+  - document-formatting
+  - autonomous-crew
+  - hemlock
+  - enterprise-blueprint
   depends_on:
-    - autonomous-crew-integration
-    - agent-identity-architecture
-    - knowledge-indexer
-    - agent-memory
+  - autonomous-crew-integration
+  - agent-identity-architecture
+  - knowledge-indexer
+  - agent-memory
   provides:
-    - dev-crew-workspace
-    - prod-crew-workspace
-    - agent-attributed-documents
-    - crew-knowledge-indexer
-    - agent-communication-protocol
-    - semantic-search-integration
+  - dev-crew-workspace
+  - prod-crew-workspace
+  - agent-attributed-documents
+  - crew-knowledge-indexer
+  - agent-communication-protocol
+  - semantic-search-integration
   compatible_with:
-    - hemlock-minimal
-    - openclaw-gateway
-    - hermes-agent
-    - turbopuffer-semantic-memory
+  - hemlock-minimal
+  - openclaw-gateway
+  - hermes-agent
+  - turbopuffer-semantic-memory
 ---
 
 # Crew Knowledge System
