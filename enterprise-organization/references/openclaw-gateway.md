@@ -78,7 +78,7 @@ MCP Proxy (port 41214) - auto-detects loopback port
          ↓
 MCP Loopback Server (random port, e.g., 43247) - requires auth
          ↓
-MCP Bridge (stdio) → Hermes Agent Runtime
+MCP Bridge (stdio) → Hemlock agent runtime
 ```
 
 ## Authentication Flow

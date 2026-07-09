@@ -62,7 +62,7 @@ Requires=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/ubuntu/hemlock-minimal/scripts/mcp_proxy_manager.py
+ExecStart=/usr/bin/python3 $HOME/hemlock-minimal/scripts/mcp_proxy_manager.py
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
@@ -97,7 +97,7 @@ journalctl -u hemlock-mcp-proxy-manager --since "1 hour ago"
 # Runs at 2 AM daily via cron
 # Clones if missing, otherwise git pull
 
-SKILLS_DIR="/home/ubuntu/hemlock-minimal/hemlock-minimal/skills/drdeeks"
+SKILLS_DIR="$HOME/hemlock-minimal/hemlock-minimal/skills/drdeeks"
 LOG_FILE="/var/log/drdeeks-pull.log"
 
 if [ -d "$SKILLS_DIR/.git" ]; then
@@ -115,7 +115,7 @@ fi
 
 ### Crontab Entry (Inside Container)
 ```bash
-0 2 * * * /home/ubuntu/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1
+0 2 * * * $HOME/hemlock-minimal/scripts/pull-drdeeks-daily.sh >> /var/log/drdeeks-cron.log 2>&1
 ```
 
 ## Gateway Restart Handling

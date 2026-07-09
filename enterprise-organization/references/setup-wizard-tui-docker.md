@@ -99,7 +99,7 @@ def _start_docker_container():
 ### `_launch_tui()`
 ```python
 def _launch_tui():
-    """Launch the Hermes TUI."""
+    """Launch the Hemlock TUI."""
     print()
     print_header("Launching TUI")
     try:

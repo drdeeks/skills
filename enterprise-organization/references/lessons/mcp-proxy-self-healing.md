@@ -23,7 +23,7 @@ Requires=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/ubuntu/hemlock-minimal/scripts/mcp_proxy_manager.py
+ExecStart=/usr/bin/python3 $HOME/hemlock-minimal/scripts/mcp_proxy_manager.py
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
