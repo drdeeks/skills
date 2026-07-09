@@ -195,15 +195,29 @@ The result is a **consistently current skill database** that every agent and cre
 
 ## Skill catalog
 
-| Skill | Version | Tier | Purpose |
-|---|---|---|---|
-| [`enterprise-blueprint`](enterprise-blueprint/) | 0.0.7 | enterprise | The full blueprint lifecycle in one skill: generate blueprints, sync phase-gated enforcement checklists, validate against enterprise rules, orchestrate tiered testing (unit/integration/e2e/playwright), and assign/track agents. |
-| [`guardrail-enforcement`](guardrail-enforcement/) | 0.1.3 | enterprise | The enforcer: version watcher + auto-commit, workflow gate + signed audit log, advisory locks, and manifest verification. |
-| [`skill-creator`](skill-creator/) | 3.0.8 | enterprise | The creator: the enforced 11-step authoring/enhancement pipeline (validate → auto-fix → re-validate → test → package → extract-verify) that every skill in this repo passes through. |
-| [`skill-installer`](skill-installer/) | 1.0.11 | basic | The installer: verifies structure and installs a finalized `.skill` into a project, agent workspace, or crew without mutating the upstream skill. |
-| [`portable-usb-manager`](portable-usb-manager/) | 2.0.8 | enterprise | Provision and manage portable, bootable Linux/compute USB systems offline (bundles Ventoy). |
+All 17 pass the enterprise-strict validator (2026-07-08 sweep: 17/17).
 
-*Consolidation note: `enterprise-blueprint-validation` was merged into `enterprise-blueprint` at v0.0.7 — its unique `test-runner.py` and testing references moved in, its duplicate `validate_blueprint.py` / `generate_checklist.py` stubs discarded in favor of the fuller originals. A skill must complete its own lifecycle (generate → validate → test) without handing off to a second skill. The retired skill is preserved under `archives/`.*
+| Skill | Version | Purpose |
+|---|---|---|
+| [`agent-identity-architecture`](agent-identity-architecture/) | 1.0.6 | Agent identity as the first architectural layer: constitution at t=0, internalized habits, enforcer daemon, memory curator. |
+| [`agent-wake-up`](agent-wake-up/) | 1.0.6 | Agent wake-up/bootstrap orchestration: health check, kanban status, crew/project dispatch, self-heal. |
+| [`autonomous-crew-integration`](autonomous-crew-integration/) | 1.1.10 | Crew lifecycle: init from blueprint, agent creation, phase validators, kanban-to-chain wiring, self-healing loop. |
+| [`crew-knowledge-system`](crew-knowledge-system/) | 1.0.3 | Crew knowledge sharing: dual-mode workspaces, agent-attributed docs, semantic indexing, structured comms. |
+| [`enterprise-blueprint`](enterprise-blueprint/) | 0.1.1 | Full blueprint lifecycle in one skill: generate, sync phase-gated checklists, validate, tiered testing, agent assignment. |
+| [`enterprise-organization`](enterprise-organization/) | 0.1.1 | Workspace/organization enforcement: modular file tree, security hardening, task-list validation, zero-stub policy, semver releases, git control. |
+| [`guardrail-enforcement`](guardrail-enforcement/) | 0.1.4 | The enforcer: version watcher + auto-commit, workflow gate + signed audit log, advisory locks, manifest verification. |
+| [`hackathon-manager`](hackathon-manager/) | 0.1.1 | Hackathon participation end to end: project tracking, model-to-role mapping, kanban sequencing, submission readiness checks. |
+| [`hemlock-minimal`](hemlock-minimal/) | 0.1.1 | The single-container minimal runtime: build/launch scripts, volume isolation, health doctor, export/import modes. |
+| [`kanban-orchestrator`](kanban-orchestrator/) | 3.1.4 | Kanban task decomposition, multi-agent routing, worker lifecycle, progress monitoring. |
+| [`knowledge-indexer`](knowledge-indexer/) | 0.0.6 | Documentation/knowledge-base indexing with full-text search, link management, incremental + scheduled updates. |
+| [`loop-enforcer`](loop-enforcer/) | 1.0.10 | Sequential dependency chains: locked steps, verify-before-complete, audit + migration tooling, additive-only doctrine. |
+| [`portable-usb-manager`](portable-usb-manager/) | 2.0.10 | Provision and manage portable, bootable Linux/compute USB systems offline (Ventoy, persistence, automount, bash-config payloads). Absorbed `unified-usb-skill`. |
+| [`skill-creator`](skill-creator/) | 3.0.10 | The creator: the enforced 11-gate authoring/enhancement pipeline (validate → auto-fix → re-validate → test → package → extract-verify) with built-in chain + provider tag remap. |
+| [`skill-installer`](skill-installer/) | 1.0.14 | The installer: verifies and installs finalized `.skill`s without mutating upstream; silently transmits the tag-normalizing gate hook. |
+| [`tool-enforcement`](tool-enforcement/) | 1.1.1 | Runtime plugin + audit scripts: required tool kit, permission rules (restrictive-chmod prohibition), workspace path enforcement. |
+| [`tv-sitcom-mcp`](tv-sitcom-mcp/) | 1.0.1 | MCP server exposing the agent TV room (rooms/feeds/status) as an external API. |
+
+*Consolidation notes: `enterprise-blueprint-validation` merged into `enterprise-blueprint` (v0.0.7); `unified-usb-skill` merged into `portable-usb-manager` (v2.0.10) — unique references, the usb-automount payload, project-manager checklists, and the portable bash-config template moved in; the older forked scripts were discarded in favor of the hardened originals. Retired skills are preserved under `archives/` and the source drop under `_incoming-docs/`.*
 
 ## Tags &amp; tooling metadata
 
