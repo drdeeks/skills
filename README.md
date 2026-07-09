@@ -200,7 +200,7 @@ All 14 pass the enterprise-strict validator with zero warnings (2026-07-09 sweep
 | Skill | Version | Purpose |
 |---|---|---|
 | [`agent-identity-architecture`](agent-identity-architecture/) | 1.0.12 | Agent identity as the first architectural layer: constitution at t=0, internalized habits, enforcer daemon, memory curator. |
-| [`autonomous-crew`](autonomous-crew/) | 1.2.0 | Crew lifecycle: init from blueprint, agent creation, phase validators, kanban-to-chain wiring, self-healing loop. Absorbed `crew-knowledge-system` (dual-mode knowledge workspaces, agent-attributed docs, semantic indexing, structured comms). |
+| [`autonomous-crew`](autonomous-crew/) | 1.2.2 | Crew lifecycle: init from blueprint, agent creation, phase validators, kanban-to-chain wiring, self-healing loop. Absorbed `crew-knowledge-system` (dual-mode knowledge workspaces, agent-attributed docs, semantic indexing, structured comms). |
 | [`enterprise-blueprint`](enterprise-blueprint/) | 1.0.1 | Full blueprint lifecycle in one skill: generate, sync phase-gated checklists, validate, tiered testing, agent assignment. |
 | [`enterprise-organization`](enterprise-organization/) | 0.1.2 | Workspace/organization enforcement: modular file tree, security hardening, task-list validation, zero-stub policy, semver releases, git control. |
 | [`guardrail-enforcement`](guardrail-enforcement/) | 0.1.4 | The enforcer: version watcher + auto-commit, workflow gate + signed audit log, advisory locks, manifest verification. |
