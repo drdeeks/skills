@@ -5,7 +5,7 @@ description: Enforce sequential dependency chains on files, tasks, and services.
   destructive ops by enforcing additive-only builds with chained verification gates.
   Use when building projects where files must be created in order, or when agents
   must not destroy existing work.
-version: 1.0.12
+version: 1.0.13
 license: MIT
 metadata:
   openclaw:
@@ -240,7 +240,7 @@ hermes kanban list
 | Component | Assignee | Verification |
 |-----------|----------|--------------|
 | Federation Gateway | autopilot-architect | Port 41207, 5 projects, 600 agents, 20 rooms, TV room plugin |
-| 4 Core Skills | default | Enterprise validation: agent-identity-architecture, crew-knowledge-system, autonomous-crew-autonomous-crew-integration, loop-enforcer |
+| 4 Core Skills | default | Enterprise validation: agent-identity-architecture, autonomous-crew, autonomous-crew-autonomous-crew, loop-enforcer |
 
 ### Key Findings (2026-07-06)
 
@@ -356,3 +356,7 @@ The kanban dispatcher does NOT check chain state before dispatching. If you crea
 ## See Also
 
 - `references/enterprise-validation-pitfalls.md` — Hardcoded paths, file type rules, tier requirements when using skill_enhance.py
+
+## File Index (validator-complete)
+
+- `references/chain-enforcement.md` — Chain Enforcement Integration with Kanban Workers

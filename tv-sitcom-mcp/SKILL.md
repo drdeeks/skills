@@ -1,7 +1,7 @@
 ---
 name: tv-sitcom-mcp
 description: "MCP server exposing the agent TV room as an external API. Provides real-time agent/room/feed access for any company integrating agent TV into their business."
-version: 1.0.1
+version: 1.0.2
 license: MIT
 metadata:
   category: devops
@@ -14,8 +14,8 @@ metadata:
     - real-time
     - production-ready
   depends_on:
-    - autonomous-crew-integration
-    - crew-knowledge-system
+    - autonomous-crew
+    - autonomous-crew
   provides:
     - tv-room-mcp
     - agent-feed-api
@@ -203,3 +203,14 @@ services:
 |------|------|-------|
 | Free | $0/mo | Python 3.12+ stdlib + fastmcp (pip install) |
 | Paid | None required | — |
+
+## File Index (validator-complete)
+
+- `references/api-reference.md` — TV Sitcom MCP — API Reference
+- `references/architecture-overview.md` — TV Sitcom MCP — Architecture Overview
+- `references/deployment-guide.md` — TV Sitcom MCP — Deployment Guide
+- `references/integration-guide.md` — TV Sitcom MCP — Integration Guide
+- `references/troubleshooting-guide.md` — TV Sitcom MCP — Troubleshooting Guide
+- `scripts/get_agent_feed.py` — TV Sitcom MCP - Agent Feed Script
+- `scripts/get_room_status.py` — TV Sitcom MCP - Room Status Script
+- `scripts/test_connection.py` — TV Sitcom MCP - Client Test Script

@@ -5,5 +5,5 @@ Re-exports skill identity for programmatic discovery.
 """
 
 __skill__ = "agent-identity-architecture"
-__version__ = "1.0.12"
+__version__ = "1.0.13"
 __all__ = ["__skill__", "__version__"]

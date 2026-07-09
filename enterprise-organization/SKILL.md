@@ -1,7 +1,7 @@
 ---
 name: enterprise-organization
 description: "Enterprise-grade organization management for AI agent systems. Enforces modular file tree, security hardening, gitignore standards, task-list-driven validation, zero-placeholder code policy, rigorous self-validation with rollback, append-only CHANGELOG.md with decision rationale, phase-tagged workflow, semantic versioning with automated releases, and robust git control. When: setting up new agent workspaces, auditing existing projects, enforcing enterprise standards, scaling agent infrastructure, managing phased development, releasing versions, controlling git operations. Triggers: 'enterprise setup', 'workspace audit', 'security hardening', 'modular enforcement', 'CHANGELOG enforcement', 'stub removal', 'phase management', 'version release', 'git control'."
-version: 0.1.2
+version: 0.1.3
 license: MIT
 metadata:
   category: infrastructure
@@ -206,7 +206,7 @@ python3 scripts/enterprise-org.py version --action list
 ## Context Management
 
 **Unified memory across all unified agents:**
-- Agents store everything in a shared local Hermes home (~/.hermes)
+- Agents store everything in a shared local agent home (~/.hermes)
 - `memory` = agent-specific notes (agent_id, task_context, working_memory)
 - `skills` = agent-specific reusable logic (function/schema registry)
 - `profile` = organization/role boundaries (hermes-agent, agent-powerhouse, etc.)
@@ -234,7 +234,7 @@ python3 scripts/enterprise-org.py version --action list
 **Dynamic Project Rules:**
 
 ### Project Membership Management:
-1. Agents register with existing Hermes projects
+1. Agents register with existing Hemlock projects
 2. System validates ownership and resource requirements
 3. Phase-based join process ensures consistent project onboarding
 4. Real-time updates on new agent connections
@@ -252,7 +252,7 @@ python3 scripts/enterprise-org.py version --action list
 4. Flexible assignment based on agent capabilities and project needs
 
 **Federation Design:**
-- Both Hermes and Agent Powerhouse designed with multi-tenancy
+- Both Hemlock and Agent Powerhouse designed with multi-tenancy
 - Shared infrastructure provides service, allowing customization based on per-project permissions
 - Independent Agent Powerhouse platform management, reusable
 - Dialogue between agents is standardized across all systems
@@ -469,3 +469,41 @@ else
     echo "[dry-run] Write → $file"
 fi
 ```
+
+## File Index (validator-complete)
+
+- `references/changelog-protocol.md` — CHANGELOG Protocol
+- `references/complete-files-principle.md` — Complete Files Principle
+- `references/container-internal-cron.md` — Container-Internal Cron Jobs
+- `references/daily-skills-autopull.md` — Daily Skills Auto-Pull
+- `references/git-control.md` — Git Control Reference
+- `references/hackathon-research-methodology.md` — Hackathon Research Methodology
+- `references/hemlock-cli-tui.md` — Hemlock CLI & TUI Patterns Reference
+- `references/hemlock-deployment-package.md` — Hemlock Minimal Deployment Package
+- `references/lessons/daily-cron-skills-update.md` — Daily Cron Job for Skills Update Inside Container
+- `references/lessons/hemlock-minimal-deployment.md` — Hemlock Minimal Deployment Package
+- `references/lessons/mcp-proxy-self-healing.md` — MCP Proxy Manager with Self-Healing
+- `references/lessons/openclaw-gateway-auth.md` — OpenClaw Gateway Authentication & MCP Loopback Handling
+- `references/lessons/playwright-test-config.md` — Playwright Test Configuration & Debugging
+- `references/lessons/tar-archiving-usb-deployment.md` — Tar Archiving Best Practices for USB Deployment
+- `references/mcp-proxy-self-healing.md` — MCP Proxy Manager with Self-Healing
+- `references/modular-file-tree.md` — Modular File Tree Standard
+- `references/openclaw-gateway.md` — OpenClaw Gateway Authentication & Configuration
+- `references/phase-management.md` — Phase Management Reference
+- `references/playwright-testing.md` — Playwright Test Configuration & Debugging
+- `references/release-workflow.md` — Release Workflow Reference
+- `references/rollback-procedures.md` — Rollback Procedures
+- `references/security-gitignore.md` — Security & Gitignore Standards
+- `references/security-hardening.md` — OpenClaw Gateway Authentication & Configuration
+- `references/self-healing-patterns.md` — Self-Healing Patterns Reference
+- `references/self-validation.md` — Self-Validation Framework
+- `references/semantic-versioning.md` — Semantic Versioning Reference
+- `references/session-2026-06-13-hemlock-minimal-deployment.md` — Session 2026-06-13: Hemlock Minimal Deployment
+- `references/session-2026-06-14-hemlock-integration.md` — Session 2026-06-14: Hemlock Agent Framework Full Integration
+- `references/session-2026-06-14-lessons-learned.md` — Session 2026-06-14: Lessons Learned from Hemlock Minimal Build
+- `references/setup-wizard-tui-docker.md` — Setup Wizard TUI/Docker Integration
+- `references/skill-installation-best-practices.md` — Skill Installer with Embedded Validation Reference
+- `references/tar-archiving-best-practices.md` — Tar Archiving Best Practices for USB Deployment
+- `references/task-validation.md` — Task Validation Protocol
+- `references/ventoy-usb-deployment.md` — USB Deployment with Ventoy
+- `references/zero-placeholder.md` — Zero-Placeholder Policy
