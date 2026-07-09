@@ -1,7 +1,7 @@
 ---
 name: enterprise-organization
 description: "Enterprise-grade organization management for AI agent systems. Enforces modular file tree, security hardening, gitignore standards, task-list-driven validation, zero-placeholder code policy, rigorous self-validation with rollback, append-only CHANGELOG.md with decision rationale, phase-tagged workflow, semantic versioning with automated releases, and robust git control. When: setting up new agent workspaces, auditing existing projects, enforcing enterprise standards, scaling agent infrastructure, managing phased development, releasing versions, controlling git operations. Triggers: 'enterprise setup', 'workspace audit', 'security hardening', 'modular enforcement', 'CHANGELOG enforcement', 'stub removal', 'phase management', 'version release', 'git control'."
-version: 0.1.1
+version: 0.1.2
 license: MIT
 metadata:
   category: infrastructure
@@ -128,6 +128,14 @@ Enterprise-grade organization management for multi-agent AI systems. Provides st
 - Configurable bump type (major/minor/patch)
 - Automatic phase tagging for releases
 - Release notes from commits and CHANGELOG
+
+### File Organization & Decluttering (NEW)
+- **.trash enforcement**: Deleted files go to .trash/, not permanently deleted
+- **Documentation structure**: README.md + AGENTS.md at root, rest in docs/
+- **BS file detection**: Scans for temp files, caches, OS metadata
+- **Version tracking**: All files tracked in git
+- **Logging**: Full audit trail of trash/restore operations
+- **Cleanup**: Automatic purging of old trash items
 
 ### Hemlock Agent Framework Integration (NEW)
 ## Hemlock Agent Framework Integration (UPDATED)
@@ -277,82 +285,15 @@ python3 scripts/enterprise-org.py version --action list
 | `scripts/version_manager.py` | Semantic versioning & releases | `python3 scripts/version_manager.py --help` |
 | `scripts/git_control.py` | Robust git operations | `python3 scripts/git_control.py --help` |
 | `scripts/phase_tagger.py` | Phase tagging & tracking | `python3 scripts/phase_tagger.py --help` |
+| `scripts/file-organizer.sh` | File organization, .trash, doc structure | `bash scripts/file-organizer.sh --help` |
 
 ## Key References
 
-- **Playwright Test Configuration & Debugging**: [references/playwright-testing.md](references/playwright-testing.md)
-- **OpenClaw Gateway Authentication & Configuration**: [references/openclaw-gateway.md](references/openclaw-gateway.md)
-- **Security Hardening Script Improvements**: [references/security-hardening.md](references/security-hardening.md)
-- **Tar Archiving Best Practices**: [references/tar-archiving-best-practices.md](references/tar-archiving-best-practices.md)
-- **Hemlock Minimal Deployment Package**: [references/hemlock-deployment-package.md](references/hemlock-deployment-package.md)
-- **Session 2026-06-13: Hemlock Minimal Deployment**: [references/session-2026-06-13-hemlock-minimal-deployment.md](references/session-2026-06-13-hemlock-minimal-deployment.md)
-- **Container-Internal Cron Jobs**: [references/container-internal-cron.md](references/container-internal-cron.md)
-- **USB Deployment with Ventoy**: [references/ventoy-usb-deployment.md](references/ventoy-usb-deployment.md)
-- **Setup Wizard TUI/Docker Integration**: [references/setup-wizard-tui-docker.md](references/setup-wizard-tui-docker.md)
-- **Daily Skills Auto-Pull**: [references/daily-skills-autopull.md](references/daily-skills-autopull.md)
-- **MCP Proxy Manager Self-Healing**: [references/mcp-proxy-self-healing.md](references/mcp-proxy-self-healing.md)
-- **Modular File Tree Standard**: [references/modular-file-tree.md](references/modular-file-tree.md)
-- **Tar Archiving Best Practices**: [references/tar-archiving-best-practices.md](references/tar-archiving-best-practices.md)
-- **Hemlock Minimal Deployment Package**: [references/hemlock-deployment-package.md](references/hemlock-deployment-package.md)
-- **Session 2026-06-14: Hemlock Agent Framework Integration**: [references/session-2026-06-14-hemlock-integration.md](references/session-2026-06-14-hemlock-integration.md)
-- **Ventoy USB Deployment with Hemlock**: [references/ventoy-usb-deployment.md](references/ventoy-usb-deployment.md)
+See `references/` directory for detailed documentation on all features.
 
 ## Provider Compatibility
 
-| Provider | Compatibility | Notes |
-|----------|---------------|-------|
-| Claude (Anthropic) | Full | MCP servers, tool use |
-| OpenAI / ChatGPT | Full | Function calling, Actions |
-| Mistral / Le Chat | Full | Tool calling, script execution |
-| Gemini (Google) | Full | Extensions, Vertex AI |
-| Hermes (Nous) | Full | Tool-use fine-tuned |
-| GitHub Copilot | Partial | Code generation; use external runner for scripts |
-| Any LLM + tools | Full | Scripts are plain Python, provider-independent |
-
-## Free-First Strategy
-
-| Tier | Cost | Stack |
-|------|------|-------|
-| **Tier 0** | $0/mo | Python 3.8+ (all scripts use stdlib only) |
-| **Tier 1** | $0-5/mo | + CI/CD for automated validation |
-| **Tier 2** | $5-20/mo | + Hosted skill registry for team distribution |
-
-The entire core toolchain is permanently $0.
-
-## Enforced Output Statistics
-
-Every script produces structured output on completion:
-
-```json
-{
-  "operation": "script_name",
-  "timestamp": "ISO8601",
-  "status": "success | failed",
-  "skill_name": "the-skill-name",
-  "details": {},
-  "cost": {"tier": 0, "amount_usd": 0.0, "service": "local"}
-}
-```
-
-## Error Handling
-
-| Error | Response |
-|-------|----------|
-| Invalid input | Validate and report with guidance |
-| Missing dependency | Auto-install or report requirement |
-| Network failure | Retry with exponential backoff |
-| Permission denied | Report and suggest alternatives |
-| Resource not found | Report with available options |
-
-## Enhancement Hooks
-
-| Skill | Enhancement | When to Add |
-|-------|-------------|-------------|
-| `skill-creator` | Basic skill creation | When creating simple skills |
-| `skill-creator-pro` | Enterprise upgrade | When upgrading to enterprise |
-| `html-report` | Visual validation dashboard | When auditing many skills |
-| `xlsx` | Export validation results | When tracking skill quality metrics |
-| `agent-bootstrap-manager` | Agent workspace creation | When bootstrapping new agents |
+All scripts are provider-agnostic (Python 3.8+ stdlib only, zero external dependencies).
 
 ## Enforcement Rules
 
@@ -434,6 +375,39 @@ Runs full validation:
 - `--no-ff`: Preserve branch history
 - `--squash`: Single commit for feature
 
+## File Organization Usage
+
+```bash
+# Initialize organization structure
+python3 scripts/enterprise-org.py organize --organize-action init
+
+# Trash a file (moves to .trash with logging)
+python3 scripts/enterprise-org.py organize --organize-action trash --organize-path "path/to/file"
+
+# Restore from trash
+python3 scripts/enterprise-org.py organize --organize-action restore --organize-path "file_20260709_123456"
+
+# Scan for files that should be trashed
+python3 scripts/enterprise-org.py organize --organize-action scan
+
+# Validate documentation structure
+python3 scripts/enterprise-org.py organize --organize-action validate-docs
+
+# Cleanup old trash items (default 30 days)
+python3 scripts/enterprise-org.py organize --organize-action cleanup --days 30
+
+# Show organization status
+python3 scripts/enterprise-org.py organize --organize-action status
+```
+
+## Documentation Structure Standards
+
+| Location | Allowed Files | Purpose |
+|----------|---------------|---------|
+| Root `/` | README.md, AGENTS.md | Project overview, agent info |
+| `docs/` | All other .md files | Detailed documentation |
+| `.trash/` | Trashed files | Deleted files (version tracked) |
+
 ## Verification
 
 ```bash
@@ -453,6 +427,10 @@ python3 scripts/enterprise-org.py git --git-action hooks
 
 # Verify rollback
 python3 scripts/self_validator.py --workspace . --verify-rollback
+
+# Test file organization
+python3 scripts/enterprise-org.py organize --organize-action validate-docs
+bash scripts/file-organizer.sh scan
 ```
 
 ## Dry-Run Pattern (Reusable)

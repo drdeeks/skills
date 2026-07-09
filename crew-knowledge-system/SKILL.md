@@ -3,7 +3,7 @@ name: crew-knowledge-system
 description: Crew knowledge sharing system with dual-mode workspaces (development/production),
   agent-attributed document formatting, semantic indexing, and structured agent communication.
   Integrates with autonomous-crew-integration and agent-identity-architecture.
-version: 1.0.3
+version: 1.0.4
 license: MIT
 metadata:
   category: devops

@@ -12,7 +12,7 @@ description: 'Define, deploy, and enforce agent identity as the first architectu
   hash integrity tracking, completion gated by identity reflection, memory pipeline
   daily to weekly to long-term plus knowledge-index, auto-remediation of missing directories
   and permissions.'
-version: 1.0.6
+version: 1.0.12
 license: MIT
 metadata:
   category: devops
@@ -440,32 +440,6 @@ We split provider-compatibility and free-first-strategy into separate reference 
 Keep SKILL.md as the structured index + key patterns, delegate detail to references/.
 
 ---
-
-## Verified Reference Implementation
-- `references/identity-constitution-example.yaml` — Full constitution example
-- `references/habit-structure.yaml` — Habit YAML format reference
-- `references/enforcer-config.yaml` — Enforcer daemon config reference
-- `references/agent-workspace-layout.md` — Complete workspace structure
-- `references/genesis-working.md` — Agent origin story (genesis.md from synthesis-1)
-- `references/constitution-working.yaml` — Working constitution (from synthesis-1)
-- `references/tool-enforcement.yaml` — Tool enforcement habit (working)
-- `references/identity-enforcement.yaml` — Identity enforcement habit (working)
-- `references/reflective-loop.yaml` — Reflective loop habit (working)
-- `references/enforce.sh` — Workspace enforcement tool
-- `references/secret.sh` — Encrypted secret management tool
-- `references/memory-log.sh` — Daily memory logging tool
-- `references/memory-promote.sh` — Daily to long-term memory promotion tool
-- `references/TOOLS-GUIDE.md` — Tool usage documentation
-- `references/templates/constitution-template.yaml` — Empty constitution template
-- `references/templates/habit-template.yaml` — Empty habit definition template
-- `references/provider-compatibility.md` — Provider compatibility matrix
-- `references/free-first-strategy.md` — Free-first cost strategy
-- `scripts/enforcer_daemon.py` — Enforcer daemon (RPC server, validation, auto-remediation)
-- `scripts/agent_runtime.py` — Agent runtime (identity at t=0, habit gating, enforcer RPC)
-- `scripts/memory_curator.py` — Memory curator (daily to weekly to long-term plus knowledge index)
-- `scripts/start-agent.sh` — Startup orchestration: workspace validation, curation run, starts enforcer
-- `scripts/install-agent.sh` — Full agent creation plus enforcer setup
-- `scripts/verify-identity.sh` — Post-setup identity verification
 
 ## Provider Compatibility
 

@@ -11,6 +11,7 @@ __pycache__/
 # ── Guardrail / monitor LOCAL state (regenerated per machine) ─────────────────
 .monitor-state.json
 .loop.lock
+.monitor-scan.log
 # NOTE: .loop-log.jsonl (the gate's hash-chained audit trail) and .gate.json
 # (gate config) are intentionally TRACKED — they are the traceability record.
 # .monitor.json and .skill-manifest.json are likewise tracked on purpose.
