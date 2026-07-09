@@ -108,7 +108,7 @@ bash $HOME/.hermes/skills/devops/agent-identity-architecture/scripts/verify-iden
 ## Notes
 
 - This implementation is the **canonical reference** for all autonomous crew agents
-- Every agent created via `autonomous-crew-integration` inherits this exact structure
+- Every agent created via `autonomous-crew` inherits this exact structure
 - The enforcer daemon MUST run at a privilege level the agent cannot escalate to
 - Unix socket permissions MUST be 0600/0700 owned by enforcer user
 - All paths in identity files use `$WORKSPACE_ROOT` or `$HOME` — no hardcoded paths

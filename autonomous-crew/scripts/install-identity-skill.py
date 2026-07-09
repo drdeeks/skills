@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-Install Identity Skill - Deploy agent-identity-architecture into agent workspace
+install-identity-skill.py — Deploy agent-identity-architecture into agent workspace.
+
+Copies constitution templates, habit definitions, enforcer scripts, and tools
+from the agent-identity-architecture skill into the target workspace.
 """
 
 import argparse
+import os
 import shutil
 from pathlib import Path
 
@@ -77,9 +81,9 @@ def main():
         shutil.copy2(habit, habits_dir / habit.name)
     
     # Create constitution from template
-    if (identity_skill / "templates/constitution-template.yaml").exists():
-        shutil.copy2(identity_skill / "templates/constitution-template.yaml", 
-                     workspace / ".agent" / "constitution.yaml")
+    constitution_tpl = identity_skill / "references" / "templates" / "constitution-template.yaml"
+    if constitution_tpl.exists():
+        shutil.copy2(constitution_tpl, workspace / ".agent" / "constitution.yaml")
     
     # Make tools executable
     for script in workspace.glob("tools/*.sh"):

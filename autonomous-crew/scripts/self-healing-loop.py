@@ -172,6 +172,130 @@ class SelfHealingLoop:
             self.log(f"Error checking habits: {e}", "ERROR")
             return True
     
+
+    def check_test_failures(self):
+        """Run tests and detect failures. Attempt to fix common issues."""
+        import subprocess
+        
+        # Check if this is a Node.js project
+        package_json = self.project_dir / "package.json"
+        if package_json.exists():
+            try:
+                # Run tests
+                result = subprocess.run(
+                    ["npm", "test", "--silent"],
+                    capture_output=True, text=True, cwd=self.project_dir, timeout=60
+                )
+                
+                if result.returncode != 0:
+                    self.log(f"Test failures detected: {result.stdout[-500:]}", "WARN")
+                    
+                    # Check for common fixable issues
+                    output = result.stdout + result.stderr
+                    
+                    # Check for missing dependencies
+                    if "Cannot find module" in output or "MODULE_NOT_FOUND" in output:
+                        self.log("Missing dependencies detected - running npm install", "INFO")
+                        subprocess.run(["npm", "install"], cwd=self.project_dir, timeout=120)
+                        return False  # Re-check needed
+                    
+                    # Check for missing TypeScript types
+                    if "@types/" in output and "not found" in output:
+                        # Extract missing type package
+                        import re
+                        matches = re.findall(r"@types/([a-z\-]+)", output)
+                        for pkg in set(matches):
+                            self.log(f"Installing missing types: @types/{pkg}", "INFO")
+                            subprocess.run(["npm", "i", "-D", f"@types/{pkg}"], cwd=self.project_dir, timeout=60)
+                        return False
+                    
+                    # Check for missing API keys in test output
+                    if "API_KEY" in output or "authentication" in output.lower():
+                        self.log("API key issues detected in tests", "WARN")
+                        return False
+                    
+                    return False
+                
+                self.log("All tests passing")
+                return True
+                
+            except subprocess.TimeoutExpired:
+                self.log("Test timeout - tests taking too long", "WARN")
+                return False
+            except Exception as e:
+                self.log(f"Error running tests: {e}", "ERROR")
+                return False
+        
+        # Check if Rust project
+        cargo_toml = self.project_dir / "Cargo.toml"
+        if cargo_toml.exists():
+            try:
+                result = subprocess.run(
+                    ["cargo", "test", "--quiet"],
+                    capture_output=True, text=True, cwd=self.project_dir, timeout=120
+                )
+                if result.returncode != 0:
+                    self.log(f"Rust test failures: {result.stdout[-500:]}", "WARN")
+                    return False
+                self.log("Rust tests passing")
+                return True
+            except Exception as e:
+                self.log(f"Error running cargo test: {e}", "ERROR")
+                return False
+        
+        return True  # No test framework detected
+    
+    def check_missing_env_keys(self):
+        """Check for required environment variables."""
+        env_file = self.project_dir / ".env"
+        env_example = self.project_dir / ".env.example"
+        
+        if not env_file.exists() and env_example.exists():
+            self.log(".env missing but .env.example exists - copying", "WARN")
+            import shutil
+            shutil.copy(env_example, env_file)
+            return False
+        
+        if env_file.exists():
+            content = env_file.read_text()
+            # Check for empty required keys
+            import re
+            empty_keys = re.findall(r'^([A-Z_]+_API_KEY|DASHSCOPE_API_KEY|SLACK_BOT_TOKEN|EMAIL_API_KEY|GITHUB_TOKEN|JIRA_API_KEY)=(\s*|$)', content, re.MULTILINE)
+            if empty_keys:
+                self.log(f"Empty required keys: {[k for k, v in empty_keys]}", "WARN")
+                return False
+        
+        return True
+    
+    def check_typescript_compilation(self):
+        """Check TypeScript compilation for Node/TS projects."""
+        tsconfig = self.project_dir / "tsconfig.json"
+        if tsconfig.exists():
+            import subprocess
+            try:
+                result = subprocess.run(
+                    ["npx", "tsc", "--noEmit"],
+                    capture_output=True, text=True, cwd=self.project_dir, timeout=60
+                )
+                if result.returncode != 0:
+                    self.log(f"TypeScript errors: {result.stdout[-1000:]}", "WARN")
+                    
+                    # Check for missing @types packages
+                    import re
+                    missing_types = re.findall(r"module '([^']+)'", result.stdout)
+                    for mod in set(missing_types):
+                        if not mod.startswith("."):
+                            self.log(f"Installing @types/{mod}", "INFO")
+                            subprocess.run(["npm", "i", "-D", f"@types/{mod}"], cwd=self.project_dir, timeout=60)
+                    
+                    return False
+                self.log("TypeScript compilation OK")
+                return True
+            except Exception as e:
+                self.log(f"Error checking TypeScript: {e}", "ERROR")
+                return False
+        return True
+
     async def run_once(self):
         """Run a single iteration of self-healing checks."""
         self.log("=" * 60)
@@ -185,6 +309,9 @@ class SelfHealingLoop:
             "marker_files": self.check_marker_files(),
             "memory_pipeline": self.curate_memory_pipeline(),
             "habit_violations": self.check_habit_violations(),
+            "test_passing": self.check_test_failures(),
+            "env_keys_configured": self.check_missing_env_keys(),
+            "typescript_compilation": self.check_typescript_compilation(),
         }
         
         all_ok = all(results.values())

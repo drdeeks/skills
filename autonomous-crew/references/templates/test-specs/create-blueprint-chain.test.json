@@ -12,7 +12,7 @@
     },
     {
       "description": "Creates chain from blueprint phases",
-      "args": ["/home/ubuntu/qwen-cloud-2026/autopilot", "/home/ubuntu/qwen-cloud-2026/autopilot/blueprint.md"],
+      "args": ["${WORKSPACE_ROOT}/qwen-cloud-2026/autopilot", "${WORKSPACE_ROOT}/qwen-cloud-2026/autopilot/blueprint.md"],
       "expect": {
         "returncode": 0,
         "stdout_contains": ["chain", "autopilot-blueprint", "created", "steps"],

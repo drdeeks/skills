@@ -8,6 +8,7 @@ import json
 import sys
 import os
 import sqlite3
+import time
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -95,15 +96,16 @@ Project: {project_dir}
             # Update if state changed
             if existing[1] != step_state:
                 cursor.execute(
-                    "UPDATE tasks SET status = ?, updated_at = ? WHERE id = ?",
-                    (step_state, now_iso(), task_id)
+                    "UPDATE tasks SET status = ? WHERE id = ?",
+                    (step_state, task_id)
                 )
                 tasks_updated += 1
         else:
             # Insert new task
+            now_ts = int(time.time())
             cursor.execute(
-                "INSERT INTO tasks (id, title, body, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                (task_id, task_title, task_body, step_state, now_iso(), now_iso())
+                "INSERT INTO tasks (id, title, body, status, created_at) VALUES (?, ?, ?, ?, ?)",
+                (task_id, task_title, task_body, step_state, now_ts)
             )
             tasks_created += 1
     

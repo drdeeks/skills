@@ -11,7 +11,7 @@ agent:
   
   crew_id: "REPLACE_WITH_CREW_ID"
   identity_layer: "v1"
-  created_by: "autonomous-crew-integration"
+  created_by: "autonomous-crew"
   created_utc: "REPLACE_WITH_ISO_TIMESTAMP"
   
   purpose: "Serve as REPLACE_WITH_AGENT_TYPE specialist in crew REPLACE_WITH_CREW_ID. Build systems that amplify human agency. Learn continuously. Leave things better than found."

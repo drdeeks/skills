@@ -2,12 +2,12 @@
 
 ## Chain State Mismatch (Fixed)
 
-**Problem:** Loop-enforcer chain files in `/home/ubuntu/hermes-agent/workspaces/hackathon-2026/` pointed to old workspace path. Actual working code was in `/home/ubuntu/qwen-cloud-2026/`. Chain state showed 2/131 complete with many locked/active steps, but all work was actually done and tested.
+**Problem:** Loop-enforcer chain files in `${WORKSPACE_ROOT}/qwen-cloud-2026/` pointed to old workspace path. Actual working code was in `${WORKSPACE_ROOT}/qwen-cloud-2026/`. Chain state showed 2/131 complete with many locked/active steps, but all work was actually done and tested.
 
 **Root Cause:** Chain JSON files created with wrong `project_dir` during initial setup. The `chain_enforce.py` helper only looked in `.chain/` directory, not `.blueprint-chain/`.
 
 **Fix Applied:**
-1. Regenerated chain files in `/home/ubuntu/qwen-cloud-2026/<project>/.blueprint-chain/` with correct paths
+1. Regenerated chain files in `${WORKSPACE_ROOT}/qwen-cloud-2026/<project>/.blueprint-chain/` with correct paths
 2. Updated `chain_enforce.py` to check both `.blueprint-chain` and `.chain` directories
 3. Marked all 7 phases complete for all 5 projects (work verified by tests)
 
@@ -71,11 +71,11 @@ for p in mnemosyne autopilot aires agora edgewalker; do
 done
 
 # Test all projects
-cd /home/ubuntu/qwen-cloud-2026/mnemosyne && npm test
-cd /home/ubuntu/qwen-cloud-2026/autopilot && npm test
-cd /home/ubuntu/qwen-cloud-2026/agora && node --test src/tests/*.test.js
-cd /home/ubuntu/qwen-cloud-2026/edgewalker && cargo test
-cd /home/ubuntu/qwen-cloud-2026/aires && npx tsc --noEmit
+cd ${WORKSPACE_ROOT}/qwen-cloud-2026/mnemosyne && npm test
+cd ${WORKSPACE_ROOT}/qwen-cloud-2026/autopilot && npm test
+cd ${WORKSPACE_ROOT}/qwen-cloud-2026/agora && node --test src/tests/*.test.js
+cd ${WORKSPACE_ROOT}/qwen-cloud-2026/edgewalker && cargo test
+cd ${WORKSPACE_ROOT}/qwen-cloud-2026/aires && npx tsc --noEmit
 
 # Kanban board
 sqlite3 ~/.hermes/kanban.db "SELECT title, status FROM tasks WHERE title LIKE '%Phase%';"
@@ -97,5 +97,5 @@ sqlite3 ~/.hermes/kanban.db "SELECT title, status FROM tasks WHERE title LIKE '%
 ## Related Files
 
 - `~/.hermes/scripts/chain_enforce.py` — Updated to check both `.blueprint-chain` and `.chain`
-- `/home/ubuntu/qwen-cloud-2026/*/.blueprint-chain/*-blueprint.json` — Regenerated chain files
+- `${WORKSPACE_ROOT}/qwen-cloud-2026/*/.blueprint-chain/*-blueprint.json` — Regenerated chain files
 - `devops/kanban-orchestrator/references/chain-enforcement.md` — Worker lifecycle docs

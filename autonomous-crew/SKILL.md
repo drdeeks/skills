@@ -6,7 +6,7 @@ description: Integrate agent identity architecture as the first layer in autonom
   Includes knowledge sharing system with dual-mode workspaces, agent-attributed documents,
   semantic indexing, and structured agent communication. Enterprise-grade with skill-creator
   validation.
-version: 1.2.0
+version: 1.2.1
 license: MIT
 metadata:
   category: devops
@@ -29,9 +29,9 @@ metadata:
   - validation-over-syntax
   depends_on:
   - agent-identity-architecture
-  - agent-workspace-enforcement
+  - tool-enforcement
   - loop-enforcer
-  - enterprise-blueprint-validation
+  - enterprise-blueprint
   provides:
   - crew-agent-with-identity
   - identity-first-crew-initialization

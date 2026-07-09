@@ -2,7 +2,7 @@
 name: tv-sitcom-mcp
 description: MCP server exposing the agent TV room as an external API. Provides real-time
   agent/room/feed access for any company integrating agent TV into their business.
-version: 1.1.1
+version: 1.1.2
 license: MIT
 metadata:
   category: devops
@@ -15,8 +15,7 @@ metadata:
   - external-api
   - federation
   depends_on:
-  - autonomous-crew-integration
-  - crew-knowledge-system
+  - autonomous-crew
   provides:
   - tv-room-mcp
   - agent-feed-api
@@ -213,7 +212,7 @@ WantedBy=multi-user.target
 Run the test suite against a live federation:
 
 ```bash
-cd ${TV_VAULT_PATH:-/home/ubuntu}/.hermes/skills/devops/tv-sitcom-mcp
+cd ${TV_VAULT_PATH:-$HOME}/.hermes/skills/devops/tv-sitcom-mcp
 python3 scripts/test_tv_mcp.py
 ```
 
