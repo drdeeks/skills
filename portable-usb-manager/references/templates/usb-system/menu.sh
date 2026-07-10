@@ -562,13 +562,15 @@ _run_sysman() {
 _run_hemlock_tui() {
   _menu_header "Hemlock Agent Runtime TUI"
   _menu_subheader "CONTAINER — agent management"
-  if [[ -z "$HEMLOCK_DIR" || ! -d "$HEMLOCK_DIR/scripts" ]]; then
+  if [[ -z "$HEMLOCK_DIR" || ! -f "$HEMLOCK_DIR/scripts/hemlock" ]]; then
     log_error "HEMLOCK_DIR not set or invalid: ${HEMLOCK_DIR:-<unset>}"
     log_info "Set HEMLOCK_DIR to the absolute path of hemlock-runtime/"
     return 1
   fi
   export HEMLOCK_DIR
-  bash "$USB_DIR/hemlock-tui" "$@"
+  # The Hemlock TUI belongs to the runtime — invoke it directly. The USB side
+  # carries no hemlock-tui wrapper (it is only useful when Hemlock is present).
+  bash "$HEMLOCK_DIR/scripts/hemlock" menu "$@"
 }
 
 _run_hemlock_status() {

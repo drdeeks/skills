@@ -1,7 +1,7 @@
 ---
 name: portable-usb-manager
 description: "Comprehensive USB-first portable Linux management. Handles detection, mounting, partitioning, formatting, Ventoy multi-boot setup with persistence, mkusb live/persistent creation, hidden device recovery, chroot install into the persistence volume, boot mode selection (headless SSH or full GUI via QEMU), per-device profile manifests with autoboot, USB-resident profile store with default selection, restart-on-CRUD volume orchestration for agent harnesses, in-persistence essentials installer that mirrors the host dev toolchain (build/edit/net/python/node/crypto/web3/docker/cloud groups with rust/go/ai as opt-in), enhanced bash profile + alias manager, sudo cache + triple-notification consent policy, permission normalization that never uses 0700, cross-OS detection (Linux/macOS/WSL2/Windows), and full plumbing for chroot/QEMU/SSH/Tailscale access. Use for any USB drive whose intent is portable compute rather than file storage."
-version: 2.0.13
+version: 2.0.14
 license: MIT
 metadata:
   category: portable-compute
@@ -93,7 +93,14 @@ Quick map (every entry is also documented below with usage):
 - `usb/usb-setup-assistant.sh` + `usb/sysman.sh` — guided setup and system manager
 - `usb/usb-automount/` — udev rules + systemd unit + mount scripts (self-consistent set; the setup script expects its siblings)
 - `usb/tests/` — 8-stage test suite; `usb/volumes/ventoy/` — persistence profiles; `usb/env.example` — string-enum config overrides
-- `usb/hemlock-tui` — Hemlock TUI wrapper (graceful error when no runtime present)
+
+> The `usb-system/` template is a generated mirror of the repo's single source
+> of truth (root `menu.sh` + `usb/`), produced by
+> `hemlock/hemlock-runtime/scripts/build-usb-kit.sh --skill-template`. Do not
+> hand-edit it — change the menu at the root and regenerate. The USB system
+> carries **no** `hemlock-tui` wrapper: the Hemlock TUI is only useful when a
+> runtime is present, so the menu invokes `hemlock-runtime/scripts/hemlock`
+> directly (guarded on `HEMLOCK_DIR`).
 
 ### Hemlock integration — hidden by default, opt-in by flag
 
@@ -102,7 +109,7 @@ The deployed system is designed for ANY system, ANYWHERE, with zero Hemlock depe
 1. the operator passes `-H`/`--hemlock` (or exports `HEMLOCK_ENABLED=true`) — a stored profile can NEVER silently enable it
 2. a hemlock-runtime is found (sibling-directory auto-detection or explicit `HEMLOCK_DIR`)
 
-Without the flag, no Hemlock option appears anywhere in the TUI. With the flag but no runtime, the wrapper explains exactly what to set. Nothing in this skill modifies a Hemlock installation — access is read/launch only.
+Without the flag, no Hemlock option appears anywhere in the TUI. With the flag but no runtime, the menu explains exactly what to set (`HEMLOCK_DIR`). Nothing in this skill modifies a Hemlock installation — access is read/launch only.
 
 ### `scripts/usb-manager.sh` — main CLI (flag-based)
 ```bash

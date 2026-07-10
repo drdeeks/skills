@@ -32,15 +32,17 @@ assert_file_exists "$HEMLOCK_RT/Makefile" "hemlock-runtime/Makefile"
 assert_syntax "$HEMLOCK_RT/scripts/hemlock" "scripts/hemlock"
 assert_syntax "$HEMLOCK_RT/scripts/runtime.sh" "scripts/runtime.sh"
 
-# Test hemlock-tui wrapper exists
-assert_file_exists "$USB_DIR/hemlock-tui" "usb/hemlock-tui"
+# The Hemlock TUI wrapper lives with the runtime, not on the USB side —
+# the USB system carries no hemlock-tui (it is only useful when a runtime
+# is present).
 assert_file_exists "$PROJECT_DIR/hemlock/hemlock-tui" "hemlock/hemlock-tui"
+assert_file_absent "$USB_DIR/hemlock-tui" "usb/hemlock-tui (removed — runtime-only)"
 
-# Test hemlock-tui has auto-detection
-if grep -q "HEMLOCK_DIR" "$USB_DIR/hemlock-tui" 2>/dev/null; then
-  assert_pass "hemlock-tui references HEMLOCK_DIR"
+# Test the master menu launches the runtime TUI directly (guarded on HEMLOCK_DIR)
+if grep -q 'scripts/hemlock" menu' "$PROJECT_DIR/menu.sh" 2>/dev/null; then
+  assert_pass "master menu invokes hemlock CLI directly"
 else
-  assert_fail "hemlock-tui missing HEMLOCK_DIR logic"
+  assert_fail "master menu missing direct hemlock CLI launch"
 fi
 
 # Test skills directory
