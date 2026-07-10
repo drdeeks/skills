@@ -4,7 +4,7 @@
 
 ### Current State
 ```
-sqlite3 ${HERMES_HOME}/kanban.db "SELECT id, status, assignee, title, worker_pid FROM tasks WHERE status IN ('running','ready');"
+sqlite3 ${HEMLOCK_HOME}/kanban.db "SELECT id, status, assignee, title, worker_pid FROM tasks WHERE status IN ('running','ready');"
 ```
 
 Returns 3 running tasks with PIDs 16375, 16376, 16377 — verify if processes exist:
@@ -18,56 +18,56 @@ ps aux | grep -E "16375|16376|16377" | grep -v grep
 
 **Step 1: Kill worker processes**
 ```bash
-for pid in $(sqlite3 ${HERMES_HOME}/kanban.db "SELECT worker_pid FROM tasks WHERE status='running' AND worker_pid IS NOT NULL;"); do
+for pid in $(sqlite3 ${HEMLOCK_HOME}/kanban.db "SELECT worker_pid FROM tasks WHERE status='running' AND worker_pid IS NOT NULL;"); do
     kill $pid 2>/dev/null && echo "Killed $pid" || echo "PID $pid already dead"
 done
 ```
 
 **Step 2: Cancel in DB**
 ```bash
-sqlite3 ${HERMES_HOME}/kanban.db "UPDATE tasks SET status='cancelled', completed_at=strftime('%s','now') WHERE status IN ('running','ready');"
+sqlite3 ${HEMLOCK_HOME}/kanban.db "UPDATE tasks SET status='cancelled', completed_at=strftime('%s','now') WHERE status IN ('running','ready');"
 ```
 
 **Step 3: Clear stale claim locks**
 ```bash
-sqlite3 ${HERMES_HOME}/kanban.db "UPDATE tasks SET claim_lock=NULL, claim_expires=NULL WHERE status='cancelled';"
+sqlite3 ${HEMLOCK_HOME}/kanban.db "UPDATE tasks SET claim_lock=NULL, claim_expires=NULL WHERE status='cancelled';"
 ```
 
 **Step 4: Check for stale gateway processes**
 ```bash
 ps aux | grep "hermes.*gateway" | grep -v grep
 for pid in $(pgrep -f "hermes.*gateway"); do
-    echo "PID $pid: $(cat /proc/$pid/environ 2>/dev/null | tr '\0' '\n' | grep HERMES_HOME)"
+    echo "PID $pid: $(cat /proc/$pid/environ 2>/dev/null | tr '\0' '\n' | grep HEMLOCK_HOME)"
 done
-# Different HERMES_HOME = different profile gateways (OK)
-# Same HERMES_HOME = duplicate (kill older)
+# Different HEMLOCK_HOME = different profile gateways (OK)
+# Same HEMLOCK_HOME = duplicate (kill older)
 ```
 
 ### Profile Config Verification (Critical)
 
-Workers on profiles created with `hermes profile create --no-skills` produce NOTHING — they run but have no config/tools.
+Workers on profiles created with `hemlock-agent profile create --no-skills` produce NOTHING — they run but have no config/tools.
 
 **Verify before dispatch:**
 ```bash
-for p in $(ls ${HERMES_HOME}/profiles/ | grep -v default); do
+for p in $(ls ${HEMLOCK_HOME}/profiles/ | grep -v default); do
   echo "=== $p ==="
-  [ -f ${HERMES_HOME}/profiles/$p/config.yaml ] && wc -c ${HERMES_HOME}/profiles/$p/config.yaml || echo "NO CONFIG"
-  [ -d ${HERMES_HOME}/profiles/$p/skills ] && ls ${HERMES_HOME}/profiles/$p/skills/ | wc -l || echo "NO SKILLS"
+  [ -f ${HEMLOCK_HOME}/profiles/$p/config.yaml ] && wc -c ${HEMLOCK_HOME}/profiles/$p/config.yaml || echo "NO CONFIG"
+  [ -d ${HEMLOCK_HOME}/profiles/$p/skills ] && ls ${HEMLOCK_HOME}/profiles/$p/skills/ | wc -l || echo "NO SKILLS"
 done
 ```
 
 **Fix all at once:**
 ```bash
-for p in $(ls ${HERMES_HOME}/profiles/ | grep -v default); do
-  [ ! -f ${HERMES_HOME}/profiles/$p/config.yaml ] && cp ${HERMES_HOME}/config.yaml ${HERMES_HOME}/profiles/$p/config.yaml
-  [ ! -d ${HERMES_HOME}/profiles/$p/skills ] && [ ! -L ${HERMES_HOME}/profiles/$p/skills ] && ln -s ${HERMES_HOME}/skills ${HERMES_HOME}/profiles/$p/skills
+for p in $(ls ${HEMLOCK_HOME}/profiles/ | grep -v default); do
+  [ ! -f ${HEMLOCK_HOME}/profiles/$p/config.yaml ] && cp ${HEMLOCK_HOME}/config.yaml ${HEMLOCK_HOME}/profiles/$p/config.yaml
+  [ ! -d ${HEMLOCK_HOME}/profiles/$p/skills ] && [ ! -L ${HEMLOCK_HOME}/profiles/$p/skills ] && ln -s ${HEMLOCK_HOME}/skills ${HEMLOCK_HOME}/profiles/$p/skills
 done
 ```
 
 Then reclaim and re-dispatch:
 ```bash
-hermes kanban reclaim <task_id>
-hermes kanban dispatch
+hemlock-agent kanban reclaim <task_id>
+hemlock-agent kanban dispatch
 ```
 
 ## Hackathon-Specific Kanban Patterns

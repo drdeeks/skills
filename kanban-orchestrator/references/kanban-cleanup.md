@@ -61,17 +61,17 @@ WHERE id='t_XXXX' AND status='running';
 
 ## Multi-Gateway Profile Discovery
 
-Each gateway process has its own HERMES_HOME:
+Each gateway process has its own HEMLOCK_HOME:
 
 ```bash
 for pid in $(pgrep -f "hermes.*gateway"); do
-    home=$(cat /proc/$pid/environ 2>/dev/null | tr '\0' '\n' | grep HERMES_HOME | cut -d= -f2)
+    home=$(cat /proc/$pid/environ 2>/dev/null | tr '\0' '\n' | grep HEMLOCK_HOME | cut -d= -f2)
     echo "PID $pid -> $home"
 done
 ```
 
-- Different HERMES_HOME = different profile gateways (normal)
-- Same HERMES_HOME = duplicate process (kill the older PID)
+- Different HEMLOCK_HOME = different profile gateways (normal)
+- Same HEMLOCK_HOME = duplicate process (kill the older PID)
 
 ## Stale Worker Patterns
 

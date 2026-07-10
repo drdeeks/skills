@@ -12,7 +12,7 @@ Before routing tasks, discover what profiles are available:
 
 ```bash
 # List all profiles
-hermes profile list
+hemlock-agent profile list
 
 # Check specific profile
 kanban_list(assignee="developer")
@@ -27,10 +27,10 @@ Ensure profiles are properly configured:
 
 ```bash
 # Check config exists
-wc -c ${HERMES_HOME}/profiles/<name>/config.yaml
+wc -c ${HEMLOCK_HOME}/profiles/<name>/config.yaml
 
 # Check skills exist
-ls ${HERMES_HOME}/profiles/<name>/skills/ | wc -l
+ls ${HEMLOCK_HOME}/profiles/<name>/skills/ | wc -l
 ```
 
 ## Routing Strategies

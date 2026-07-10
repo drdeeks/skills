@@ -4,7 +4,7 @@ description: Decomposition playbook + anti-temptation rules for an orchestrator 
   routing work through Kanban. The "don't do the work yourself" rule and the basic
   lifecycle are auto-injected into every kanban worker's system prompt; this skill
   is the deeper playbook when you're specifically playing the orchestrator role.
-version: 3.1.5
+version: 3.1.6
 license: MIT
 metadata:
   openclaw:
@@ -44,7 +44,7 @@ Before fanning out, you must ground the decomposition in the profiles that actua
 
 Use one of these:
 
-- `hermes profile list` — prints the table of profiles configured on this machine. Run it through your terminal tool if you have one; otherwise ask the user.
+- `hemlock-agent profile list` — prints the table of profiles configured on this machine. Run it through your terminal tool if you have one; otherwise ask the user.
 - `kanban_list(assignee="<some-name>")` — sanity-check a single name. Returns an empty list (rather than an error) for an unknown assignee, so this only confirms a name you're already considering.
 - **Just ask the user.** "What profiles do you have set up?" is a fine first turn when the goal needs more than one specialist.
 
@@ -52,35 +52,35 @@ Cache the result in your working memory for the rest of the conversation. Re-ask
 
 ### Step 0b — Verify profiles are configured (not just listed)
 
-A profile appearing in `hermes profile list` does NOT mean it can run workers. Profiles created with `hermes profile create --no-skills` (the fast path for bulk creation) have:
-- **No `config.yaml`** — the default profile uses the global `${HERMES_HOME}/config.yaml`, but new profiles get an empty directory. Workers spawned without config run blind.
+A profile appearing in `hemlock-agent profile list` does NOT mean it can run workers. Profiles created with `hemlock-agent profile create --no-skills` (the fast path for bulk creation) have:
+- **No `config.yaml`** — the default profile uses the global `${HEMLOCK_HOME}/config.yaml`, but new profiles get an empty directory. Workers spawned without config run blind.
 - **No skills directory** — `--no-skills` skips copying skills. Workers have no tool access.
 
 **Before dispatching, verify each profile has:**
 ```bash
 # Check config exists (should be ~16KB, same as global)
-wc -c ${HERMES_HOME}/profiles/<name>/config.yaml
+wc -c ${HEMLOCK_HOME}/profiles/<name>/config.yaml
 
 # Check skills exist (should be 80+ entries)
-ls ${HERMES_HOME}/profiles/<name>/skills/ | wc -l
+ls ${HEMLOCK_HOME}/profiles/<name>/skills/ | wc -l
 ```
 
 **If profiles are missing config/skills, fix before dispatching:**
 ```bash
 # Copy global config to all crew profiles
-for p in $(ls ${HERMES_HOME}/profiles/ | grep -v default); do
-  [ ! -f ${HERMES_HOME}/profiles/$p/config.yaml ] && \
-    cp ${HERMES_HOME}/config.yaml ${HERMES_HOME}/profiles/$p/config.yaml
-  [ ! -d ${HERMES_HOME}/profiles/$p/skills ] && [ ! -L ${HERMES_HOME}/profiles/$p/skills ] && \
-    ln -s ${HERMES_HOME}/skills ${HERMES_HOME}/profiles/$p/skills
+for p in $(ls ${HEMLOCK_HOME}/profiles/ | grep -v default); do
+  [ ! -f ${HEMLOCK_HOME}/profiles/$p/config.yaml ] && \
+    cp ${HEMLOCK_HOME}/config.yaml ${HEMLOCK_HOME}/profiles/$p/config.yaml
+  [ ! -d ${HEMLOCK_HOME}/profiles/$p/skills ] && [ ! -L ${HEMLOCK_HOME}/profiles/$p/skills ] && \
+    ln -s ${HEMLOCK_HOME}/skills ${HEMLOCK_HOME}/profiles/$p/skills
 done
 ```
 
 **If workers are already running on empty profiles**, reclaim them, fix profiles, then re-dispatch:
 ```bash
-hermes kanban reclaim <task_id>   # stop the blind worker
+hemlock-agent kanban reclaim <task_id>   # stop the blind worker
 # ... fix profiles ...
-hermes kanban dispatch            # re-spawn with fixed profiles
+hemlock-agent kanban dispatch            # re-spawn with fixed profiles
 ```
 
 Workers do NOT self-heal missing config — they just produce nothing. The reclaim+fix+redispatch cycle is the only recovery path.
@@ -202,7 +202,7 @@ Tell them what you created in plain prose, naming the actual profiles you used:
 > - **T3** (`<profile-B>`): synthesizes T1 + T2 into a recommendation
 > - **T4** (`<profile-C>`): turns T3 into a CTO memo
 >
-> The dispatcher will pick up T1 and T2 now. T3 starts when both finish. You'll get a gateway ping when T4 completes. Use the dashboard or `hermes kanban tail <id>` to follow along.
+> The dispatcher will pick up T1 and T2 now. T3 starts when both finish. You'll get a gateway ping when T4 completes. Use the dashboard or `hemlock-agent kanban tail <id>` to follow along.
 
 ## Common patterns
 
@@ -234,31 +234,31 @@ When you need to kill everything (update, crash recovery, "stop them all"):
 
 **Step 1: Identify active tasks**
 ```bash
-sqlite3 ${HERMES_HOME}/kanban.db "SELECT id, status, assignee, title, worker_pid FROM tasks WHERE status IN ('running','ready');"
+sqlite3 ${HEMLOCK_HOME}/kanban.db "SELECT id, status, assignee, title, worker_pid FROM tasks WHERE status IN ('running','ready');"
 ```
 
 **Step 2: Kill worker processes**
 ```bash
-for pid in $(sqlite3 ${HERMES_HOME}/kanban.db "SELECT worker_pid FROM tasks WHERE status='running' AND worker_pid IS NOT NULL;"); do
+for pid in $(sqlite3 ${HEMLOCK_HOME}/kanban.db "SELECT worker_pid FROM tasks WHERE status='running' AND worker_pid IS NOT NULL;"); do
     kill $pid 2>/dev/null && echo "Killed $pid" || echo "PID $pid already dead"
 done
 ```
 
 **Step 3: Cancel in DB**
 ```bash
-sqlite3 ${HERMES_HOME}/kanban.db "UPDATE tasks SET status='cancelled', completed_at=strftime('%s','now') WHERE status IN ('running','ready');"
+sqlite3 ${HEMLOCK_HOME}/kanban.db "UPDATE tasks SET status='cancelled', completed_at=strftime('%s','now') WHERE status IN ('running','ready');"
 ```
 
 **Step 4: Check for stale gateway processes**
 ```bash
 ps aux | grep "hermes.*gateway" | grep -v grep
-# Each gateway shows its HERMES_HOME in /proc/<pid>/environ
+# Each gateway shows its HEMLOCK_HOME in /proc/<pid>/environ
 for pid in $(pgrep -f "hermes.*gateway"); do
-    echo "PID $pid: $(cat /proc/$pid/environ 2>/dev/null | tr '\0' '\n' | grep HERMES_HOME)"
+    echo "PID $pid: $(cat /proc/$pid/environ 2>/dev/null | tr '\0' '\n' | grep HEMLOCK_HOME)"
 done
 ```
 
-Different HERMES_HOME values = different profile gateways (expected). Same HERMES_HOME = duplicate (kill the older one).
+Different HEMLOCK_HOME values = different profile gateways (expected). Same HEMLOCK_HOME = duplicate (kill the older one).
 
 Full reference: `references/kanban-cleanup.md`
 
@@ -280,11 +280,11 @@ Full reference: `references/kanban-cleanup.md`
 
 **Tenant inheritance.** If `HERMES_TENANT` is set in your env, pass `tenant=os.environ.get("HERMES_TENANT")` on every `kanban_create` call so child tasks stay in the same namespace.
 
-**Workers spawned on unconfigured profiles produce nothing.** If `hermes profile create --no-skills` was used (the fast bulk-creation path), profiles lack `config.yaml` and `skills/`. Workers start, heartbeat, but never produce files. Symptom: workspace stays empty after 10+ minutes. Fix: `reclaim` all affected tasks, copy `${HERMES_HOME}/config.yaml` into each profile dir, symlink `${HERMES_HOME}/skills` into each profile dir, then `dispatch` again. This is not a crash — the worker is "running" but has no model config or tools.
+**Workers spawned on unconfigured profiles produce nothing.** If `hemlock-agent profile create --no-skills` was used (the fast bulk-creation path), profiles lack `config.yaml` and `skills/`. Workers start, heartbeat, but never produce files. Symptom: workspace stays empty after 10+ minutes. Fix: `reclaim` all affected tasks, copy `${HEMLOCK_HOME}/config.yaml` into each profile dir, symlink `${HEMLOCK_HOME}/skills` into each profile dir, then `dispatch` again. This is not a crash — the worker is "running" but has no model config or tools.
 
 **Stale "running" tasks after crash/update.** When the system updates or crashes, worker PIDs die but the DB keeps them as `running`. The DB has no watchdog — it won't auto-detect dead PIDs. Symptom: board shows N tasks "running" but no processes exist (`ps aux | grep kanban` finds nothing). Fix: bulk-cancel via `UPDATE tasks SET status='cancelled' WHERE status IN ('running','ready');` then re-dispatch if needed. See `references/kanban-cleanup.md` for the full SQL playbook.
 
-**Stale claim locks prevent re-dispatch.** When workers are killed (SIGKILL, OOM, manual kill), the `claim_lock` and `claim_expires` columns retain the dead worker's lock. `kanban dispatch` sees the claim and skips the task — it appears "ready" but never spawns. Symptom: `dispatch` returns `spawned: []` despite tasks being `ready` with `consecutive_failures=0`. Fix: `sqlite3 ${HERMES_HOME}/kanban.db "UPDATE tasks SET claim_lock=NULL, claim_expires=NULL WHERE id='<task_id>';"` then re-dispatch. Always check for stale claims when dispatch spawns nothing.
+**Stale claim locks prevent re-dispatch.** When workers are killed (SIGKILL, OOM, manual kill), the `claim_lock` and `claim_expires` columns retain the dead worker's lock. `kanban dispatch` sees the claim and skips the task — it appears "ready" but never spawns. Symptom: `dispatch` returns `spawned: []` despite tasks being `ready` with `consecutive_failures=0`. Fix: `sqlite3 ${HEMLOCK_HOME}/kanban.db "UPDATE tasks SET claim_lock=NULL, claim_expires=NULL WHERE id='<task_id>';"` then re-dispatch. Always check for stale claims when dispatch spawns nothing.
 
 **workspace_kind='project' is not supported.** Tasks created with `workspace_kind='project'` fail with `workspace: unknown workspace_kind: project`. The kanban system only supports `scratch` (ephemeral tmp dir) and `dir:<path>` (persistent directory). Fix: set `workspace_kind='scratch'` and let the worker write to the project directory via the task body instructions. The worker's scratch workspace is just its working directory — it should be told where the actual project lives.
 
@@ -316,9 +316,9 @@ Write the body as **explicit acceptance criteria** — the judge is only as good
 
 When a worker profile keeps crashing, hallucinating, or getting blocked by its own mistakes (usually: wrong model, missing skill, broken credential), the kanban dashboard flags the task with a ⚠ badge and opens a **Recovery** section in the drawer. Three primary actions:
 
-1. **Reclaim** (or `hermes kanban reclaim <task_id>`) — abort the running worker immediately and reset the task to `ready`. The existing claim TTL is ~15 min; this is the fast path out.
-2. **Reassign** (or `hermes kanban reassign <task_id> <new-profile> --reclaim`) — switch the task to a different profile (one that exists on this setup) and let the dispatcher pick it up with a fresh worker.
-3. **Change profile model** — the dashboard prints a copy-paste hint for `hermes -p <profile> model` since profile config lives on disk; edit it in a terminal, then Reclaim to retry with the new model.
+1. **Reclaim** (or `hemlock-agent kanban reclaim <task_id>`) — abort the running worker immediately and reset the task to `ready`. The existing claim TTL is ~15 min; this is the fast path out.
+2. **Reassign** (or `hemlock-agent kanban reassign <task_id> <new-profile> --reclaim`) — switch the task to a different profile (one that exists on this setup) and let the dispatcher pick it up with a fresh worker.
+3. **Change profile model** — the dashboard prints a copy-paste hint for `hemlock-agent -p <profile> model` since profile config lives on disk; edit it in a terminal, then Reclaim to retry with the new model.
 
 Hallucination warnings appear on tasks where a worker's `kanban_complete(created_cards=[...])` claim included card ids that don't exist or weren't created by the worker's profile (the gate blocks the completion), or where the free-form summary references `t_<hex>` ids that don't resolve (advisory prose scan, non-blocking). Both produce audit events that persist even after recovery actions — the trail stays for debugging.
 

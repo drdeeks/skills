@@ -60,7 +60,7 @@ def main():
         with redirect_stdout(buf):
             mod.log_path_violations(tool_name="write_file",
                                     args={"path": "/somewhere/else/file.txt"})
-        # only warns when HERMES_HOME is set; either outcome is acceptable here
+        # only warns when HEMLOCK_HOME (or legacy HERMES_HOME) is set; either outcome is acceptable here
         print("PASS pre_tool_call write_file path check callable")
 
     print("---")

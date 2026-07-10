@@ -6,7 +6,7 @@ lost on container restart.
 ## The contract
 
 - The workspace root is the agent-home environment variable
-  (`$HEMLOCK_HOME`, with `$HERMES_HOME` as the working legacy alias).
+  (`$HEMLOCK_HOME`, with `$HEMLOCK_HOME` as the working legacy alias).
 - All writes go under it: `memory/ sessions/ skills/ projects/ .archive/
   media/ tools/ logs/ .secrets/ .backups/`.
 - Never create sibling directories named `agent-<name>` — that pattern means

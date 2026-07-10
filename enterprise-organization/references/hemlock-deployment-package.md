@@ -178,7 +178,7 @@ volumes:
 - Persists to `hemlock-shared-skills` volume
 
 ### 3. Setup Wizard → TUI/Docker Integration
-- After `hermes setup`, offers to launch TUI, start Docker, or both
+- After `hemlock-agent setup`, offers to launch TUI, start Docker, or both
 - Auto-detects Docker availability
 - Seamless transition from config to operation
 

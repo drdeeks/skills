@@ -5,7 +5,7 @@ description: 'Manages hackathon participation end to end: project organization, 
   readiness checks, and deadline tracking. Use when: joining a hackathon, organizing multiple
   project tracks, preparing submissions, mapping models to agent roles, or validating a
   project is production-grade before submitting.'
-version: 0.1.1
+version: 0.1.2
 license: MIT
 metadata:
   category: productivity
