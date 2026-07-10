@@ -1,5 +1,17 @@
 # Skill Updates Summary
 
+## v2.0.14 — single source of truth; drop hemlock-tui from the USB side
+
+- The `usb-system` template is now a **generated mirror** of the repo's single
+  source of truth (root `menu.sh` + `usb/`), produced by
+  `build-usb-kit.sh --skill-template`. It is never hand-edited — the menu is
+  changed at the root and regenerated. This ends the two-copies drift.
+- Removed `usb/hemlock-tui` from the USB system entirely. The Hemlock TUI is
+  only useful when a runtime is present, so the master menu now invokes
+  `hemlock-runtime/scripts/hemlock menu` directly (guarded on `HEMLOCK_DIR`)
+  instead of routing through a USB-side wrapper. The runtime keeps its own
+  `hemlock/hemlock-tui` launcher — unchanged.
+
 ## v2.0.13 — usb-system template refreshed to CL-047
 
 - `references/templates/usb-system/menu.sh` refreshed from the live master menu

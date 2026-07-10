@@ -368,11 +368,11 @@ Launches the Hemlock agent runtime inside a Docker container.
 # Via master menu
 bash menu.sh   # → Option 8
 
-# Direct
+# Via the runtime launcher
 export HEMLOCK_DIR=$(pwd)/hemlock/hemlock-runtime
-bash usb/hemlock-tui
+bash hemlock/hemlock-tui
 
-# Or via hemlock CLI
+# Or via the hemlock CLI directly
 bash hemlock/hemlock-runtime/scripts/hemlock menu
 ```
 

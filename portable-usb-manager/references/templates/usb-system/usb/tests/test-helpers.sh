@@ -102,6 +102,16 @@ assert_file_exists() {
   fi
 }
 
+assert_file_absent() {
+  local file="$1"
+  local desc="${2:-$file}"
+  if [[ ! -e "$file" ]]; then
+    assert_pass "$desc absent"
+  else
+    assert_fail "$desc present" "Did not expect: $file"
+  fi
+}
+
 assert_dir_exists() {
   local dir="$1"
   local desc="${2:-$dir}"

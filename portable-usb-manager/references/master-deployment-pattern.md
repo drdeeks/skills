@@ -121,5 +121,5 @@ After successful deployment:
 1. Log out/in or `source ~/.profile && source ~/.cargo/env`
 2. Run `tailscale up` to join tailnet
 3. Configure USB: `sudo bash $USB_AUTO_DIR/usb-setup-assistant.sh`
-4. Access Hemlock TUI: `bash $USB_AUTO_DIR/hemlock-tui`
+4. Access Hemlock TUI: `bash $HEMLOCK_DIR/../hemlock-tui` (runtime launcher) or `bash menu.sh --hemlock`
 5. Check Hemlock: `docker ps | grep hemlock`

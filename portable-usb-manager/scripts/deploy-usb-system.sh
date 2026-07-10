@@ -47,8 +47,8 @@ if ! $DRY_RUN; then
   # Templates ship 0444 — restore working permissions on the deployed copy
   find "$TARGET" -type d -exec chmod 755 {} +
   find "$TARGET" -type f -name "*.sh" -exec chmod 755 {} +
-  chmod 755 "$TARGET/usb/hemlock-tui" "$TARGET/usb/cli/usbctl" 2>/dev/null || true
-  find "$TARGET" -type f ! -name "*.sh" ! -name "usbctl" ! -name "hemlock-tui" \
+  chmod 755 "$TARGET/usb/cli/usbctl" 2>/dev/null || true
+  find "$TARGET" -type f ! -name "*.sh" ! -name "usbctl" \
     -exec chmod 644 {} +
 fi
 
