@@ -6,7 +6,7 @@ description: 'Enforces workspace structure, tool availability, and safe tool usa
   the required tool kit, auditing file permissions, investigating path violations,
   wiring the plugin into agent creation/import, or enforcing the restrictive-chmod
   prohibition.'
-version: 1.1.1
+version: 1.1.2
 license: MIT
 metadata:
   category: devops

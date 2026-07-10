@@ -87,7 +87,7 @@ python3 -m mcp_bridge --agent-id <agent-id> --hermes-home /workspace
       "hermes-mcp": {
         "command": "python3",
         "args": ["-m", "mcp_bridge"],
-        "env": { "AGENT_ID": "gateway-mcp", "HERMES_HOME": "/workspace" },
+        "env": { "AGENT_ID": "gateway-mcp", "HEMLOCK_HOME": "/workspace" },
         "transport": "stdio"
       }
     }
@@ -192,7 +192,7 @@ python3 -m mcp_bridge --agent-id <agent-id> --hermes-home /workspace
       "hermes-mcp": {
         "command": "python3",
         "args": ["-m", "mcp_bridge"],
-        "env": { "AGENT_ID": "gateway-mcp", "HERMES_HOME": "/workspace" },
+        "env": { "AGENT_ID": "gateway-mcp", "HEMLOCK_HOME": "/workspace" },
         "transport": "stdio"
       }
     }
@@ -289,7 +289,7 @@ python3 -m mcp_bridge --agent-id <agent-id> --hermes-home /workspace
       "hermes-mcp": {
         "command": "python3",
         "args": ["-m", "mcp_bridge"],
-        "env": { "AGENT_ID": "gateway-mcp", "HERMES_HOME": "/workspace" },
+        "env": { "AGENT_ID": "gateway-mcp", "HEMLOCK_HOME": "/workspace" },
         "transport": "stdio"
       }
     }

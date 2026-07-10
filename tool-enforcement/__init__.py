@@ -21,13 +21,13 @@ CHMOD_PROHIBITION = (
 )
 
 PATH_ENFORCEMENT = (
-    "YOUR WORKSPACE is $HERMES_HOME — an environment variable already set. "
-    "ALL files must be written INSIDE $HERMES_HOME. "
+    "YOUR WORKSPACE is $HEMLOCK_HOME — an environment variable already set. "
+    "ALL files must be written INSIDE $HEMLOCK_HOME. "
     "NEVER create directories named agent-<name>. NEVER use relative paths like agent-allman/. "
     "Your workspace directories: memory/ sessions/ skills/ projects/ .archive/ media/ tools/ logs/ "
-    ".secrets/ .backups/ — all relative to $HERMES_HOME. "
-    "If you need to write a file, use $HERMES_HOME/path or a path relative to $HERMES_HOME. "
-    "Files written outside $HERMES_HOME will be LOST on container restart."
+    ".secrets/ .backups/ — all relative to $HEMLOCK_HOME. "
+    "If you need to write a file, use $HEMLOCK_HOME/path or a path relative to $HEMLOCK_HOME. "
+    "Files written outside $HEMLOCK_HOME will be LOST on container restart."
 )
 
 
@@ -63,23 +63,24 @@ def log_path_violations(
     if args is None:
         args = {}
 
-    hermes_home = os.environ.get("HERMES_HOME", "")
+    # HEMLOCK_HOME is canonical; HERMES_HOME kept as legacy fallback (older runtimes).
+    hemlock_home = os.environ.get("HEMLOCK_HOME") or os.environ.get("HERMES_HOME", "")
 
     # Check write_file paths
     if tool_name == "write_file":
         path = args.get("path", "")
-        if path and hermes_home and not path.startswith(hermes_home) and not path.startswith("/tmp"):
-            print(f"⚠️ WARNING: write_file to {path} — outside $HERMES_HOME ({hermes_home})")
+        if path and hemlock_home and not path.startswith(hemlock_home) and not path.startswith("/tmp"):
+            print(f"⚠️ WARNING: write_file to {path} — outside $HEMLOCK_HOME ({hemlock_home})")
 
     # Check terminal for mkdir agent-*
     if tool_name == "terminal":
         cmd = args.get("command", "")
         if "mkdir" in cmd and "agent-" in cmd:
-            print(f"⚠️ WARNING: mkdir agent-* detected — use $HERMES_HOME instead")
+            print(f"⚠️ WARNING: mkdir agent-* detected — use $HEMLOCK_HOME instead")
         if "chmod 700" in cmd or "chmod 000" in cmd:
             print(f"⚠️ CRITICAL: chmod 700/000 detected — THIS IS PROHIBITED")
 
-    # Check execute_code for os.path operations outside HERMES_HOME
+    # Check execute_code for os.path operations outside HEMLOCK_HOME
     if tool_name == "execute_code":
         code = args.get("code", "")
         if "agent-" in code and ("mkdir" in code or "os.path" in code or "Path(" in code):

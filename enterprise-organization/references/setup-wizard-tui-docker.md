@@ -1,7 +1,7 @@
 # Setup Wizard TUI/Docker Integration
 
 ## Overview
-The `hermes setup` command now offers to launch TUI and/or start Docker container after configuration completes. This provides a seamless first-run experience.
+The `hemlock-agent setup` command now offers to launch TUI and/or start Docker container after configuration completes. This provides a seamless first-run experience.
 
 ## Implementation Location
 `/docker/hermes-agent/hermes_cli/setup.py` - patched in `run_setup_wizard()` function.
@@ -49,7 +49,7 @@ def _offer_launch_tui_and_docker():
     ], 0)
     
     if choice == 3:  # Skip
-        print_info("Setup complete! Run 'hermes tui' to launch TUI, 'hermes gateway start' to start Docker.")
+        print_info("Setup complete! Run 'hemlock-agent tui' to launch TUI, 'hemlock-agent gateway start' to start Docker.")
         return
     
     # Handle Docker start
@@ -142,7 +142,7 @@ def run_setup_wizard(args):
 ## User Experience Flow
 
 ```
-$ hermes setup
+$ hemlock-agent setup
 # ... configuration steps ...
 # Configuration saved
 ✅ Setup complete!
@@ -178,13 +178,13 @@ Gateway will be available at http://localhost:18789
 
 ```bash
 # Test setup wizard
-hermes setup
+hemlock-agent setup
 
 # Test individual components
-hermes setup model
-hermes setup gateway
-hermes tui
-hermes gateway start
+hemlock-agent setup model
+hemlock-agent setup gateway
+hemlock-agent tui
+hemlock-agent gateway start
 ```
 
 ## Key Learnings (Session 2026-06-13)

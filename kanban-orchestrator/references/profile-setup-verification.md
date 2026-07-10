@@ -2,7 +2,7 @@
 
 ## The Problem
 
-`hermes profile create --no-skills --no-alias --description "..." <name>` creates a profile directory with:
+`hemlock-agent profile create --no-skills --no-alias --description "..." <name>` creates a profile directory with:
 - `agent.json` (minimal, no model config)
 - NO `config.yaml`
 - NO `skills/` directory
@@ -13,15 +13,15 @@ The dispatcher spawns workers using `-p <profile> --skills kanban-worker chat -q
 
 ```bash
 # 1. Check config exists and is non-trivial
-for p in $(hermes profile list 2>&1 | awk 'NR>2{print $1}'); do
-  size=$(wc -c < ${HERMES_HOME}/profiles/$p/config.yaml 2>/dev/null || echo 0)
+for p in $(hemlock-agent profile list 2>&1 | awk 'NR>2{print $1}'); do
+  size=$(wc -c < ${HEMLOCK_HOME}/profiles/$p/config.yaml 2>/dev/null || echo 0)
   echo "$p: config=${size}B"
 done
 # Expected: ~16000B for each profile (same as global config)
 
 # 2. Check skills exist
-for p in $(hermes profile list 2>&1 | awk 'NR>2{print $1}'); do
-  count=$(ls ${HERMES_HOME}/profiles/$p/skills/ 2>/dev/null | wc -l)
+for p in $(hemlock-agent profile list 2>&1 | awk 'NR>2{print $1}'); do
+  count=$(ls ${HEMLOCK_HOME}/profiles/$p/skills/ 2>/dev/null | wc -l)
   echo "$p: skills=$count"
 done
 # Expected: 80+ for each profile
@@ -31,15 +31,15 @@ done
 
 ```bash
 # Copy global config
-GLOBAL=${HERMES_HOME}/config.yaml
-for p in $(ls ${HERMES_HOME}/profiles/ | grep -v default); do
-  [ ! -f ${HERMES_HOME}/profiles/$p/config.yaml ] && cp $GLOBAL ${HERMES_HOME}/profiles/$p/config.yaml
+GLOBAL=${HEMLOCK_HOME}/config.yaml
+for p in $(ls ${HEMLOCK_HOME}/profiles/ | grep -v default); do
+  [ ! -f ${HEMLOCK_HOME}/profiles/$p/config.yaml ] && cp $GLOBAL ${HEMLOCK_HOME}/profiles/$p/config.yaml
 done
 
 # Symlink skills
-for p in $(ls ${HERMES_HOME}/profiles/ | grep -v default); do
-  [ ! -d ${HERMES_HOME}/profiles/$p/skills ] && [ ! -L ${HERMES_HOME}/profiles/$p/skills ] && \
-    ln -s ${HERMES_HOME}/skills ${HERMES_HOME}/profiles/$p/skills
+for p in $(ls ${HEMLOCK_HOME}/profiles/ | grep -v default); do
+  [ ! -d ${HEMLOCK_HOME}/profiles/$p/skills ] && [ ! -L ${HEMLOCK_HOME}/profiles/$p/skills ] && \
+    ln -s ${HEMLOCK_HOME}/skills ${HEMLOCK_HOME}/profiles/$p/skills
 done
 ```
 
@@ -47,21 +47,21 @@ done
 
 ```bash
 # 1. Reclaim all affected tasks
-hermes kanban reclaim t_xxx
+hemlock-agent kanban reclaim t_xxx
 
 # 2. Fix profiles (see above)
 
 # 3. Re-dispatch
-hermes kanban dispatch
+hemlock-agent kanban dispatch
 ```
 
 ## Key Gotcha: Default Profile Location
 
-The default profile does NOT have a directory at `${HERMES_HOME}/profiles/default/`. It uses the global config at `${HERMES_HOME}/config.yaml`. When copying config to new profiles, always use the global path, not the default profile path.
+The default profile does NOT have a directory at `${HEMLOCK_HOME}/profiles/default/`. It uses the global config at `${HEMLOCK_HOME}/config.yaml`. When copying config to new profiles, always use the global path, not the default profile path.
 
 ## Symptoms of Empty Profiles
 
-- `hermes kanban tail <task_id>` shows: created -> claimed -> spawned -> heartbeat (no file creation)
-- Workspace directory at `${HERMES_HOME}/kanban/workspaces/<task_id>/` stays empty
+- `hemlock-agent kanban tail <task_id>` shows: created -> claimed -> spawned -> heartbeat (no file creation)
+- Workspace directory at `${HEMLOCK_HOME}/kanban/workspaces/<task_id>/` stays empty
 - Worker process is running (visible in `ps aux`) but produces nothing
 - No error messages -- the worker just has no model to call

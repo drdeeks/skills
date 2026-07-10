@@ -16,7 +16,7 @@ The demo.js is a showcase of the working application, NOT a replacement for buil
 
 ## Delegation: Use Kanban, Don't Hand-Code
 
-When kanban profiles exist for a project, DISPATCH IMMEDIATELY via `hermes kanban dispatch`. The agents are the workforce — you are the orchestrator. Stay available to the user while agents work in the background.
+When kanban profiles exist for a project, DISPATCH IMMEDIATELY via `hemlock-agent kanban dispatch`. The agents are the workforce — you are the orchestrator. Stay available to the user while agents work in the background.
 
 **User correction:** "why aren't you letting the agents do all this why are you doing it... there's completely separate profiles created for these fuckers. you should be able to test them with by using /autonomous-crew skill and let them run in the background so you're here with me"
 

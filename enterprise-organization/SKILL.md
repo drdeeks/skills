@@ -1,7 +1,7 @@
 ---
 name: enterprise-organization
 description: "Enterprise-grade organization management for AI agent systems. Enforces modular file tree, security hardening, gitignore standards, task-list-driven validation, zero-placeholder code policy, rigorous self-validation with rollback, append-only CHANGELOG.md with decision rationale, phase-tagged workflow, semantic versioning with automated releases, and robust git control. When: setting up new agent workspaces, auditing existing projects, enforcing enterprise standards, scaling agent infrastructure, managing phased development, releasing versions, controlling git operations. Triggers: 'enterprise setup', 'workspace audit', 'security hardening', 'modular enforcement', 'CHANGELOG enforcement', 'stub removal', 'phase management', 'version release', 'git control'."
-version: 0.1.3
+version: 0.1.4
 license: MIT
 metadata:
   category: infrastructure
