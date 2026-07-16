@@ -46,8 +46,15 @@ def slugify(text):
     return s.strip("-")
 
 
+def _bare_title(phase_name):
+    """Strip a leading 'Phase N:' prefix, if present. Default phases carry it
+    baked into the string; --phases-supplied names never do — this normalizes
+    both shapes to the same bare title before it's reused as a header/flag."""
+    return re.sub(r"^phase\s*\d+[:\s]*", "", phase_name, flags=re.IGNORECASE).strip()
+
+
 def flag_name(phase_name):
-    slug = slugify(re.sub(r"^phase\s*\d+[:\s]*", "", phase_name, flags=re.IGNORECASE))
+    slug = slugify(_bare_title(phase_name))
     return "FEAT_" + slug.upper().replace("-", "_")
 
 
@@ -60,8 +67,9 @@ def phase_tag(index):
 def blueprint_phase_section(i, phase):
     tag = phase_tag(i)
     flag = flag_name(phase)
+    title = _bare_title(phase)
     lines = [
-        f"## {phase}",
+        f"### PHASE-{i}: {title}",
         "",
         f"**Section Tag:** `{tag}`",
         f"**Feature Flag:** `{flag}`",
@@ -73,8 +81,8 @@ def blueprint_phase_section(i, phase):
         "",
         "### Deliverables",
         "",
-        "- [ ] [Define deliverable 1]",
-        "- [ ] [Define deliverable 2]",
+        f"- [ ] **PHASE-{i}.1** [Define deliverable 1]",
+        f"- [ ] **PHASE-{i}.2** [Define deliverable 2]",
         "",
         "### Validation Gate",
         "",
@@ -341,9 +349,10 @@ def generate_changelog(project_name, phases):
 def checklist_phase_section(i, phase):
     tag = phase_tag(i)
     flag = flag_name(phase)
+    title = _bare_title(phase)
     prior = f"Phase {i - 1}" if i > 0 else "N/A"
     lines = [
-        f"## {phase}",
+        f"### PHASE-{i}: {title}",
         "",
         f"**Section Tag:** `{tag}` | **Feature Flag:** `{flag}`",
         "**Status:** `NOT STARTED` | **Assigned Agent:** _unassigned_",

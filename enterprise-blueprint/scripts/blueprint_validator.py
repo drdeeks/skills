@@ -55,8 +55,8 @@ def validate_changelog(project_root, changelog_path):
     if len(content.strip()) < 20:
         return False, "CHANGELOG.md is empty or too short"
     
-    # Check for CL- entries
-    if not re.search(r"##\s+CL-\d+", content):
+    # Check for CL- entries (can be in headings or bullet points)
+    if not re.search(r"CL-\d+", content):
         return False, "No CL- entries found in changelog"
     
     return True, "CHANGELOG.md valid"
