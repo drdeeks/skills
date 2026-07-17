@@ -148,20 +148,25 @@
       ]
     },
     "autonomous-crew": {
-      "current_version": "1.2.2",
-      "previous_version": "1.2.1",
-      "last_packaged": "2026-07-09T18:54:58.246190+00:00",
+      "current_version": "1.2.4",
+      "previous_version": "1.2.3",
+      "last_packaged": "2026-07-17T12:50:38.299018+00:00",
       "files": 106,
-      "size_bytes": 515294,
+      "size_bytes": 516433,
       "history": [
         {
           "version": "1.2.2",
           "timestamp": "2026-07-09T18:54:58.246190+00:00",
           "files": 106
+        },
+        {
+          "version": "1.2.4",
+          "timestamp": "2026-07-17T12:50:38.299018+00:00",
+          "files": 106
         }
       ]
     }
   },
-  "last_packaged": "2026-07-09T21:59:03.023898+00:00",
+  "last_packaged": "2026-07-17T12:50:38.299018+00:00",
   "total_packaged": 1
 }

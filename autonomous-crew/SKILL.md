@@ -6,7 +6,7 @@ description: Integrate agent identity architecture as the first layer in autonom
   Includes knowledge sharing system with dual-mode workspaces, agent-attributed documents,
   semantic indexing, and structured agent communication. Enterprise-grade with skill-creator
   validation.
-version: 1.2.3
+version: 1.2.4
 license: MIT
 metadata:
   category: devops
@@ -58,6 +58,57 @@ metadata:
 - Private enforcer daemon (Unix socket RPC, workspace ownership)
 - Memory pipeline (daily → weekly → long-term + knowledge index)
 - Builder code registration (ERC-8021) with identity attestation
+
+## Functional Autonomous Loop
+
+Use `scripts/autonomous-loop.py` as the default runner for real autonomous work.
+It works with one shared workspace and one or more logical agents by running a
+builder pass followed by an independent reviewer pass for each active chain
+item. It writes live status, child PID, elapsed time, timeout, stdout log,
+evidence, and review files. It advances the chain only after the review file
+ends with `VERDICT: PASS`.
+
+Single-agent project loop:
+
+```bash
+python3 scripts/autonomous-loop.py \
+  --root /path/to/project \
+  --chain /path/to/project/.chain/project-blueprint.json \
+  --chain-name project-blueprint \
+  --preflight "python3 -m unittest discover" \
+  --cycles 0
+```
+
+Multi-agent/reviewer loop with local Docker, package installers, and servers:
+
+```bash
+python3 scripts/autonomous-loop.py \
+  --root /path/to/project \
+  --chain /path/to/project/.chain/project-blueprint.json \
+  --chain-name project-blueprint \
+  --preflight "python3 scripts/full_blueprint_status.py" \
+  --preflight "docker version --format {{.Server.Version}}" \
+  --bypass \
+  --cycles 0
+```
+
+Monitor without touching the run:
+
+```bash
+cat /path/to/project/.agent/runtime/autonomous-crew/autonomous-crew-status.json
+```
+
+Operational rules:
+- Keep all agents in one shared workspace unless production isolation is
+  explicitly required.
+- Provision dependencies in `--preflight` before delegating to the builder or
+  reviewer.
+- Never complete a chain item from builder output alone; require the independent
+  review file to contain final line `VERDICT: PASS`.
+- If Docker, network, local ports, or package installs are required, use
+  `--bypass` or an equivalent trusted external sandbox so validation is real.
+- Treat `task-dispatcher.py` and `task-poller.py` as legacy Hermes/Kanban
+  integration scripts. Do not use them as the default autonomous execution loop.
 
 ## Crew Mode Flag
 
@@ -316,12 +367,13 @@ Validates workspace structure matches identity requirements. Runs as part of too
 | `scripts/generate-phase-validators.py` | Generate phase validator scripts |
 | `scripts/wire-kanban-to-chain.py` | Wire kanban tasks to chain steps |
 | `scripts/chain_enforce.py` | Chain enforcement helper for kanban workers (check/complete/status) |
+| `scripts/autonomous-loop.py` | Portable one-agent or builder/reviewer autonomous loop with live heartbeat, preflight, evidence, independent review, and chain advance |
 | `scripts/self-healing-loop.py` | Run integrity checks (constitution, chain, memory, habits) |
 | `scripts/crew-manager.py` | Create crews with blueprint enforcement, identity layer, and model configuration |
 | `scripts/spawn-crew-agents.py` | Spawn all agents from blueprint.json |
 | `scripts/start-crew-enforcers.py` | Start enforcer daemons for all agents in crew |
-| `scripts/task-dispatcher.py` | Sync kanban with chain state; unlock + round-robin-assign ALL active-phase subtasks to agents |
-| `scripts/task-poller.py` | Per-PROJECT poller (never per-crew): queries tasks by project id, drives the agent runtime, verifies deliverables, advances the chain for EVERY phase |
+| `scripts/task-dispatcher.py` | Legacy Hermes/Kanban integration: sync kanban with chain state; unlock + assign active-phase subtasks |
+| `scripts/task-poller.py` | Legacy Hermes/Kanban integration: per-project poller that queries tasks by project id and drives the configured runtime |
 | `scripts/generate-tasks-from-checklist.py` | Generate granular kanban tasks from checklist.md |
 | `scripts/progress-monitor.py` | Monitor project health, tests, API, chain progress |
 | `scripts/enforcer_daemon.py` | Per-agent enforcer daemon (identity, habits, constitution) |
