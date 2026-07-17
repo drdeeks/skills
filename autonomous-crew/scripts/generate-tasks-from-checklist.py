@@ -166,8 +166,13 @@ def sync_to_kanban(tasks):
     print(f"Synced {len(tasks)} tasks to kanban")
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print("Usage: generate-tasks-from-checklist.py")
+        print("Parses each known project's checklist.md and syncs tasks to the kanban DB.")
+        sys.exit(0)
+
     projects = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
-    
+
     print("Parsing checklists...")
     tasks = generate_kanban_tasks(projects)
     
