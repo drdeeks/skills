@@ -1,5 +1,8 @@
 # Hemlock Curated Skills
 
+[![DrDeeks Project](https://img.shields.io/badge/DrDeeks%20Project-171718?style=flat-square&labelColor=b84d32)](https://github.com/drdeeks)
+
+
 **The canonical, version-tracked, self-enforcing source of truth for every curated skill the Hemlock agent runtime uses.**
 
 This repository is not a loose folder of scripts. It is a governed skill database: every skill in it has passed an enforced validation-and-packaging loop, is pinned by a git hash, is recorded in a signed/verifiable manifest, and is auto-committed the moment its version changes. The container that runs Hemlock agents mirrors this repository into a read-only skills seed and pulls the latest **every day**, so agents always reference a consistent, current, diagnostic set of tools.
