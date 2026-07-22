@@ -295,19 +295,35 @@ def test_fixture_pipeline(skill_dir: Path) -> Dict:
             "detail": f"moved={moved} original_gone={not stray.is_file()}",
         })
 
-        # 3. Packaging must produce a real archive with a bumped version —
-        #    proves package_skills.py does what it claims. It deliberately
-        #    does NOT validate first (that's skill_enhance.py's job) — this
-        #    fixture only asserts what package_skills.py itself is responsible for.
+        # 3. Packaging must REFUSE a still-broken skill (REPLACE_ME markers
+        #    remain — auto_fix in step 2 only moved a stray file, it doesn't
+        #    fill in placeholders) — proves the validate-before-package gate
+        #    is real, not bypassable by calling package_skills.py directly.
+        #    Confirmed bug this fixture exists to prevent from recurring:
+        #    package_skills.py used to zip and version-bump ANY directory
+        #    with a SKILL.md, including one with invalid Python and no
+        #    __init__.py, with zero validation ever running.
         packager = _package_skills.SkillPackager(tmp_path)
-        pkg_result = packager.package_skill(fixture.name)
         archive = fixture / f"{fixture.name}.skill"
+        refused = packager.package_skill(fixture.name)
         checks.append({
-            "assertion": "package_skills produces a .skill archive with a bumped version",
-            "passed": (pkg_result.get("status") == "success" and archive.is_file()
-                       and pkg_result.get("version_bumped") is True),
-            "detail": f"status={pkg_result.get('status')} "
-                      f"version={pkg_result.get('version')}",
+            "assertion": "package_skills refuses a skill that fails validation",
+            "passed": (refused.get("status") == "failed" and not archive.is_file()
+                       and "validation" in refused.get("error", "")),
+            "detail": f"status={refused.get('status')} error={refused.get('error')}",
+        })
+
+        # 4. --skip-validation (skill_enhance.py's own sanctioned internal
+        #    use, after it has already run the real gate sequence) must still
+        #    produce a real archive with a bumped version — proves the zip/
+        #    bump mechanics themselves work, independent of the gate.
+        bypassed = packager.package_skill(fixture.name, skip_validation=True)
+        checks.append({
+            "assertion": "package_skills --skip-validation still packages + bumps version",
+            "passed": (bypassed.get("status") == "success" and archive.is_file()
+                       and bypassed.get("version_bumped") is True),
+            "detail": f"status={bypassed.get('status')} "
+                      f"version={bypassed.get('version')}",
         })
 
     passed = sum(1 for c in checks if c["passed"])

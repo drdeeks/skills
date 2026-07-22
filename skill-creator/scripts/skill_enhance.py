@@ -544,7 +544,10 @@ def run_pipeline(cmd: str, args) -> int:
         step_path = chain_step_dir / "package"
         fm_before = read_frontmatter(skill_dir / "SKILL.md")
         version_before = str(fm_before.get("version", "0.0.0"))
-        rc = run_script(PACKAGE, ["--skills-root", str(skill_dir.parent), "--skill", skill_dir.name])
+        pkg_args = ["--skills-root", str(skill_dir.parent), "--skill", skill_dir.name, "--skip-validation"]
+        if tier == "basic":
+            pkg_args.append("--basic")
+        rc = run_script(PACKAGE, pkg_args)
         if rc != 0:
             fail(f"package_skills.py exited {rc}")
             return 11

@@ -6,7 +6,7 @@ The skill_enhance.py validator rejects hardcoded paths in SKILL.md and scripts.
 
 **Banned patterns:**
 - `$HOME/` — any absolute path with a username
-- `~/.hermes/` — tilde paths in SKILL.md content
+- tilde-prefixed provider install paths in SKILL.md content (Hermes, OpenClaw, etc.)
 
 **Use instead:**
 - `<HEMLOCK_HOME>` — for Hermes config/skill paths
