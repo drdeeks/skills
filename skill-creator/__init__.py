@@ -30,7 +30,7 @@ from pathlib import Path
 # ─── Package metadata (importable) ────────────────────────────────────────
 
 NAME = "skill-creator"
-VERSION = "3.0.13"
+VERSION = "3.0.14"
 PREVIOUS_VERSION = "2.1.1"
 FORK_ORIGIN = "_curated/skill-creator@2.1.1"
 FORK_NOTE = ("Every mutating script is directly invokable. skill_enhance.py "
@@ -258,22 +258,19 @@ def scaffold(skill_name, base_dir, force=False, tier="enterprise",
     }
 
 
-LESSON_TEMPLATE = """# Lesson: {title}
+LESSON_TEMPLATE = """---
+title: {title}
+category: REPLACE_ME_CATEGORY
+failure: REPLACE_ME_CONCRETE_SYMPTOM_WHAT_BROKE_OR_SURPRISED
+root_cause: REPLACE_ME_WHY_IT_HAPPENED
+resolution: REPLACE_ME_WHAT_FIXED_IT
+prevention: REPLACE_ME_THE_RULE_OR_PATTERN_GOING_FORWARD
+date: {date}
+verified: false
+---
 
-## Context
-(environment, constraints, what was being attempted)
-
-## What Happened
-(the failure or surprise — symptom and root cause)
-
-## Resolution
-(how it was fixed)
-
-## Prevention
-(the pattern that avoids this class of error going forward)
-
-**Date:** {date}
-**Verified:** no
+(optional prose elaboration below, only if the frontmatter fields alone don't
+capture the full context)
 """
 
 

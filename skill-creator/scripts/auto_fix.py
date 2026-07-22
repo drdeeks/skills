@@ -6,21 +6,25 @@ Split out from validate.py so validate.py stays purely read-only (anyone can
 run it any time to check status). All mutation lives here — invoked directly
 or via skill_enhance.py.
 
-Contract (CL-042 — never delete):
+Contract (CL-042 — conservative, but not blind):
   MAY DELETE only:
     - Cached/VCS/build dirs (__pycache__, .git, node_modules, ...) — pure caches
     - Empty directories left behind by a move
+    - Foreign/stale .skill archives anywhere in the tree — regenerable build
+      artifacts, never the skill's own <name>.skill (that one is replaced in
+      place, atomically, by package_skills.py, which always runs immediately
+      after auto_fix in the skill_enhance.py pipeline — so a deleted foreign
+      archive doesn't leave the skill without one, it gets repacked correctly)
   MAY MOVE (always preserves content, never clobbers an existing target):
     - lessons/ → references/lessons/
     - templates/ → references/templates/ (then chmod 0444)
     - any stray root file → references/ or scripts/ by extension
-    - foreign .skill archives (name != skill) → references/templates/ with a
-      rename prompt; the skill's own <name>.skill stays where it is
     - bad-name / forbidden files WITH CONTENT → moved to the correct dir,
       validator still FAILS with a rename hint (the fixer can't pick a good
       name for you — you rename it)
   NEVER:
-    - Deletes ANY file, empty or not
+    - Deletes a file with real, needed content — the only files it deletes
+      are foreign/stale .skill archives (see above) and pure cache artifacts
     - Overwrites an existing file (collision targets get a numeric suffix)
     - Touches guardrail artifacts (.gate.json, .loop-log.jsonl, ...)
     - Overwrites a non-empty __init__.py (creates one only if MISSING)
@@ -113,15 +117,23 @@ def auto_fix_skill(skill_path, dry_run: bool = False) -> List[str]:
                 d.mkdir(exist_ok=True)
             fixes.append(f"created {d.name}/")
 
-    # 3. Foreign .skill archives (root archive <skill_name>.skill stays put;
-    #    the packager regenerates it — we never delete an archive)
+    # 3. Foreign/stale .skill archives (root archive <skill_name>.skill stays
+    #    put; every OTHER .skill file anywhere in the tree is a regenerable
+    #    build artifact — delete it. package_skills.py runs right after
+    #    auto_fix in the skill_enhance.py pipeline and repacks the correct
+    #    archive in place, so nothing is left un-packaged.
     for sk in list(skill_path.rglob("*.skill")):
         if not sk.is_file():
             continue
         if sk.parent == skill_path and sk.name == f"{skill_name}.skill":
             continue
-        _move(sk, refs / "templates" / sk.name, fixes, skill_path, dry_run,
-              note="foreign .skill archive — rename or extract, do not nest")
+        rel = sk.relative_to(skill_path)
+        if not dry_run:
+            sk.unlink()
+        fixes.append(
+            f"{'[dry-run] would delete' if dry_run else 'deleted'} "
+            f"foreign/stale .skill archive: {rel} (repacked by package step)"
+        )
 
     # 4. Forbidden root files: MOVE to references/ (never delete, even empty)
     for forbidden in sorted(FORBIDDEN_ROOT_FILES):
@@ -247,6 +259,10 @@ def main():
                     help="Report what would change without touching anything")
     ap.add_argument("--json", action="store_true", help="JSON output")
     args = ap.parse_args()
+
+    if not Path(args.skill_dir).is_dir():
+        print(f"Error: not a directory: {args.skill_dir}", file=sys.stderr)
+        sys.exit(1)
 
     applied = auto_fix_skill(args.skill_dir, dry_run=args.dry_run)
 

@@ -9,7 +9,7 @@ description: Author, edit, audit, validate, package, and upgrade AgentSkills. Pr
   on phrases like 'create a skill', 'author a skill', 'tidy up a skill', 'audit the
   skill', 'package this skill', 'upgrade skill to enterprise'. Validator runs enterprise-strict
   by default; pass --basic for the lighter-count tier. Every script is directly invokable.
-version: 3.0.13
+version: 3.0.14
 license: MIT
 metadata:
   category: skill-authoring
@@ -30,12 +30,33 @@ metadata:
 
 # Skill Creator — Authoring Guidance + Unified Toolchain
 
-The **sole source of truth** for how skills are authored, validated, packaged, and upgraded in this project. Every other skill in the `skill-*` family (skill-installer, skill-scan-validate-resolver) delegates to the scripts in this skill rather than shipping its own copies.
+The **sole source of truth** for how skills are authored, validated, packaged, and upgraded in this project. Every other skill in the `skill-*` family (e.g. `skill-installer`) delegates to the scripts in this skill rather than shipping its own copies.
 
 Two things live here on purpose:
 
 1. **Authoring philosophy** — the *why* behind lean skills. Read this before writing any SKILL.md.
 2. **Operational toolchain** — the validator/packager/upgrader/auto-fixer scripts that enforce the philosophy.
+
+---
+
+## Is this actually a skill?
+
+Before creating anything, answer this. A skill is a reusable, executable capability —
+not a knowledge dump, tutorial, policy document, or prompt collection.
+
+- **No `scripts/`, or nothing in it that's actually executed?** It's not a skill. Text
+  that only ever gets read isn't a capability — it's information, and belongs in a doc,
+  not a skill package.
+- **Fits on one page with no real toolchain behind it?** It's knowledge, not a skill.
+  Knowledge doesn't need `__init__.py`, `scripts/`, or a validator — a skill does.
+- **Can't clear the enterprise minimums (3+ scripts, 5+ references, 7+ tags) with real,
+  substantive content?** The fix is never to relax the validator or pad content to hit a
+  number — find a genuinely broader application of the capability, or don't build it as
+  a skill. See `references/lessons/validator-vs-content-rephrase-not-relax.md`.
+
+The full responsibility model (component boundaries, contamination detection, what this
+skill exists to prevent) is in `references/standards.md` — this section is the
+short-form gate; that file is the long-form reference.
 
 ---
 
@@ -160,7 +181,7 @@ Six steps. Follow in order; skip only with a clear reason.
 
 1. **Understand** the skill through concrete examples. Ask the user what triggers it, what usage looks like. Don't overwhelm — one or two questions at a time.
 2. **Plan** reusable contents. For each example, identify what scripts/refs/assets would help.
-3. **Initialize** via `scripts/scaffold_skill.py <name>`. Auto-generates the structural skeleton.
+3. **Initialize** via `python3 __init__.py --scaffold <name> --path <parent>`. Auto-generates the structural skeleton (enterprise tier only — see `references/lessons/always-scaffold-through-init.md`).
 4. **Edit** SKILL.md and add resources. Test any scripts by actually running them.
 5. **Package** via `scripts/package_skills.py`. Validates + version-bumps + emits `.skill` archive.
 6. **Iterate** based on real usage.
@@ -180,6 +201,7 @@ Six steps. Follow in order; skip only with a clear reason.
 | `version` | Semantic (X.Y.Z); packager auto-bumps patch |
 | `metadata.tags` | ≥ 5 (basic), ≥ 7 (enterprise) — used for auto-triggering |
 | `license` | Optional but recommended |
+| `allowed-tools` | Optional; the only other top-level key the validator accepts |
 
 Only these keys are allowed at the top level. Extras trigger a FAIL.
 
@@ -187,7 +209,9 @@ Only these keys are allowed at the top level. Extras trigger a FAIL.
 
 ## Toolchain
 
-Every script emits structured JSON with `operation`, `timestamp`, `status`, `skill`, and `details`. Every script is directly invokable, and `skill_enhance.py` sequences the full 11-step pipeline by calling each script as an ordinary subprocess.
+Every script is directly invokable — but for actually creating or changing a skill, `skill_enhance.py` is the only sanctioned path, however small the change. Running `validate.py`/`auto_fix.py`/`package_skills.py` directly is for debugging and inspection only; it skips the enforced gate sequence and is never a substitute for the full pipeline. `skill_enhance.py` sequences the full 11-step pipeline by calling each script as an ordinary subprocess.
+
+Most scripts that support `--json` emit `operation`/`timestamp`/... structured output, but the exact shape varies by script's purpose (e.g. `analyze_skill.py` and `detect_redundancy.py` use their own result schemas, and `normalize_tags.py` has no `--json` mode at all) — check a given script's own `--help`/docstring for its actual output shape rather than assuming a universal one.
 
 ### `scripts/skill_enhance.py` — Pipeline Orchestrator WITH CHAIN ENFORCEMENT
 
@@ -214,6 +238,12 @@ Vendored copy of the universal chain concept (loop-enforcer). Locked sequential 
 
 Strips install-time provider tag blocks from SKILL.md(s) so the REPO ships standard tags only. Runs automatically from the post-commit gate hook (transmitted by skill-installer on every install); `--check` mode reports without writing.
 
+### `scripts/validate.py` — Structural + Content Validator
+
+```bash
+python3 scripts/validate.py /path/to/skill/          # enterprise (default)
+python3 scripts/validate.py /path/to/skill/ --basic   # lighter tier
+```
 
 Purely read-only — never mutates. Structural fixes live in `auto_fix.py`.
 
@@ -222,11 +252,12 @@ Purely read-only — never mutates. Structural fixes live in `auto_fix.py`.
 - Root layout: `SKILL.md`, `__init__.py`, `scripts/`, `references/`, `<name>.skill` — nothing else at root
 - Frontmatter format + allowed keys + tag minimum (5 basic / 7 enterprise)
 - Description 100–1024 chars, no angle brackets
-- Every file under `scripts/` and `references/` (except `references/templates/`) has substantive content
 - `scripts/` extensions: `.py .sh .bat .exe .ps1 .js .ts .mjs .cjs` (min 2 basic / 3 enterprise)
 - `references/` extensions: `.md .txt .html .pdf` (min 3 basic / 5 enterprise), plus `templates/` (any type) and optional `lessons/`
 - No hardcoded absolute paths outside code fences
-- No placeholder patterns
+- No placeholder patterns anywhere in the skill (SKILL.md, references/, scripts/ comments)
+- No lesson-shaped narrative language (e.g. `we discovered`, `fixed by`) in SKILL.md or script docstrings — WARN, points at `references/lessons/`
+- Every `references/lessons/*.md` opens with required YAML frontmatter (`title`, `category`, `failure`, `root_cause`, `resolution`, `prevention`, `date`, `verified`)
 - Body ≤ 500 lines
 - Every script + ref cross-referenced from SKILL.md (WARN if not)
 
@@ -238,9 +269,9 @@ python3 scripts/auto_fix.py /path/to/skill/
 
 Applies the safe-move contract:
 
-- **DELETE** — cached dirs (`__pycache__` etc.), empty dirs, stale `.skill` archives, purely empty / whitespace-only / self-declared PLACEHOLDER files
+- **DELETE** — cached/VCS/build dirs (`__pycache__` etc.), empty directories left behind by a move, and foreign/stale `.skill` archives anywhere in the tree (never the skill's own `<name>.skill` — that one is replaced in place by the next `package` step, so a deleted foreign archive doesn't leave the skill without one)
 - **MOVE** — `lessons/` → `references/lessons/`, `templates/` → `references/templates/` (chmod 0444), root-level `.md/.txt/.html/.pdf` → `references/`, root-level scripts by extension → `scripts/`
-- **NEVER RENAME IN BATCH** — mis-named files (`README.md`, `TODO.md`, `notes.md`, etc.) with substantive content get MOVED to the right dir; the validator still FAILs with a rename hint so a human picks the name.
+- **NEVER** deletes a file with real, needed content — only cache artifacts and foreign `.skill` archives are ever deleted; mis-named files (`README.md`, `TODO.md`, `notes.md`, etc.) with substantive content get MOVED to the right dir, never renamed in batch — the validator still FAILs with a rename hint so a human picks the name.
 
 ### `scripts/package_skills.py` — Packager
 
@@ -248,13 +279,14 @@ Applies the safe-move contract:
 python3 scripts/package_skills.py --skills-root /path/to/parent --skill skill-name
 ```
 
-1. Validate with `--basic` — FAIL if any substance issue exists
-2. Delete cached + empty dirs (safe cleanup)
-3. Chmod `references/templates/*` to 0444
-4. Auto-bump patch version in SKILL.md; record `previous_version` in the manifest
-5. Re-validate
-6. Emit `<skill_name>.skill` (zip); remove any old archive
-7. Refuse to package if any FAIL persists
+This script does exactly two things: reads the current `SKILL.md` version, bumps the
+patch number and writes it back (recording `previous_version` in
+`.skill-manifest.json`); then zips the tree into `<skill_name>.skill`, excluding
+cache/VCS dirs, compiled artifacts, and nested `.skill` files. **It does not validate,
+does not chmod anything, and does not refuse to package an invalid skill** — calling it
+directly can package a broken skill. The validate → auto_fix → re-validate → package →
+extract-verify sequence that makes packaging safe lives one level up, in
+`skill_enhance.py` — that's the only sanctioned path (see Toolchain intro above).
 
 ### `scripts/upgrade_to_enterprise.py` — Basic → Enterprise
 
@@ -270,7 +302,7 @@ Syntax check + shebang check + docstring check + manual execution.
 
 ### `scripts/verify_sources.py` — External Source Verification
 
-Extracts URLs from refs + SKILL.md; if an external tool is referenced with no docs URL, web-searches for the official source. FAILS if none found.
+Extracts URLs from refs + SKILL.md; if an external tool is referenced with no docs URL, probes a handful of guessed URL patterns (`github.com/<slug>`, `npmjs.com/package/<slug>`, `pypi.org/project/<slug>`, `docs.<slug>.com`) with a HEAD request — this is a heuristic guess-and-probe, not a real web search, and a reachable guessed URL is reported as an unverified *candidate*, not confirmed official documentation. FAILS if nothing is found.
 
 ### `scripts/analyze_skill.py` — Analysis (read-only)
 
@@ -288,6 +320,21 @@ Finds overlapping functionality, duplicate content, similar scripts across a ski
 
 Shared discovery used by the whole toolchain: resolves any path up to its true skill root (nearest ancestor with a root SKILL.md), scans a tree for skill roots without descending into found skills, and reports nested SKILL.md violations. Read-only.
 
+### `scripts/scan_report.py` — Multi-Root Scan, Batch Validate, Diff, Report
+
+```bash
+python3 scripts/scan_report.py --root /path/to/skills
+python3 scripts/scan_report.py --root /source/skills --diff-target /target/skills
+python3 scripts/scan_report.py --root /path/to/skills --fix --json
+```
+
+Tree-wide layer on top of `skill_root.py` (discovery) and `validate.py` (the same
+validator every other script uses — never a forked copy): validates every skill under
+one or more roots, optionally diffs skill names between a source and target tree,
+optionally runs `auto_fix.py` on failures, and emits a consolidated report. This is what
+used to require a separate downstream skill for multi-directory audits — that capability
+now lives here. See `references/scan-report.md`.
+
 ### `scripts/skill_enhance.py` — Pipeline Orchestrator
 
 ```bash
@@ -295,7 +342,7 @@ python3 scripts/skill_enhance.py create --name my-skill --tier enterprise
 python3 scripts/skill_enhance.py update --path ./existing-skill --tier enterprise
 ```
 
-Sequences the full 11-step pipeline: scaffold → gate SKILL.md → gate scripts/ → gate references/ → validate → auto_fix → re-validate → test → verify sources → package → extract-verify. No lock, no token gate — a human or CI can run any step independently.
+Sequences the full 11-step pipeline: scaffold → gate SKILL.md → gate scripts/ → gate references/ → validate → auto_fix → re-validate → test → verify sources → package → extract-verify. This is the only sanctioned path for creating or updating a skill — however small the change. Individual steps remain directly invokable (each is a real, independent script) for debugging and inspection, but running them piecemeal instead of through `skill_enhance.py` skips the enforced gate sequence and is never a substitute for it.
 
 ---
 
@@ -317,7 +364,10 @@ This skill's `validate.py` is the single source of truth. Downstream skills cons
 Current downstream callers:
 
 - `skill-installer` — live delegation when this skill is present, bundled copy otherwise (`--basic` gate before installing)
-- `skill-scan-validate-resolver` — calls `scripts/validate.py` (the single validator; there is no separate "pro" validator)
+
+Multi-directory scan/validate/audit (previously a separate downstream skill) is now
+native to this skill — see `scripts/scan_report.py` above. There is no separate "pro"
+validator anywhere; `validate.py` is the only one.
 
 When updating this skill, downstream copies get overwritten from here (byte-identical, hash-verifiable). Do not fork; do not edit a copy in place.
 
@@ -327,7 +377,7 @@ When updating this skill, downstream copies get overwritten from here (byte-iden
 
 - `references/skill-anatomy.md` — full structural reference
 - `references/packaging.md` — packaging conventions + version discipline
-- `references/standards.md` — enterprise validation rules
+- `references/standards.md` — enterprise validation rules + the full skill-responsibility model
 - `references/source-verification.md` — external source rules
 - `references/error-handling.md` — error report formats
 - `references/output-patterns.md` — JSON output schema
@@ -335,19 +385,22 @@ When updating this skill, downstream copies get overwritten from here (byte-iden
 - `references/agnostic-rules.md` — platform-agnostic requirements
 - `references/free-first-strategy.md` — when a skill *does* consume paid services, prefer free before paid
 - `references/workflows.md` — end-to-end create + update pipelines
+- `references/scan-report.md` — multi-root scan/validate/diff/report usage
 
 ### Lessons (`references/lessons/`)
 
-Real doctrines carried forward from prior sessions:
+Real doctrines carried forward from prior sessions. Each file opens with structured YAML
+frontmatter (`title`, `category`, `failure`, `root_cause`, `resolution`, `prevention`,
+`date`, `verified`) — see any file for the schema.
 
 - `references/lessons/validator-vs-content-rephrase-not-relax.md` — reword content, don't weaken the validator
-- `references/lessons/validation.md` — validation baseline
-- `references/lessons/skill-5-root-items.md` — 5 root items, no exceptions
+- `references/lessons/validation.md` — session residue (raw transcripts, absolute paths) corrupts lesson files; distill, don't paste
+- `references/lessons/skill-5-root-items.md` — 5 root items, no exceptions; `assets/` banned everywhere
 - `references/lessons/look-before-writing.md` — read a file before diffing it
 - `references/lessons/reject-self-declared-placeholders.md` — files that declare themselves PLACEHOLDER don't pass
 - `references/lessons/verify-beyond-version.md` — newer version ≠ better; cross-verify with substance + validator + structure
 - `references/lessons/version-guard-overwrites.md` — never overwrite a newer copy with an older one
-- `references/lessons/always-scaffold-through-init.md` — always init via `__init__.py --scaffold`, never hand-craft
+- `references/lessons/always-scaffold-through-init.md` — always init via `__init__.py --scaffold`, never hand-craft — and the earliest on-record instance of the exact phantom-script doc-drift class this skill's validator now catches
 - `references/lessons/import-full-tree-not-selective.md` — "copy over" means whole tree, not cherry-pick
 - `references/lessons/chain-enforcement-integration.md` — how the 11-gate pipeline was first chain-locked (historical: superseded by built-in `scripts/chain.py`)
 - `references/lessons/federation-gateway-skills.md` — coordination-gateway skill scaffolding lessons (server stability, health endpoints)

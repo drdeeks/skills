@@ -217,9 +217,10 @@ class SkillPackager:
         return True
 
     def find_nested_skill_files(self, skill_dir: Path) -> List[str]:
-        """Report .skill files nested BELOW root. They are never deleted —
+        """Report .skill files nested BELOW root, still present at pack time
+        (e.g. package_skills.py invoked directly, without auto_fix first).
         should_include() already keeps them out of the archive; auto_fix.py
-        relocates them with a rename prompt."""
+        deletes them as stale/foreign build artifacts when it runs."""
         skill_name = skill_dir.name
         nested = []
         for f in skill_dir.rglob("*.skill"):

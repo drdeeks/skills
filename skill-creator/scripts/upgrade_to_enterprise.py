@@ -146,8 +146,12 @@ def main():
     if args.skill:
         root = find_skill_root(args.skill)
         if root is None:
-            # Not yet a skill — still analyzable as a candidate dir
+            # Not yet a skill — still analyzable as a candidate dir, but it
+            # must at least exist; analyze_gap mkdirs into it otherwise.
             root = Path(args.skill).resolve()
+            if not root.is_dir():
+                print(f"Error: not a directory: {args.skill}", file=sys.stderr)
+                sys.exit(1)
         targets = [root]
     else:
         targets = find_skills(args.target)

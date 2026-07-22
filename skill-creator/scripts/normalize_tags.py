@@ -78,7 +78,11 @@ def main() -> int:
         return 2
     dirty_files = []
     for arg in paths:
-        for md in find_skill_mds(Path(arg).resolve()):
+        p = Path(arg).resolve()
+        if not p.exists():
+            print(f"[normalize-tags] error: path does not exist: {arg}", file=sys.stderr)
+            return 2
+        for md in find_skill_mds(p):
             if normalize(md, write=not check_only):
                 dirty_files.append(md)
                 action = "would strip" if check_only else "stripped"

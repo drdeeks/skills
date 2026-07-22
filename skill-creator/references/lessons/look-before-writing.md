@@ -1,22 +1,19 @@
 ---
-name: feedback-look-before-writing
-description: "When user asks \"what's different between X and Y\", LOOK at both files and diff them. Never answer from theory/analogy without checking the actual bytes on disk. Same rule for any comparison, merge, or overwrite."
-metadata: 
-  node_type: memory
-  type: feedback
-  originSessionId: eb376b9a-bf69-4ed6-9d5a-9d799c698dcf
+title: Comparative questions require reading both files, never theory from analogy
+category: consolidation
+failure: Asked "what's different between your init_skill and the init at root?", answered with a generic Python-package-marker vs. scaffolder-script analogy instead of the actual diff — and separately produced a 140-line init_skill.py that duplicated logic that should have lived in the existing 26-line __init__.py scaffolder pattern already used across 125 other skills
+root_cause: Answered from theory/convention instead of opening and reading the actual files first
+resolution: Read both files, found the existing __init__.py scaffolder template, and built on it instead of duplicating
+prevention: Any comparative question, overwrite, merge, or import must start by reading the actual files involved (Read, diff, wc -l, head) — the response leads with observed facts (line counts, function names, byte differences), theory second or not at all
+date: unknown
+verified: true
 ---
 
-If the user asks "what's the difference between X and Y" — or ANY comparative question about files/scripts/skills — **read both files, print the actual diff or side-by-side, THEN answer**. Never fall back to a theoretical explanation ("well, X is typically a foo while Y is typically a bar") without opening the actual files first.
+If asked "what's the difference between X and Y" — or any comparative question about
+files/scripts/skills — read both files and produce the actual diff or side-by-side
+before answering. Never fall back to a theoretical explanation ("X is typically a foo
+while Y is typically a bar") without opening the files first.
 
-**Why:** during CL-040 the user asked "what's different between your init_skill and the init at root?" I answered with a generic Python-package-marker vs scaffolder-script analogy from theory. What they wanted was the CONCRETE diff — because the existing `__init__.py` files in 125 skills are 26-line scaffolders with executable `scaffold()` + `integrate()` functions, NOT the 5-line metadata dumps I assumed. My newly-written `__init__.py` was 5 lines. My newly-written `init_skill.py` was 140 lines and REDUNDANT with what should have lived IN the existing `__init__.py` pattern. If I'd looked first, I'd have found the existing template + built on it rather than duplicating.
-
-**How to apply:**
-- Comparative question → `Read` both files (or `diff`, `wc -l`, `head`) BEFORE writing a response
-- The response leads with concrete facts (line counts, function names, byte differences), theory second
-- If the files are large, sample representatively but LOOK, don't infer
-- Extends to overwrites, merges, imports: before overwriting X with Y, read both and know exactly what differs
-- The user's phrase for this: "not what the theoretically in plain text without any actual reviewing is the difference"
-
-**Pattern to catch this in real time:**
-- If I'm about to write "typically", "conceptually", "in Python conventions", "usually" in a comparison answer — STOP, open the files, and start over with observed facts
+**Pattern to catch this in real time:** if about to write "typically," "conceptually,"
+"in \[language\] conventions," or "usually" in a comparison answer — stop, open the
+files, and start over with observed facts.
