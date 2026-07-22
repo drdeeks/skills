@@ -89,8 +89,14 @@ STALE_TEMPLATE_NAMES = {"example.py", "api_reference.md", "example_asset.txt"}
 # System roots (/opt, /etc, /var, /usr, /tmp) are intentionally excluded —
 # they are not user- or mount-specific and forcing them into variables adds
 # noise without improving portability.
+# Also catches tilde-prefixed provider install paths (~/.hermes/, ~/.openclaw/,
+# ~/.config/opencode/, ~/.claude/) — confirmed missed entirely before this was
+# added: a real skill (loop-enforcer) shipped 6 literal ~/.hermes/... paths
+# that this check ran against and passed, because the original pattern only
+# ever matched absolute /home/... form, never the tilde form providers use.
 NONPORTABLE_PATH_RE = re.compile(
     r'(?<![\w$])/(?:home|Users|media|mnt|run/media)/[A-Za-z0-9][\w.+-]*'
+    r'|~[/\\]\.(?:hermes|openclaw|config/opencode|claude)(?:[/\\][\w.+-]*)*'
 )
 
 
@@ -104,6 +110,11 @@ def _line_allows_hardcoded_path(line: str) -> bool:
         return True  # shell parameter-expansion default
     if re.search(r'\b(?:os\.)?(?:environ\.get|getenv)\s*\(', line):
         return True  # python env lookup with a default
+    if re.search(r'''r['"][~/]''', line):
+        return True  # a raw-string pattern LITERAL (regex/pattern-list data
+        # defining what to detect) is not itself a live path being used —
+        # confirmed false-positive: this check's own pattern-definition lines
+        # in analyze_skill.py/validate.py otherwise flag themselves
     return False
 
 
@@ -137,7 +148,10 @@ def check_hardcoded_paths_in_scripts(skill_path, checks):
     # Reference docs: advisory only, but flag genuine per-user paths loudly.
     refs = skill_path / "references"
     if refs.is_dir():
-        user_path_re = re.compile(r'(?<![\w$])/(?:home|Users|media|run/media)/[A-Za-z0-9][\w.-]*/')
+        user_path_re = re.compile(
+            r'(?<![\w$])/(?:home|Users|media|run/media)/[A-Za-z0-9][\w.-]*/'
+            r'|~[/\\]\.(?:hermes|openclaw|config/opencode|claude)(?:[/\\][\w.+-]*)*'
+        )
         for f in sorted(refs.rglob("*")):
             if not f.is_file() or f.suffix.lower() not in {".md", ".txt", ".html"}:
                 continue
@@ -147,7 +161,11 @@ def check_hardcoded_paths_in_scripts(skill_path, checks):
                 text = f.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            m = user_path_re.search(text)
+            # Strip fenced code blocks — a doc demonstrating detection
+            # patterns in an example snippet isn't itself a hardcoded path
+            # in live use (matches check_placeholders_all_files' convention).
+            text_no_code = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+            m = user_path_re.search(text_no_code)
             if m:
                 checks.append(Check(
                     f"Hardcoded path in doc — {f.relative_to(skill_path)}",

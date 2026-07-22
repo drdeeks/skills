@@ -8,6 +8,10 @@ or via skill_enhance.py.
 
 Contract (CL-042 — conservative, but not blind):
   MAY DELETE only:
+    - The whole target directory, if it is genuinely empty: no SKILL.md and
+      no real files anywhere (cache junk doesn't count as content). This is
+      not "a skill under construction" — construction starts from SKILL.md
+      existing. An empty directory gets removed, not scaffolded into.
     - Cached/VCS/build dirs (__pycache__, .git, node_modules, ...) — pure caches
     - Empty directories left behind by a move
     - Foreign/stale .skill archives anywhere in the tree — regenerable build
@@ -89,6 +93,19 @@ def _move(src: Path, dest: Path, fixes: List[str], skill_path: Path,
     )
 
 
+def _is_genuinely_empty(skill_path: Path) -> bool:
+    """True if skill_path has no SKILL.md and contains zero real files —
+    i.e. there is nothing here that could plausibly be "a skill under
+    construction," only an empty or junk-only directory."""
+    if (skill_path / "SKILL.md").is_file():
+        return False
+    for root, dirs, files in os.walk(skill_path):
+        dirs[:] = [d for d in dirs if d not in FORBIDDEN_DIRS]
+        if files:
+            return False
+    return True
+
+
 def auto_fix_skill(skill_path, dry_run: bool = False) -> List[str]:
     """Apply CONSERVATIVE structural fixes (move, never delete files)."""
     fixes = []
@@ -96,6 +113,15 @@ def auto_fix_skill(skill_path, dry_run: bool = False) -> List[str]:
     skill_name = skill_path.name
     refs = skill_path / "references"
     scripts = skill_path / "scripts"
+
+    # 0. Genuinely empty (no SKILL.md, no real files anywhere but maybe
+    #    cache junk) — this isn't a skill under construction, it's a stray
+    #    directory. Delete it outright and stop; nothing else to fix.
+    if _is_genuinely_empty(skill_path):
+        if not dry_run:
+            shutil.rmtree(skill_path, ignore_errors=True)
+        return [f"{'[dry-run] would delete' if dry_run else 'deleted'} "
+                f"empty directory (no SKILL.md, no content): {skill_path}"]
 
     # 1. Purge cached/junk dirs anywhere (pure caches — the only deletion)
     for root, dirs, _ in os.walk(skill_path, topdown=True):

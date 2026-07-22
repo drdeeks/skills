@@ -13,9 +13,20 @@ import json
 import sys
 import os
 import subprocess
+from pathlib import Path
 
-CHAIN_SCRIPT = os.path.expanduser("~/.hermes/skills/devops/loop-enforcer/scripts/chain.py")
-PROJECT_BASE = os.path.expanduser("~/qwen-cloud-2026")
+# Self-resolving: env override -> sibling chain.py (normal case, since this
+# script and chain.py ship together). Fails closed — no guessed hardcoded
+# install path — if neither is found: a prior version hardcoded the Hermes
+# install location and would silently point at a nonexistent file on any
+# other install layout instead of erroring.
+_sibling_chain = Path(__file__).resolve().parent / "chain.py"
+CHAIN_SCRIPT = os.environ.get("CHAIN_ENFORCER_SCRIPT") or str(_sibling_chain)
+if not Path(CHAIN_SCRIPT).is_file():
+    print(f"error: chain.py not found at {CHAIN_SCRIPT} — set $CHAIN_ENFORCER_SCRIPT "
+          "to its actual path.", file=sys.stderr)
+    sys.exit(1)
+PROJECT_BASE = os.environ.get("CHAIN_ENFORCER_PROJECT_BASE") or os.path.expanduser("~/qwen-cloud-2026")
 
 def find_chain(project_dir):
     """Find the blueprint chain JSON file."""

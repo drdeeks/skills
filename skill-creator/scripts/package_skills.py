@@ -14,6 +14,7 @@ Responsibilities:
 
 import sys
 sys.dont_write_bytecode = True  # never litter skills with __pycache__ (validator FAIL)
+import os
 import json
 import re
 import argparse
@@ -21,6 +22,9 @@ import zipfile
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from validate import validate_skill
 
 try:
     import yaml
@@ -231,8 +235,20 @@ class SkillPackager:
 
     # ── Packaging ─────────────────────────────────────────────────
 
-    def package_skill(self, skill_name: str, overwrite: bool = True, bump: bool = True) -> Dict:
-        """Package a single skill into .skill file with version bump."""
+    def package_skill(self, skill_name: str, overwrite: bool = True, bump: bool = True,
+                       basic_mode: bool = False, skip_validation: bool = False) -> Dict:
+        """Package a single skill into .skill file with version bump.
+
+        Refuses to package anything that doesn't pass validate.py first
+        (enterprise by default — matching skill-creator's own standard;
+        --basic only if explicitly requested). This is the fix for the
+        confirmed bypass where package_skills.py, called directly instead of
+        through skill_enhance.py, would zip up a skill with invalid Python,
+        no __init__.py, and empty references/ without running a single check.
+        --skip-validation exists only for skill_enhance.py's own internal use
+        (it already ran the full gate sequence immediately before this call)
+        — never pass it from the CLI.
+        """
         skill_dir = self.skills_root / skill_name
 
         if not skill_dir.exists():
@@ -240,6 +256,19 @@ class SkillPackager:
 
         if not (skill_dir / "SKILL.md").exists():
             return {"skill": skill_name, "status": "failed", "error": "No SKILL.md found"}
+
+        if not skip_validation:
+            report = validate_skill(str(skill_dir), basic_mode=basic_mode)
+            if not report.get("valid", False):
+                tier = "basic" if basic_mode else "enterprise"
+                return {
+                    "skill": skill_name, "status": "failed",
+                    "error": f"refused to package — fails {tier} validation "
+                             f"({report.get('fails', '?')} fail(s)). Run "
+                             f"skill_enhance.py update --path {skill_dir} to "
+                             f"fix and package through the real pipeline.",
+                    "validation_fails": report.get("fails"),
+                }
 
         # Report (never delete) nested .skill files
         nested = self.find_nested_skill_files(skill_dir)
@@ -293,7 +322,8 @@ class SkillPackager:
                 tmp_file.unlink()  # partial temp only — old archive untouched
             return {"skill": skill_name, "status": "failed", "error": str(e)}
 
-    def package_all(self, overwrite: bool = True, bump: bool = True, filter_names: Optional[List[str]] = None) -> Dict:
+    def package_all(self, overwrite: bool = True, bump: bool = True, filter_names: Optional[List[str]] = None,
+                     basic_mode: bool = False, skip_validation: bool = False) -> Dict:
         """Package all skills in the skills root."""
         results = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -317,7 +347,8 @@ class SkillPackager:
             skill_dirs = [s for s in skill_dirs if s in filter_names]
 
         for skill_name in sorted(skill_dirs):
-            result = self.package_skill(skill_name, overwrite=overwrite, bump=bump)
+            result = self.package_skill(skill_name, overwrite=overwrite, bump=bump,
+                                         basic_mode=basic_mode, skip_validation=skip_validation)
 
             if result["status"] == "success":
                 results["packaged"].append(result)
@@ -391,6 +422,12 @@ def main():
     parser.add_argument("--no-overwrite", action="store_false", dest="overwrite", help="Don't overwrite existing")
     parser.add_argument("--bump", action="store_true", default=True, help="Auto-bump patch version (default: true)")
     parser.add_argument("--no-bump", action="store_false", dest="bump", help="Don't bump version")
+    parser.add_argument("--basic", action="store_true",
+                         help="Validate against basic tier instead of the enterprise default")
+    parser.add_argument("--skip-validation", action="store_true",
+                         help="INTERNAL — skill_enhance.py's own use only, after it has already run "
+                              "the full gate sequence. Never pass this by hand: it's exactly the "
+                              "bypass this gate exists to close.")
     parser.add_argument("--json", action="store_true", help="Output JSON")
 
     args = parser.parse_args()
@@ -398,7 +435,8 @@ def main():
     packager = SkillPackager(Path(args.skills_root), Path(args.output_dir) if args.output_dir else None)
 
     if args.skill:
-        result = packager.package_skill(args.skill, overwrite=args.overwrite, bump=args.bump)
+        result = packager.package_skill(args.skill, overwrite=args.overwrite, bump=args.bump,
+                                         basic_mode=args.basic, skip_validation=args.skip_validation)
         results = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "skills_root": str(packager.skills_root),
@@ -411,10 +449,12 @@ def main():
             "versions_bumped": 1 if result.get("version_bumped") else 0,
         }
     elif args.skills:
-        result = packager.package_all(overwrite=args.overwrite, bump=args.bump, filter_names=args.skills)
+        result = packager.package_all(overwrite=args.overwrite, bump=args.bump, filter_names=args.skills,
+                                       basic_mode=args.basic, skip_validation=args.skip_validation)
         results = result
     else:
-        result = packager.package_all(overwrite=args.overwrite, bump=args.bump)
+        result = packager.package_all(overwrite=args.overwrite, bump=args.bump,
+                                       basic_mode=args.basic, skip_validation=args.skip_validation)
         results = result
 
     # Write manifest

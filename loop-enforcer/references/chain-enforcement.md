@@ -91,11 +91,10 @@ you MUST enforce the loop-enforcer chain before doing ANY work:
 
 a) Identify the chain: `ls <project>/.chain/*.json`
 b) Read the chain JSON to find the step matching your phase
-c) Run: `python3 ~/.hermes/skills/devops/loop-enforcer/scripts/chain.py check <project_dir> <chain_name> <marker_path>`
+c) Run: `python3 <loop-enforcer-install>/scripts/chain_enforce.py check <project> <phase_num>` (self-resolving — set $CHAIN_ENFORCER_SCRIPT to override the chain.py it wraps, no hardcoded install path)
 d) If state is 'locked': STOP. Call `kanban_block(reason='Chain locked: prior phase not complete. Run chain.py complete on the previous phase first.')` and exit.
 e) If state is 'active': proceed with work.
-f) When work is COMPLETE, run: `python3 ~/.hermes/skills/devops/loop-enforcer/scripts/chain.py verify <project_dir> <chain_name> <marker_path>`
-   then `python3 ~/.hermes/skills/devops/loop-enforcer/scripts/chain.py complete <project_dir> <chain_name> <marker_path>`
+f) When work is COMPLETE, run: `python3 <loop-enforcer-install>/scripts/chain_enforce.py complete <project> <phase_num>`
    to unlock the next phase.
 g) Log the chain enforcement: `kanban_comment(body='Chain enforced: <chain_name> step <N> verified+complete')`
 ```
@@ -126,7 +125,7 @@ g) Log the chain enforcement: `kanban_comment(body='Chain enforced: <chain_name>
 
 ```bash
 # 1. Reset all phase tasks to "ready" in kanban
-sqlite3 ~/.hermes/kanban.db "UPDATE tasks SET status='ready' WHERE title LIKE '%Phase%';"
+sqlite3 "${HERMES_HOME:-$HOME/.hermes}/kanban.db" "UPDATE tasks SET status='ready' WHERE title LIKE '%Phase%';"
 
 # 2. Reset chain state
 python3 reset_chain.py <project>
