@@ -5,7 +5,7 @@ description: Enforce sequential dependency chains on files, tasks, and services.
   destructive ops by enforcing additive-only builds with chained verification gates.
   Use when building projects where files must be created in order, or when agents
   must not destroy existing work.
-version: 1.0.14
+version: 1.0.15
 license: MIT
 metadata:
   openclaw:
@@ -253,7 +253,7 @@ hemlock-agent kanban list
 
 ## Kanban Integration (MANDATORY for Phased Tasks)
 
-**Critical pitfall:** The kanban dispatcher does NOT check chain state before dispatching. If you create Phase 0-6 tasks, the dispatcher will happily run them all simultaneously. Chain enforcement is the WORKER's responsibility, not the dispatcher's.
+**Standing rule:** the kanban dispatcher does not check chain state before dispatching — if you create Phase 0-6 tasks, the dispatcher runs them all simultaneously. Chain enforcement is the worker's responsibility, never the dispatcher's (see below).
 
 ### How it works
 
@@ -298,13 +298,13 @@ Phase 6: Deployment & Operations
 
 **Production-ready, not just demos.** The blueprint must enforce ALL aspects of a production-ready application, not just code implementation. Every phase must include validation gates that verify the complete deliverable exists and functions — API documentation, deployment configuration, testing, monitoring, security, and full functionality.
 
-### Pitfall: Empty phase markers
+### Rule: empty phase markers are forbidden
 
-NEVER create `.phase-*.marker` files as empty stubs. This signals "done" without
-actual work. Markers should only be created by `chain.py complete` after verification.
-If you find empty markers, delete them and reset the chain step to `active`.
+Never create `.phase-*.marker` files as empty stubs — that signals "done" without
+actual work. Markers get created only by `chain.py complete`, after verification.
+A found empty marker means: delete it and reset that chain step to `active`.
 
-### Pitfall: Root directory vs qwen-cloud-2026
+### Rule: root directory vs qwen-cloud-2026
 
 Project code lives in `<WORKSPACE_ROOT>/qwen-cloud-2026/<project>/`.
 Root-level directories (`<WORKSPACE_ROOT>/<project>/`) should be symlinks:
@@ -313,18 +313,16 @@ ln -s qwen-cloud-2026/<project> <WORKSPACE_ROOT>/<project>
 ```
 The chain JSON paths must point to the REAL directory, not the symlink.
 
-### Pitfall: Chain Directory Name Mismatch
+### Rule: chain directory search order
 
-`chain_enforce.py` searches for chains in multiple locations:
+`chain_enforce.py` searches for chains in multiple locations, in priority order:
 1. `.crew-*/.blueprint-chain/` (highest priority — crew-manager chains)
 2. `.blueprint-chain/` (standard location)
 3. `.chain/` (fallback)
 
-If you have chains in multiple locations, the crew-manager chains take priority. This is by design — crew-manager.py creates chains in `.crew-<name>/.blueprint-chain/` and chain_enforce.py finds them automatically.
-
-### Pitfall: Kanban Dispatcher Does Not Check Chain
-
-The kanban dispatcher does NOT check chain state before dispatching. If you create Phase 0-6 tasks, the dispatcher will happily run them all simultaneously. Chain enforcement is the WORKER's responsibility, not the dispatcher's.
+If chains exist in multiple locations, the crew-manager chains take priority by
+design — `crew-manager.py` creates chains in `.crew-<name>/.blueprint-chain/` and
+`chain_enforce.py` finds them automatically.
 
 ## Enhancement Hooks
 
@@ -341,7 +339,11 @@ The kanban dispatcher does NOT check chain state before dispatching. If you crea
 - `references/agent-integration.md` — how agents must interact with chains
 - `references/state-format.md` — JSON state schema and log format
 - `references/design-principles.md` — additive-only, verification gates, atomicity rules
-- `references/lessons/operational-lessons.md` — real operational learnings from building this skill
+- `references/lessons/validator-must-enforce-content-not-structure.md` — a validator that only checks structure lets garbage through
+- `references/lessons/structural-validation-not-equal-semantic-quality.md` — passing validate.py isn't the same as passing manual review
+- `references/lessons/chain-state-must-be-atomic.md` — why state writes use tmp+rename
+- `references/lessons/validators-need-config-not-hardcoded-rules.md` — one configurable script beats three hardcoded ones
+- `references/lessons/agent-must-check-before-write.md` — the tool enforces, the agent must obey; both parts required
 - `references/operational-guide.md` — quick-start guide and operational patterns
 - `references/chain-deliverable-validation-failure.md` — CRITICAL: Why chain must validate specific deliverables, not just phase completion
 

@@ -26,3 +26,19 @@ The chain doesn't care which agent is working. It's a file-based coordination me
 - If no validator is set, verification auto-passes (with a warning)
 - Locked steps return clear error messages, not silent failures
 - State is JSON (human-readable, debuggable)
+
+## Chain Enforcer Patterns That Work
+
+| Pattern | Use Case |
+|---|---|
+| Sequential build | src/config → src/db → src/api → src/routes |
+| TDD pairs | src/utils.js → tests/utils.test.js → src/db.js → tests/db.test.js |
+| Blueprint phases | phase1.md → phase2.md → phase3.md (with phase validators) |
+| Additive enforcement | Validator checks git diff for deletions on completed steps |
+
+## Files That Embody These Principles
+
+- `scripts/validate.py` — unified validator with all checks composable
+- `scripts/chain.py` — enforcement engine with atomic state + audit log
+- `references/agent-integration.md` — agent MUST check before write
+- `references/lessons/` — the operational incidents that produced each principle above
