@@ -5,7 +5,8 @@ description: Enforce sequential dependency chains on files, tasks, and services.
   destructive ops by enforcing additive-only builds with chained verification gates.
   Use when building projects where files must be created in order, or when agents
   must not destroy existing work.
-version: 1.0.20
+version: 1.0.22
+previous_version: 1.0.21
 license: MIT
 metadata:
   openclaw:

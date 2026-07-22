@@ -47,7 +47,7 @@ except ImportError:
 MAX_SKILL_NAME_LENGTH = 64
 MAX_DESCRIPTION_LENGTH = 1024
 MIN_DESCRIPTION_LENGTH = 100
-ALLOWED_PROPERTIES = {'name', 'description', 'license', 'metadata', 'allowed-tools', 'version'}
+ALLOWED_PROPERTIES = {'name', 'description', 'license', 'metadata', 'allowed-tools', 'version', 'previous_version'}
 
 PLACEHOLDER_PATTERNS = [
     (r'(?:^|(?<=\s))(?<!`)TODO(?!\w)(?!.*\btodo\b)(?!\s*,)(?!\s+list)', 'TODO marker'),
