@@ -406,6 +406,39 @@ def run_pipeline(cmd: str, args) -> int:
             fail("failed to create chain")
             return 1
 
+        # Real per-file content chain — auto-discovered from skill_dir itself
+        # (scripts/, references/, one level into references/templates|lessons),
+        # not synthetic markers. This is what actually gets locked file-by-file,
+        # generically, for whatever skill_dir points at.
+        content_chain = f"content-{skill_dir.name}"
+        content_rc = subprocess.run(
+            [sys.executable, str(CHAIN_PY), "auto-create", str(chain_workdir), content_chain, str(skill_dir)],
+            capture_output=True, text=True
+        )
+        content_files = []
+        if content_rc.returncode == 0:
+            try:
+                content_files = [Path(s["path"]) for s in json.loads(
+                    (chain_workdir / ".chain" / f"{content_chain}.json").read_text()
+                )["steps"]]
+            except Exception:
+                content_files = []
+        else:
+            warn(f"content chain auto-create failed: {content_rc.stderr.strip()[-300:]}")
+
+        def _lock_content_files(under: str):
+            """Verify+complete every discovered file under scripts/ or
+            references/ as that phase's gate passes — real files, real state,
+            not one marker standing in for the whole directory."""
+            for f in content_files:
+                try:
+                    rel = f.relative_to(skill_dir)
+                except ValueError:
+                    continue
+                if rel.parts and rel.parts[0] == under:
+                    run_chain(chain_workdir, content_chain, "verify", str(f))
+                    run_chain(chain_workdir, content_chain, "complete", str(f))
+
         # Gate 1: Scaffold (already done for create, skip for update)
         step_path = chain_step_dir / "scaffold"
         if cmd == "update":
@@ -432,6 +465,7 @@ def run_pipeline(cmd: str, args) -> int:
             return 4
         run_chain(chain_workdir, chain_name, "verify", str(step_path))
         run_chain(chain_workdir, chain_name, "complete", str(step_path))
+        _lock_content_files("scripts")
 
         # Gate 4: References
         step(5, 11, f"Gate: references/ ({mins['references']}+ substantive)")
@@ -440,6 +474,7 @@ def run_pipeline(cmd: str, args) -> int:
             return 5
         run_chain(chain_workdir, chain_name, "verify", str(step_path))
         run_chain(chain_workdir, chain_name, "complete", str(step_path))
+        _lock_content_files("references")
 
         # Gate 5: Initial validate (enterprise-level)
         step(6, 11, "Gate: validate.py (ENTERPRISE validation)")
@@ -526,7 +561,8 @@ def run_pipeline(cmd: str, args) -> int:
         run_chain(chain_workdir, chain_name, "verify", str(step_path))
         run_chain(chain_workdir, chain_name, "complete", str(step_path))
 
-        ok(f"{skill_dir.name} {tier}-tier pipeline COMPLETE — all gates passed, chain enforced")
+        ok(f"{skill_dir.name} {tier}-tier pipeline COMPLETE — all gates passed, "
+           f"{len(content_files)} real file(s) locked through content chain")
         return 0
     finally:
         # ALWAYS clean up chain workdir (self-delete after completion)
