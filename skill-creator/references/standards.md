@@ -1,198 +1,123 @@
-# Skill Creator — Enterprise Standards
+# Skill Creator — Enterprise Standards & Responsibility Model
 
-Complete reference for enterprise-grade skill validation, scoring, pillar definitions, quality checklist, reusable patterns, and the enterprise SKILL.md structure.
+Complete reference for how this skill actually validates, scores, and reasons about
+skill quality, plus the full responsibility model this skill enforces across the
+ecosystem. Every claim below is checked against the real code in `scripts/` — if a
+script this file names doesn't exist, or doesn't do what's described, that's a bug in
+this file, not a stale fact to leave standing (see `references/lessons/always-scaffold-through-init.md`
+for what happens when that's allowed to persist for years).
 
 ## Table of Contents
 
-1. [The 8 Enterprise Pillars](#1-the-8-enterprise-pillars)
-2. [Scoring System](#2-scoring-system)
-3. [Validation Levels](#3-validation-levels)
-4. [Quality Checklist](#4-quality-checklist)
-5. [Permissions Validation](#5-permissions-validation)
-6. [Information Quality](#6-information-quality)
+1. [What Actually Gets Checked](#1-what-actually-gets-checked)
+2. [analyze_skill.py's Quality Score](#2-analyze_skillpys-quality-score)
+3. [Validation Commands](#3-validation-commands)
+4. [Quality Checklist (authorial guidance, not all validator-enforced)](#4-quality-checklist-authorial-guidance-not-all-validator-enforced)
+5. [Template Permissions](#5-template-permissions)
+6. [Information Quality (authorial guidance)](#6-information-quality-authorial-guidance)
 7. [Reusable Script Patterns](#7-reusable-script-patterns)
-8. [Metadata Flexibility](#8-metadata-flexibility)
-9. [Enterprise SKILL.md Structure](#9-enterprise-skillmd-structure)
+8. [Frontmatter & Provider Tags](#8-frontmatter--provider-tags)
+9. [Real SKILL.md Structure](#9-real-skillmd-structure)
 10. [Consolidation Precision Protocol](#10-consolidation-precision-protocol)
+11. [Skill Definition Enforcement](#11-skill-definition-enforcement)
+12. [Component Responsibility Model](#12-component-responsibility-model)
+13. [Contamination Detection](#13-contamination-detection)
 
 ---
 
-## 1. The 8 Enterprise Pillars
+## 1. What Actually Gets Checked
 
-Every enterprise-grade skill MUST include these components:
+`validate.py` is binary per-check FAIL/WARN, not a weighted score. There is no "8
+pillars" percentage system anywhere in this skill's actual code — if you see that
+framing elsewhere, it describes a different, unbuilt design, not this validator. The
+real checks, both tiers unless noted:
 
-| # | Pillar | Weight | What It Means | Minimum Requirement |
-|---|---|---|---|---|
-| 1 | **Frontmatter** | 20% | Valid YAML, required keys, naming | Valid `name` + `description`, 100-1024 chars |
-| 2 | **Structure** | 15% | Directory layout, file organization | `scripts/` (2+ files), `references/` (3+ files) |
-| 3 | **Content** | 20% | Comprehensive, accurate, clear | No TODOs, all sections have content, <500 lines |
-| 4 | **Agnostic** | 15% | No hardcoded paths, cross-platform | Environment variables, portable file operations |
-| 5 | **Sources** | 10% | Documented, verified, current | Documentation URLs, API endpoints, version numbers |
-| 6 | **Syntax** | 10% | Working code, proper error handling | Valid Python/Bash/Node syntax, stdlib only |
-| 7 | **Enterprise** | 15% | Provider compat, free-first, output stats | All 8 pillar sections present in SKILL.md |
-| 8 | **Accessibility** | 5% | Clear triggers, good descriptions | Progressive disclosure, references for deep docs |
-
-### Conditional Components (include when applicable)
-
-| Component | When Required |
-|---|---|
-| Multi-Agent Coordination | Skill may run as concurrent instances |
-| Scheduling / Cron | Skill involves recurring tasks |
-| Analytics Framework | Skill produces measurable outcomes |
-| A/B Testing Protocol | Skill has tunable parameters |
-
-## 2. Scoring System
-
-### Pillar Scores
-
-| Pillar | Weight | Pass Criteria |
-|---|---|---|
-| Frontmatter | 20% | Valid YAML, required keys, naming conventions |
-| Structure | 15% | Proper directory layout, minimum file counts |
-| Content | 20% | Comprehensive, accurate, clear, no placeholders |
-| Agnostic | 15% | No hardcoded paths, hostnames, or secrets |
-| Sources | 10% | Documented, verified, current |
-| Syntax | 10% | Working code, proper error handling |
-| Enterprise | 15% | Provider compat, free-first, output stats, error handling |
-| Accessibility | 5% | Clear triggers, good descriptions |
-
-### Calculation
-
-```
-score = Σ (pillar_score × weight)
-```
-
-Each pillar returns `passed` (1.0) or `failed` (0.0). The total score is the sum of `(passed × weight)` across all pillars.
-
-### Validation Levels
-
-| Rating | Score Range | FAIL Count | WARN Count |
+| Area | What's checked | Enterprise | Basic |
 |---|---|---|---|
-| **Enterprise Grade** | 90-100% | 0 | 0-5 |
-| **Production Ready** | 75-89% | 0 | 6-10 |
-| **Needs Hardening** | 60-74% | 1-3 | Any |
-| **Not Enterprise** | <60% | 4+ | Any |
+| Frontmatter | Required keys (`name`, `description`, `version`); allowed keys only (`name`, `description`, `license`, `metadata`, `allowed-tools`, `version`) | same | same |
+| Description | 100–1024 chars, no `<`/`>` | same | same |
+| Tags | `metadata.tags` count | ≥7 | ≥5 |
+| Structure | Exactly the 5 root items; `references/` may only contain files + `templates/` + `lessons/` | same | same |
+| Scripts | Count of `.py .sh .bat .exe .ps1 .js .ts .mjs .cjs` files | ≥3 | ≥2 |
+| References | Count of `.md .txt .html .pdf` files (`templates/` exempt from extension check) | ≥5 | ≥3 |
+| Body length | SKILL.md body ≤500 lines | same | same |
+| Placeholders | No `TODO`/`FIXME`/`TBD`/`WIP`/etc. patterns anywhere in the skill | same | same |
+| Hardcoded paths | No literal `/home/`, `/Users/`, `/media/`, `/mnt/` paths in scripts (FAIL) or refs (WARN) unless behind an overridable default | same | same |
+| Secrets | No hardcoded credential-shaped assignments in scripts | same | same |
+| Lessons | Optional in both tiers; if `references/lessons/*.md` exist, each must open with the required YAML frontmatter | same | same |
+| Content contamination | No lesson-shaped narrative language in SKILL.md/script docstrings (WARN) | same | same |
+| Cross-references | Every script/ref should be mentioned in SKILL.md (WARN if not) | same | same |
 
-## 3. Validation Levels
+There is no permissions check (no 755/644 enforcement) and no provider-harness
+frontmatter requirement anywhere in `validate.py` — see sections 5 and 8 below for what
+actually exists in those areas.
 
-### Automated Validation
+## 2. analyze_skill.py's Quality Score
+
+`analyze_skill.py` (read-only, separate from `validate.py`) computes an **unweighted
+average across 4 dimensions** — frontmatter, content, structure, agnostic — each scored
+0–100 by its own heuristics, then simple-averaged for `overall_score`. This is the only
+scoring system that actually exists in this skill; it's advisory (never gates
+packaging), distinct from `validate.py`'s pass/fail checks.
+
+## 3. Validation Commands
 
 ```bash
-# Enterprise validation (all pillars, scored)
-python3 scripts/validate_pro.py /path/to/skill --verbose
-
-# Quick validation (frontmatter, structure only)
+# Enterprise validation (default)
 python3 scripts/validate.py /path/to/skill
 
-# Batch validation (all skills in directory)
-python3 scripts/validate_pro.py /path/to/skills/ --json
+# Basic (lighter-count) tier
+python3 scripts/validate.py /path/to/skill --basic
+
+# Advisory quality score (separate tool, not a gate)
+python3 scripts/analyze_skill.py /path/to/skill
+
+# Batch validate every skill under a root (see references/scan-report.md)
+python3 scripts/scan_report.py --root /path/to/skills/
+
+# External source verification (heuristic URL probing, not a real search —
+# see SKILL.md's verify_sources.py section)
+python3 scripts/verify_sources.py /path/to/skill
 ```
 
-### Manual Review Checklist
+## 4. Quality Checklist (authorial guidance, not all validator-enforced)
 
-- [ ] Content accuracy
-- [ ] Use case coverage
-- [ ] Example quality
-- [ ] Reference completeness
-- [ ] No stale template files
-- [ ] Every script and reference mentioned in SKILL.md
+Structural items marked **(V)** are enforced by `validate.py`; the rest are judgment
+calls a human or reviewing agent should still apply.
 
-### Source Verification
-
-```bash
-python3 scripts/verify_sources.py /path/to/skill --check-urls
-```
-
-## 4. Quality Checklist
-
-### Structure (FAIL = must fix)
-
-- SKILL.md exists with YAML frontmatter (`name` + `description`)
-- Description 100-1024 characters, contains WHAT + WHEN + triggers
-- `scripts/` has 2+ `.py`, `.sh`, `.js`, or `.ts` files
-- `references/` has 3+ `.md`, `.txt`, `.json`, `.yaml`, `.yml`, or `.csv` files
+- **(V)** SKILL.md exists with YAML frontmatter (`name` + `description`)
+- **(V)** Description 100–1024 characters, contains what + when + triggers
+- **(V)** `scripts/` and `references/` meet tier minimums
+- **(V)** No stale template names (`example.py`, `api_reference.md`, `example_asset.txt`)
+- **(V)** Every script and reference mentioned in SKILL.md (WARN if missed)
 - Directory name matches frontmatter `name`
-- No stale template files (`example.py`, `api_reference.md`, `example_asset.txt`)
-- Every script and reference mentioned in SKILL.md
-- `metadata.openclaw` section present in frontmatter
+- Content accuracy — every claim in SKILL.md is true of the actual code (not
+  mechanically checkable beyond the contamination scan; verify by hand for anything the
+  automated checks can't see)
+- Use case coverage, example quality, reference completeness
 
-### SKILL.md Quality
+## 5. Template Permissions
 
-- Body <500 lines (progressive disclosure)
-- 6+ top-level sections (## headers)
-- Provider Compatibility, Free-First, Output Statistics, Error Handling, Scripts table, Key References sections all present
-- No `TODO`/`FIXME`/`WIP`/coming-soon markers remaining
-- At least 1 Workflow section
-- No empty/sparse sections (<20 chars content)
+The only permissions rule `validate.py` actually enforces: files under
+`references/templates/` must be read-only (`chmod 0444` — any write bit set is a FAIL).
+`auto_fix.py` repairs this automatically. There is no broader 755/644
+directory/file-permission requirement anywhere in this toolchain — don't apply one that
+isn't there.
 
-### Script Quality
+## 6. Information Quality (authorial guidance)
 
-- Shebang line (`#!/usr/bin/env python3`)
-- Module docstring with usage
-- CLI argument support
-- Error handling with try/except
-- No hardcoded secrets (`api_key="..."`, `secret="..."`, etc.)
-- `--dry-run` and `--status` support for setup/deploy scripts
-- Valid Python/Bash/Node syntax
-
-### Reference Quality
-
-- Files >100 lines have table of contents
-- Each file covers one concern (not mixed topics)
-- Cross-references where relevant
-- Contains procedures/schemas/examples, not just descriptions
-- `references/lessons/` populated with operational lessons learned
-
-## 5. Permissions Validation
-
-### Required Standards
-
-| Type | Permission | Description |
-|---|---|---|
-| Directories | `755` (rwxr-xr-x) | Owner write, all read/execute |
-| Files | `644` (rw-r--r--) | Owner write, all read |
-| Secrets dir | `755` (NOT 700) | Group-accessible for collaboration |
-
-### Forbidden Permissions
-
-| Permission | Reason |
-|---|---|
-| `700` on directories | Locks out co-developers and group members |
-| `777` on anything | World-writable, security risk |
-| `600` on non-secrets | Blocks group access unnecessarily |
-
-## 6. Information Quality
-
-### Completeness Checks
+Not validator-enforced; use as a review lens when writing or auditing a skill's content.
 
 | Check | Description |
 |---|---|
-| **API Endpoints** | All endpoints documented with method, path, body, response |
-| **Code Examples** | Every function has at least one working example |
-| **Error States** | All error conditions documented with codes and messages |
-| **Configuration** | All env vars, config files, and options listed |
-| **Prerequisites** | Dependencies, versions, and setup steps documented |
-
-### Robustness Checks
-
-| Check | Description |
-|---|---|
-| **Edge Cases** | Boundary conditions and error handling covered |
-| **Idempotency** | Repeated operations don't cause side effects |
-| **Rollback** | Every state change has a documented reversal |
-| **Timeout** | Long operations have timeout and retry behavior |
-| **Graceful Degradation** | Fallback behavior when dependencies unavailable |
-
-### Accuracy Checks
-
-| Check | Description |
-|---|---|
-| **API URLs** | Endpoints respond with expected status codes |
-| **Code Syntax** | All code examples parse without errors |
-| **Version Numbers** | Match current releases |
-| **No Placeholder Secrets** | Example keys clearly marked as examples |
+| **Completeness** | API endpoints, code examples, error states, configuration, and prerequisites are all documented, not just described in passing |
+| **Robustness** | Edge cases, idempotency, rollback, timeout/retry, and graceful-degradation behavior are covered where relevant |
+| **Accuracy** | Code examples parse, version numbers match current releases, example secrets are clearly marked as examples |
 
 ## 7. Reusable Script Patterns
+
+Generic patterns for skill authors to build on — illustrative, not claims about this
+skill's own scripts (which follow their own documented behavior in SKILL.md).
 
 ### Script Skeleton
 
@@ -310,76 +235,60 @@ def deploy_crons():
         pass
 ```
 
-## 8. Metadata Flexibility
+## 8. Frontmatter & Provider Tags
 
-Skills must include a `metadata` section with at least one provider-specific harness. The validator accepts any of these:
+The real, currently-enforced frontmatter schema has exactly these top-level keys:
+`name`, `description`, `version`, `license` (optional), `metadata` (optional, holds
+`tags` + free-form fields like `category`/`complexity`), `allowed-tools` (optional).
+There is no required per-provider harness section (`metadata.openclaw`,
+`metadata.openai`, `metadata.anthropic`, etc.) — `validate.py` never checks for one.
 
-| Harness | Use Case | Example Fields |
-|---------|----------|----------------|
-| `openclaw` | OpenClaw/Hemlock agents | `version`, `category`, `complexity`, `tags` |
-| `openai` | OpenAI-compatible (ChatGPT, vLLM, LM Studio) | `type`, `parameters`, `endpoints` |
-| `anthropic` | Claude API / Anthropic | `model`, `tools`, `max_tokens` |
-| `google` | Gemini / Vertex AI | `model`, `extensions`, `project` |
-| `mistral` | Mistral / Le Chat | `model`, `functions`, `agents` |
-| `harness` | Generic fallback for any provider | `version`, `category`, `tags` |
+What actually exists for provider-specific behavior: `skill_enhance.py`'s provider tag
+remap (see `references/provider-tag-remapping.md`). Before packaging, it detects the
+harness from environment signals (`HERMES_*`/`OPENCLAW_*`/`OPENAI_*` env vars,
+`HEMLOCK_MODE`, or an explicit `--provider` flag) and copies the canonical
+`metadata.tags` list into that provider's own block (`metadata.<provider>.tags`) —
+additive and idempotent; the canonical list is never altered. That's the entire scope of
+per-provider metadata in this toolchain.
 
-**Minimum requirement**: At least one harness section must exist. Include the harnesses you actively test against. The `openclaw` section is recommended as the default for cross-platform compatibility.
-
-## 9. Enterprise SKILL.md Structure
+## 9. Real SKILL.md Structure
 
 ```markdown
 ---
 name: skill-name
-description: "[WHAT]. [PROVIDER compat]. [FREE-FIRST]. [WHEN to use]."
+description: "What this skill does and when to use it — 100 to 1024 characters,
+  concrete triggers, no angle brackets."
+version: 0.1.0
+license: MIT
 metadata:
-  openclaw:
-    version: "1.0"
-    category: infrastructure
-    complexity: enterprise
-  openai:
-    type: function
-    parameters:
-      - name: command
-        type: string
-  hermes:
-    tags: [automation, tools]
-    category: devops
-version: 0.0.1
+  category: your-category
+  complexity: enterprise
+  tags:
+    - at least 5 (basic) or 7 (enterprise) natural-language trigger phrases
 ---
 
 # Skill Name
-[1-2 sentence overview]
 
-## Provider Compatibility
-[Table: Provider | Compatibility | Notes]
+One or two sentences on what this does and why it matters.
 
-## Free-First Strategy
-[Cost tier table + escalation rule]
+## When to use
 
-## Core Stack
-[Table: Component | Role | Cost | Free Alternative]
+Concrete scenarios that should trigger this skill.
 
-## Workflow: [Primary]
-[Steps with reference links]
+## Toolchain / workflow
 
-## Scripts
-[Table: Script | Purpose]
-
-## Enforced Output Statistics
-[JSON format spec]
-
-## Error Handling
-[Error table + reference link]
-
-## Enhancement Hooks
-[Table: Skill | Enhancement | When]
+Whatever the skill's own body needs — a scripts table, workflow steps, etc. There is no
+fixed required section list beyond what's useful for this specific skill's own domain.
 
 ## Key References
-[Bulleted links with "when to read" guidance]
 
-## Sources
-[Table: Source | URL | Last Verified]
+Bulleted links into `references/`, each with a one-line "when to load this" note.
 ```
+
+There's no requirement for "Provider Compatibility," "Free-First Strategy," or
+"Enforced Output Statistics" sections — those describe a different, unbuilt template.
+Write the sections this specific skill actually needs; keep the body under 500 lines and
+push detail into `references/`.
 
 ## 10. Consolidation Precision Protocol
 
@@ -392,7 +301,7 @@ version: 0.0.1
 5. **Merge common modules** — shared code goes in shared location
 6. **Update all references** — internal links point to new structure
 7. **Verify completeness** — every source file's content appears somewhere
-8. **Test consolidated skill** — validate structure and content
+8. **Test consolidated skill** — run `validate.py` (not a "pro" variant — there is only one validator) on the result
 
 ### Consolidation Checklist
 
@@ -404,8 +313,7 @@ version: 0.0.1
 - [ ] Duplicate sections removed
 - [ ] Internal cross-references updated
 - [ ] No information lost from any source
-- [ ] Permissions set correctly (755/644)
-- [ ] Validation passes on consolidated skill
+- [ ] `validate.py` passes on the consolidated skill
 
 ### Methodical Precision Rules
 
@@ -417,3 +325,47 @@ version: 0.0.1
 | **Conflict Resolution** | When sources disagree, document both and pick one |
 | **Reference Integrity** | All links must resolve to valid targets |
 | **Backward Compatibility** | Existing users can find equivalent content |
+
+## 11. Skill Definition Enforcement
+
+Before anything else, this skill's whole purpose is answering: **is this actually a
+skill?** A skill is a reusable, applied capability — executable behavior, structured
+knowledge, validation, a lifecycle. It is not:
+
+- A knowledge article, tutorial, or policy document
+- A collection of notes or a prompt dump
+- A personal history log
+- A template with no behavior behind it
+
+If something fails this test, the answer is not to force it into skill shape by padding
+content to hit the enterprise minimums — it's to either find a genuinely broader,
+real application of the capability, or leave it as a document, not a skill. See
+`references/lessons/validator-vs-content-rephrase-not-relax.md`: the fix for a validator
+flag is always to change the content's truth, never to weaken the check.
+
+## 12. Component Responsibility Model
+
+| Component | Purpose | Must NOT contain |
+|---|---|---|
+| `SKILL.md` | The operational contract — what, when, required behavior, execution rules, boundaries | Development history, debug logs, failed attempts, session notes, long tutorials |
+| `scripts/` | Executable capability — automation, validators, generators, parsers | Non-executable notes; every script must run, handle errors, avoid hidden assumptions and hardcoded paths |
+| `references/` | Supporting intelligence loaded on demand — schemas, specs, domain knowledge | Duplicated SKILL.md content; anything not actually referenced |
+| `references/templates/` | Read-only (chmod 0444) instantiation skeletons, copied out and then acted upon | Environment-specific data; anything that becomes an edited-in-place copy |
+| `references/lessons/` | Historical intelligence — known failures, root causes, resolutions, prevention patterns, in structured YAML frontmatter | Operational rules that belong in SKILL.md instead; unstructured narrative with no frontmatter |
+
+Lessons answer "what has happened before" — they do not define "what must happen." An
+operational rule discovered via a specific incident still belongs in SKILL.md (or a
+reference doc) once generalized; the incident narrative itself belongs in
+`references/lessons/`.
+
+## 13. Contamination Detection
+
+`validate.py`'s lesson-shaped-content check exists because doc drift is otherwise
+invisible to the pipeline: structural checks (counts, extensions, placeholders) can't
+tell whether SKILL.md's prose is still *true* of the code. If SKILL.md or a script
+docstring reads like a case study — "during testing," "we discovered," "originally,"
+"fixed by," "in this session," "pitfall" — that's a signal the content is either
+misplaced (move it to `references/lessons/`) or has rotted into an unverified historical
+claim dressed as a current instruction (verify it against the actual code and correct
+whichever side is wrong). Nothing gets auto-moved; a human or reviewing agent judges
+operational-vs-historical, the same way `auto_fix.py` never renames files in batch.

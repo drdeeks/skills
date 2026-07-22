@@ -628,6 +628,115 @@ def check_duplicate_sections(checks, skill_md_content):
             ))
         seen.add(key)
 
+# ─── CL-043: content-classification (lesson contamination) ──────────────────
+# Historical/narrative material ("what happened during a specific session")
+# belongs in references/lessons/, never in the operational contract (SKILL.md)
+# or in a script. This is what would have caught doc/reality drift like a
+# script being renamed/removed while SKILL.md's prose kept describing the old
+# one — structural checks (counts, extensions) can't see that; only scanning
+# for narrative language can.
+LESSON_SHAPED_PATTERNS = [
+    (r'\blessons?\s+learned\b', 'Lessons Learned'),
+    (r'\bpitfalls?\b', 'Pitfalls'),
+    (r'\bduring\s+testing\b', 'During testing'),
+    (r'\bin\s+this\s+session\b', 'In this session'),
+    (r'\bwe\s+discovered\b', 'We discovered'),
+    (r'\bfixed\s+by\b', 'Fixed by'),
+    (r'\boriginally\b', 'Originally'),
+]
+
+def _scan_lesson_shaped_language(text):
+    """Yield (pattern_label, matched_line) for narrative language, skipping
+    fenced code blocks and inline code spans (docs may legitimately DISCUSS
+    these phrases inside an example)."""
+    in_code_block = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        scan_line = re.sub(r"`[^`]*`", "", line)
+        for pattern, label in LESSON_SHAPED_PATTERNS:
+            if re.search(pattern, scan_line, re.IGNORECASE):
+                yield label, stripped
+                break  # one finding per line keeps output readable
+
+def check_lesson_shaped_content_in_skill_md(skill_path, checks, skill_md_body):
+    """WARN when SKILL.md's body (operational contract) or a script's
+    docstring reads like a case study / session log instead of an
+    instruction. Points at references/lessons/ as the correct home — never
+    auto-moved, a human/agent judges what's operational vs. historical."""
+    for label, line in _scan_lesson_shaped_language(skill_md_body):
+        checks.append(Check(
+            "Lesson-shaped content in SKILL.md", "WARN", False,
+            f"{label}: '{line[:70]}' — if this is a historical account of a "
+            "specific past failure/fix, move it to references/lessons/; if "
+            "it's a general operational rule, rephrase it as one"
+        ))
+
+    scripts_dir = skill_path / "scripts"
+    if not scripts_dir.is_dir():
+        return
+    for f in sorted(scripts_dir.rglob("*.py")):
+        if not f.is_file():
+            continue
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        try:
+            import ast
+            doc = ast.get_docstring(ast.parse(text)) or ""
+        except SyntaxError:
+            continue
+        for label, line in _scan_lesson_shaped_language(doc):
+            rel = f.relative_to(skill_path)
+            checks.append(Check(
+                f"Lesson-shaped content in script docstring — {rel}",
+                "WARN", False,
+                f"{label}: '{line[:70]}' — move historical narrative to "
+                "references/lessons/, keep the docstring operational"
+            ))
+
+def check_lesson_frontmatter(skill_path, checks):
+    """Every references/lessons/*.md must open with YAML frontmatter carrying
+    the structured fields — free-text narrative without these fields isn't
+    machine-checkable and tends to rot into unverifiable prose."""
+    lessons_dir = skill_path / "references" / "lessons"
+    if not lessons_dir.is_dir():
+        return
+    required = {"title", "category", "failure", "root_cause", "resolution",
+                "prevention", "date", "verified"}
+    for f in sorted(lessons_dir.glob("*.md")):
+        if not f.is_file():
+            continue
+        rel = f.relative_to(skill_path)
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        frontmatter_text, _ = extract_frontmatter(text)
+        if frontmatter_text is None:
+            checks.append(Check(
+                f"Lesson missing YAML frontmatter — {rel}", "FAIL", False,
+                f"Required keys: {', '.join(sorted(required))}"
+            ))
+            continue
+        fm = parse_frontmatter(frontmatter_text)
+        if not fm or not isinstance(fm, dict):
+            checks.append(Check(
+                f"Lesson frontmatter not a YAML dict — {rel}", "FAIL", False
+            ))
+            continue
+        missing = required - set(fm.keys())
+        if missing:
+            checks.append(Check(
+                f"Lesson frontmatter missing keys — {rel}", "FAIL", False,
+                f"Missing: {', '.join(sorted(missing))}"
+            ))
+
 # ─── CL-022: auto-fix (called when --fix passed) ────────────────────────────
 # CONSERVATIVE CONTRACT (CL-023):
 #   --fix may DELETE only:
@@ -675,7 +784,8 @@ def validate_skill(skill_path: str, basic_mode: bool = False) -> Dict:
     # 1. File existence
     skill_md = skill_path / "SKILL.md"
     if not skill_md.exists():
-        return {"valid": False, "status": "fail", "issues": ["SKILL.md not found"], "warnings": []}
+        missing = Check("SKILL.md not found", "FAIL", False, f"No SKILL.md at {skill_path}")
+        return {"valid": False, "status": "fail", "checks": [missing], "fails": 1, "warnings": 0}
     
     # 2. __init__.py required
     init_py = skill_path / "__init__.py"
@@ -686,7 +796,8 @@ def validate_skill(skill_path: str, basic_mode: bool = False) -> Dict:
     try:
         content = skill_md.read_text(encoding='utf-8')
     except OSError as e:
-        return {"valid": False, "status": "fail", "issues": [f"Could not read SKILL.md: {e}"], "warnings": []}
+        unreadable = Check("Could not read SKILL.md", "FAIL", False, str(e))
+        return {"valid": False, "status": "fail", "checks": [unreadable], "fails": 1, "warnings": 0}
     
     lines = content.splitlines()
     line_count = len(lines)
@@ -953,6 +1064,12 @@ def validate_skill(skill_path: str, basic_mode: bool = False) -> Dict:
     check_hardcoded_paths_in_scripts(skill_path, checks)
     check_internal_links(skill_path, checks, content)
     check_duplicate_sections(checks, content)
+
+    # 13. CL-043 content-classification — narrative/lesson-shaped content
+    # doesn't belong in the operational contract; structured lesson files
+    # must be machine-checkable YAML frontmatter, not free prose.
+    check_lesson_shaped_content_in_skill_md(skill_path, checks, body)
+    check_lesson_frontmatter(skill_path, checks)
     
     # Calculate status
     fails = [c for c in checks if not c.passed and c.severity == "FAIL"]

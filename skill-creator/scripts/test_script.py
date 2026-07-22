@@ -108,6 +108,57 @@ def check_dry_run_support(script_path: Path) -> bool:
     return bool(re.search(r"--dry[-_]run|DRY_RUN", text))
 
 
+def check_version_flag(script_path: Path) -> bool:
+    """Does the script expose a --version flag? Not yet a hard project
+    convention (unlike --dry-run) — reported as a warning, not a failure."""
+    try:
+        text = script_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    return bool(re.search(r"--version", text))
+
+
+def run_invalid_input(script_path: Path) -> Tuple[bool, List[str]]:
+    """Invoke the script with one deliberately-bad positional argument (a
+    nonexistent path) and require a CLEAN failure: nonzero exit, no raw
+    Python traceback. This is generic across every script's CLI shape —
+    either the script's own path validation rejects it cleanly, or argparse
+    itself rejects an unexpected/invalid argument cleanly; both satisfy the
+    same invariant (bad input never crashes with a traceback). Never runs
+    bare — same isolated-temp-cwd, timeout, non-mutating contract as --help."""
+    script_path = script_path.resolve()
+    ext = script_path.suffix.lower()
+    if ext == ".py":
+        cmd = [sys.executable, str(script_path),
+               "/nonexistent/skill-creator-test-fixture-path-does-not-exist"]
+    elif ext == ".sh":
+        cmd = ["bash", str(script_path),
+               "/nonexistent/skill-creator-test-fixture-path-does-not-exist"]
+    else:
+        return True, []
+    issues = []
+    with tempfile.TemporaryDirectory(prefix="skilltest-invalid-") as tmp:
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True,
+                               timeout=RUN_TIMEOUT, cwd=tmp)
+            output = (r.stdout + r.stderr).strip()
+            if r.returncode == 0:
+                issues.append(
+                    "exited 0 on a nonexistent path — should fail clearly"
+                )
+            if "Traceback (most recent call last)" in output:
+                issues.append(
+                    f"raw Python traceback leaked on bad input: {output[-200:]}"
+                )
+        except subprocess.TimeoutExpired:
+            issues.append(f"invalid-input run timed out after {RUN_TIMEOUT}s")
+        except FileNotFoundError as e:
+            issues.append(f"Interpreter unavailable: {e}")
+        except Exception as e:
+            issues.append(f"Execution failed: {e}")
+    return len(issues) == 0, issues
+
+
 def run_help(script_path: Path) -> Tuple[bool, List[str], str]:
     """Invoke `<script> --help` in an isolated temp cwd. Never runs bare."""
     script_path = script_path.resolve()  # cwd is a temp dir — path must be absolute
@@ -161,9 +212,16 @@ def test_script(script_path: Path) -> Dict:
     if not ok:
         all_issues.extend(f"Runtime: {i}" for i in issues)
 
+    ok, issues = run_invalid_input(script_path)
+    if not ok:
+        all_issues.extend(f"Invalid-input: {i}" for i in issues)
+
     if not check_dry_run_support(script_path):
         warnings.append("No --dry-run flag detected (project convention "
                         "for mutating scripts)")
+
+    if not check_version_flag(script_path):
+        warnings.append("No --version flag detected")
 
     return {
         "script": script_path.name,
@@ -174,10 +232,98 @@ def test_script(script_path: Path) -> Dict:
     }
 
 
+def test_fixture_pipeline(skill_dir: Path) -> Dict:
+    """Build a synthetic skill using THIS skill's own scaffolder, then run
+    validate.py / auto_fix.py / package_skills.py against it and assert
+    concrete, specific outcomes — not just 'the process exited 0'.
+
+    Scoped to skill-creator's own domain: its scripts operate on skill
+    directories, so a scaffolded skill directory is the natural fixture.
+    Skips cleanly (not a failure) if `skill_dir` isn't skill-creator itself
+    (no scaffold() capability, or missing one of the three scripts tested).
+    """
+    init_py = skill_dir / "__init__.py"
+    scripts_dir = skill_dir / "scripts"
+    required = ("validate.py", "auto_fix.py", "package_skills.py")
+    if not init_py.is_file() or not all((scripts_dir / r).is_file() for r in required):
+        return {"fixture_pipeline": False, "skipped": True,
+                "reason": "target is not skill-creator's own toolchain shape "
+                          "(missing __init__.py scaffold() or one of "
+                          + ", ".join(required) + ")"}
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_sc_fixture", str(init_py))
+    sc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sc)
+    if not hasattr(sc, "scaffold"):
+        return {"fixture_pipeline": False, "skipped": True,
+                "reason": "__init__.py has no scaffold() function"}
+
+    sys.path.insert(0, str(scripts_dir))
+    import validate as _validate
+    import auto_fix as _auto_fix
+    import package_skills as _package_skills
+
+    checks = []
+    with tempfile.TemporaryDirectory(prefix="skill-creator-fixture-") as tmp:
+        tmp_path = Path(tmp)
+
+        result = sc.scaffold("fixture-outcome-check", tmp_path, tier="enterprise")
+        fixture = Path(result["path"])
+
+        # 1. A freshly scaffolded skill (REPLACE_ME markers, empty scripts/
+        #    references) must FAIL enterprise validation — proves validate.py
+        #    actually catches an incomplete skill instead of rubber-stamping it.
+        outcome = _validate.validate_skill(str(fixture))
+        checks.append({
+            "assertion": "freshly scaffolded skill fails enterprise validation",
+            "passed": (not outcome["valid"]) and outcome["fails"] > 0,
+            "detail": f"valid={outcome['valid']} fails={outcome['fails']}",
+        })
+
+        # 2. Plant a stray root .md file with real content; auto_fix must
+        #    actually move it into references/ — proves auto_fix does what
+        #    it claims, not just that the process exits 0.
+        stray = fixture / "stray-note.md"
+        stray.write_text("Real content for the fixture test, not a stub.\n" * 3,
+                         encoding="utf-8")
+        _auto_fix.auto_fix_skill(str(fixture))
+        moved = (fixture / "references" / "stray-note.md").is_file()
+        checks.append({
+            "assertion": "auto_fix moves a stray root .md file into references/",
+            "passed": moved and not stray.is_file(),
+            "detail": f"moved={moved} original_gone={not stray.is_file()}",
+        })
+
+        # 3. Packaging must produce a real archive with a bumped version —
+        #    proves package_skills.py does what it claims. It deliberately
+        #    does NOT validate first (that's skill_enhance.py's job) — this
+        #    fixture only asserts what package_skills.py itself is responsible for.
+        packager = _package_skills.SkillPackager(tmp_path)
+        pkg_result = packager.package_skill(fixture.name)
+        archive = fixture / f"{fixture.name}.skill"
+        checks.append({
+            "assertion": "package_skills produces a .skill archive with a bumped version",
+            "passed": (pkg_result.get("status") == "success" and archive.is_file()
+                       and pkg_result.get("version_bumped") is True),
+            "detail": f"status={pkg_result.get('status')} "
+                      f"version={pkg_result.get('version')}",
+        })
+
+    passed = sum(1 for c in checks if c["passed"])
+    return {
+        "fixture_pipeline": True,
+        "skipped": False,
+        "assertions": checks,
+        "passed": passed,
+        "total": len(checks),
+    }
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Test every script in a skill (syntax/shebang/docstring/"
-                    "--help; never executes bare)")
+                    "--help/invalid-input; never executes bare)")
     ap.add_argument("target", help="Skill dir or scripts/ dir")
     ap.add_argument("--json", action="store_true", help="JSON output")
     ap.add_argument("--dry-run", action="store_true",
@@ -208,6 +354,14 @@ def main():
     results = [test_script(s) for s in scripts]
     passed = sum(1 for r in results if r["passed"])
 
+    skill_root = target if (target / "__init__.py").is_file() else (
+        target.parent if (target.parent / "__init__.py").is_file() else None)
+    fixture = test_fixture_pipeline(skill_root) if skill_root else {
+        "fixture_pipeline": False, "skipped": True,
+        "reason": "could not determine skill root from target",
+    }
+    fixture_ok = fixture.get("skipped") or fixture.get("passed") == fixture.get("total")
+
     if args.json:
         print(json.dumps({
             "operation": "test_scripts",
@@ -216,6 +370,7 @@ def main():
             "passed": passed,
             "failed": len(scripts) - passed,
             "results": results,
+            "fixture_pipeline": fixture,
         }, indent=2))
     else:
         for r in results:
@@ -226,7 +381,16 @@ def main():
                 print(f"    ⚠ {w}")
         print(f"\nResults: {passed}/{len(results)} scripts passed")
 
-    sys.exit(0 if passed == len(results) else 1)
+        print("\nFixture pipeline (temp-item outcome testing):")
+        if fixture.get("skipped"):
+            print(f"  ⊘ skipped — {fixture['reason']}")
+        else:
+            for a in fixture["assertions"]:
+                mark = "✓" if a["passed"] else "✗"
+                print(f"  {mark} {a['assertion']} ({a['detail']})")
+            print(f"  {fixture['passed']}/{fixture['total']} fixture assertions passed")
+
+    sys.exit(0 if passed == len(results) and fixture_ok else 1)
 
 
 if __name__ == "__main__":
