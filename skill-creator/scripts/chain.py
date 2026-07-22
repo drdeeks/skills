@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# BAKED-IN copy of the universal chain enforcer (loop-enforcer skill concept).
-# skill-creator is self-reliant: enhance uses THIS unless LOOP_ENFORCER_ROOT
-# explicitly points at an external loop-enforcer. Keep in sync when upgrading.
 """
 chain.py — Sequential dependency chain enforcer
 Locks files until prior steps are verified complete.
@@ -9,6 +6,10 @@ Works interactively (menu) and programmatically (agent API).
 
 Usage:
     python3 chain.py create <project-dir> <chain-name> <path1> [path2] ...
+    python3 chain.py auto-create <project-dir> <chain-name> <skill-dir>
+        (discovers real files under <skill-dir>'s scripts/ and references/
+        — including references/templates/ and references/lessons/, one level
+        deep — and creates the chain from them; works against any skill dir)
     python3 chain.py menu <project-dir> <chain-name>
     python3 chain.py check <project-dir> <chain-name> [path]
     python3 chain.py verify <project-dir> <chain-name> <path>
@@ -23,7 +24,6 @@ Usage:
 import json
 import os
 import sys
-sys.dont_write_bytecode = True  # never litter skills with __pycache__ (validator FAIL)
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -96,6 +96,56 @@ def create_chain(project_dir, chain_name, paths):
     save_state(project_dir, chain_name, state)
     append_log(project_dir, chain_name, f"Chain created with {len(steps)} steps")
     return {"ok": True, "chain": chain_name, "steps": len(steps)}
+
+
+def discover_skill_files(skill_dir):
+    """Auto-populate the real file list to lock for any skill directory.
+
+    Never walks deeper than root -> a top-level dir -> that dir's own
+    immediate children:
+      - scripts/*        (flat — every real script)
+      - references/*      (flat)
+      - references/templates/*  and  references/lessons/*  (one extra level,
+        since those are the only two containers that ever hold their own
+        files worth locking)
+
+    Anything living under a `templates` directory (wherever it appears) is
+    inert example/scaffold material, not this skill's own functioning code —
+    callers that need to tell the two apart should use is_template_path().
+    """
+    skill_dir = Path(skill_dir)
+    files = []
+
+    scripts_dir = skill_dir / "scripts"
+    if scripts_dir.is_dir():
+        for f in sorted(scripts_dir.iterdir()):
+            if f.is_file():
+                files.append(f)
+
+    refs_dir = skill_dir / "references"
+    if refs_dir.is_dir():
+        for f in sorted(refs_dir.iterdir()):
+            if f.is_file():
+                files.append(f)
+            elif f.is_dir() and f.name in ("templates", "lessons"):
+                for g in sorted(f.iterdir()):
+                    if g.is_file():
+                        files.append(g)
+
+    return files
+
+
+def is_template_path(skill_dir, path):
+    """True if `path` lives under a `templates/` directory anywhere inside
+    `skill_dir` — inert example/scaffold material, never this skill's own
+    functioning code, so it never needs the same enforcement strictness as a
+    real script or reference."""
+    skill_dir = Path(skill_dir).resolve()
+    try:
+        rel_parts = Path(path).resolve().relative_to(skill_dir).parts
+    except ValueError:
+        return False
+    return "templates" in rel_parts
 
 
 def check_status(project_dir, chain_name, path=None):
@@ -387,6 +437,19 @@ def main():
         project_dir = sys.argv[2]
         chain_name = sys.argv[3]
         paths = sys.argv[4:]
+        print(json.dumps(create_chain(project_dir, chain_name, paths), indent=2))
+
+    elif cmd == "auto-create":
+        if len(sys.argv) < 5:
+            print("Usage: chain.py auto-create <project-dir> <chain-name> <skill-dir>")
+            sys.exit(1)
+        project_dir = sys.argv[2]
+        chain_name = sys.argv[3]
+        skill_dir = sys.argv[4]
+        paths = [str(p) for p in discover_skill_files(skill_dir)]
+        if not paths:
+            print(json.dumps({"error": f"no scripts/ or references/ files found under {skill_dir}"}, indent=2))
+            sys.exit(1)
         print(json.dumps(create_chain(project_dir, chain_name, paths), indent=2))
 
     elif cmd == "menu":
