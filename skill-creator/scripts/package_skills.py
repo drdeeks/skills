@@ -117,8 +117,12 @@ class SkillPackager:
         m = re.search(r'^version:\s*["\']?([^"\']+)', frontmatter_text, re.MULTILINE)
         return m.group(1).strip() if m else "0.0.0"
 
-    def write_version(self, skill_dir: Path, new_version: str) -> bool:
-        """Write bumped version back to SKILL.md frontmatter."""
+    def write_version(self, skill_dir: Path, new_version: str, old_version: Optional[str] = None) -> bool:
+        """Write bumped version (+ previous_version, if old_version given) back
+        to SKILL.md frontmatter. previous_version lives in the skill's own file
+        (not just the root .skill-manifest.json history) so a skill's last
+        version is visible from the file itself — restores a field the earliest
+        recovered skill-creator lineage (v3.0.8) already carried."""
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             return False
@@ -133,7 +137,8 @@ class SkillPackager:
             count=1,
             flags=re.MULTILINE,
         )
-        if new_content == content:
+        version_line_found = new_content != content
+        if not version_line_found:
             # No version line found — insert after first --- line
             lines = content.splitlines()
             insert_idx = 0
@@ -143,6 +148,22 @@ class SkillPackager:
                     break
             lines.insert(insert_idx, f"version: {new_version}")
             new_content = "\n".join(lines)
+
+        if old_version and old_version != new_version:
+            if re.search(r'^previous_version:\s*.*$', new_content, flags=re.MULTILINE):
+                new_content = re.sub(
+                    r'^previous_version:\s*["\']?[^"\'\n]+["\']?\s*$',
+                    f"previous_version: {old_version}",
+                    new_content, count=1, flags=re.MULTILINE,
+                )
+            else:
+                lines = new_content.splitlines()
+                for i, line in enumerate(lines):
+                    if re.match(r'^version:\s*', line):
+                        lines.insert(i + 1, f"previous_version: {old_version}")
+                        break
+                new_content = "\n".join(lines)
+
         skill_md.write_text(new_content, encoding="utf-8")
         return True
 
@@ -277,7 +298,7 @@ class SkillPackager:
         old_version = self.read_version(skill_dir)
         if bump:
             new_version = self.bump_patch(old_version)
-            self.write_version(skill_dir, new_version)
+            self.write_version(skill_dir, new_version, old_version=old_version)
             self.sync_init_version(skill_dir, new_version)
         else:
             new_version = old_version

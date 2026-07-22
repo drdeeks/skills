@@ -74,11 +74,11 @@
       ]
     },
     "skill-creator": {
-      "current_version": "3.0.16",
-      "previous_version": "3.0.15",
-      "last_packaged": "2026-07-22T19:27:53.357215+00:00",
+      "current_version": "3.0.18",
+      "previous_version": "3.0.17",
+      "last_packaged": "2026-07-22T20:58:30.746134+00:00",
       "files": 39,
-      "size_bytes": 345254,
+      "size_bytes": 346450,
       "history": [
         {
           "version": "3.0.8",
@@ -104,6 +104,16 @@
         {
           "version": "3.0.16",
           "timestamp": "2026-07-22T19:27:53.357215+00:00",
+          "files": 39
+        },
+        {
+          "version": "3.0.17",
+          "timestamp": "2026-07-22T20:55:39.810525+00:00",
+          "files": 39
+        },
+        {
+          "version": "3.0.18",
+          "timestamp": "2026-07-22T20:58:30.746134+00:00",
           "files": 39
         }
       ]
@@ -187,11 +197,11 @@
       ]
     },
     "loop-enforcer": {
-      "current_version": "1.0.20",
-      "previous_version": "1.0.19",
-      "last_packaged": "2026-07-22T19:28:09.488027+00:00",
+      "current_version": "1.0.22",
+      "previous_version": "1.0.21",
+      "last_packaged": "2026-07-22T20:58:47.048823+00:00",
       "files": 22,
-      "size_bytes": 92502,
+      "size_bytes": 92526,
       "history": [
         {
           "version": "1.0.15",
@@ -222,10 +232,20 @@
           "version": "1.0.20",
           "timestamp": "2026-07-22T19:28:09.488027+00:00",
           "files": 22
+        },
+        {
+          "version": "1.0.21",
+          "timestamp": "2026-07-22T20:46:39.740663+00:00",
+          "files": 22
+        },
+        {
+          "version": "1.0.22",
+          "timestamp": "2026-07-22T20:58:47.048823+00:00",
+          "files": 22
         }
       ]
     }
   },
-  "last_packaged": "2026-07-22T19:28:09.488027+00:00",
+  "last_packaged": "2026-07-22T20:58:47.048823+00:00",
   "total_packaged": 1
 }
