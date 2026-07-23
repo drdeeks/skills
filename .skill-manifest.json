@@ -1,11 +1,11 @@
 {
   "skills": {
     "enterprise-blueprint": {
-      "current_version": "0.0.7",
-      "previous_version": "0.0.6",
-      "last_packaged": "2026-07-03T03:36:28.932414+00:00",
-      "files": 17,
-      "size_bytes": 173321,
+      "current_version": "1.0.9",
+      "previous_version": "1.0.8",
+      "last_packaged": "2026-07-23T05:08:06.881755+00:00",
+      "files": 62,
+      "size_bytes": 517401,
       "history": [
         {
           "version": "0.0.6",
@@ -16,6 +16,11 @@
           "version": "0.0.7",
           "timestamp": "2026-07-03T03:36:28.932414+00:00",
           "files": 17
+        },
+        {
+          "version": "1.0.9",
+          "timestamp": "2026-07-23T05:08:06.881755+00:00",
+          "files": 62
         }
       ]
     },
@@ -251,6 +256,6 @@
       ]
     }
   },
-  "last_packaged": "2026-07-23T04:58:16.660410+00:00",
+  "last_packaged": "2026-07-23T05:08:06.881755+00:00",
   "total_packaged": 1
 }

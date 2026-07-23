@@ -218,6 +218,17 @@ def validate_registry() -> dict:
 
 if __name__ == "__main__":
     import json
+    import sys
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ("--help", "-h"):
+            print(__doc__ or "validator_registry.py — list/validate the "
+                  "project-type -> phase validator registry.")
+            print("\nUsage: validator_registry.py [--help]")
+            print("Takes no positional arguments — prints the registry report.")
+            sys.exit(0)
+        print(f"Error: unrecognized argument: {sys.argv[1]!r} "
+              "(this script takes no positional arguments)", file=sys.stderr)
+        sys.exit(1)
     print("Supported project types:")
     for t in list_supported_types():
         print(f"  - {t}")

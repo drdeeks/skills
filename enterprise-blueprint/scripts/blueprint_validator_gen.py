@@ -328,7 +328,11 @@ if __name__ == "__main__":
     
     bp_path = Path(args.blueprint)
     out_dir = Path(args.output_dir)
-    
+
+    if not bp_path.is_file():
+        print(f"Error: blueprint not found: {bp_path}", file=sys.stderr)
+        sys.exit(1)
+
     if args.phase:
         v = get_validator_for_phase(bp_path, args.phase, out_dir)
         if v:

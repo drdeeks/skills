@@ -78,9 +78,7 @@ def main():
         print(err, file=sys.stderr)
 
     # If the result contains "error" at top level or non-zero exit, forward it
-    if r.returncode != 0 and not out:
-        sys.exit(r.returncode)
-    elif out:
+    if out:
         try:
             parsed = json.loads(out)
             if isinstance(parsed, dict) and parsed.get("error"):
@@ -89,6 +87,12 @@ def main():
                 sys.exit(1)
         except json.JSONDecodeError:
             pass
+
+    # Whatever the JSON check above didn't already resolve: always propagate
+    # the underlying subprocess's real exit code — never silently swallow a
+    # nonzero return just because SOME stdout happened to be produced.
+    if r.returncode != 0:
+        sys.exit(r.returncode)
 
 
 if __name__ == "__main__":

@@ -466,8 +466,12 @@ def main():
         
     else:
         print(f"\nDetected: PROJECT (no agent/crew identity)")
-        print(f"Choose setup type:")
-        choice = prompt_choice("Setup type", ["agent", "crew", "project-only"])
+        if args.noninteractive:
+            choice = "project-only"
+            print(f"Setup type: {choice} (--noninteractive default)")
+        else:
+            print(f"Choose setup type:")
+            choice = prompt_choice("Setup type", ["agent", "crew", "project-only"])
         
         if choice == "agent":
             config = setup_agent(workspace, blueprint_phases)
@@ -485,4 +489,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    try:
+        main()
+    except EOFError:
+        print("\nError: interactive input required but no input available "
+              "(stdin closed/empty) — rerun with --noninteractive.",
+              file=sys.stderr)
+        sys.exit(1)

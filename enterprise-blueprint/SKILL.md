@@ -6,7 +6,8 @@ description: Parse, validate, and generate execution checklists from enterprise 
   generating execution checklists, or planning multi-phase enterprise workflows. Triggers
   on 'blueprint', 'enterprise blueprint', 'project blueprint', 'blueprint validation',
   'checklist generation', 'phase planning'.
-version: 1.0.8
+version: 1.0.9
+previous_version: 1.0.8
 license: MIT
 metadata:
   category: project-planning

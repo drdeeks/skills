@@ -24,3 +24,17 @@ def resolve_loop_enforcer() -> Path:
         if le_path.exists():
             return le_path
     return OWN_SCRIPTS_DIR / "chain.py"
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ("--help", "-h"):
+            print(__doc__)
+            print("\nUsage: skill_paths.py [--help]")
+            print("Takes no positional arguments — prints the resolved chain.py path.")
+            sys.exit(0)
+        print(f"Error: unrecognized argument: {sys.argv[1]!r} "
+              "(this script takes no positional arguments)", file=sys.stderr)
+        sys.exit(1)
+    print(resolve_loop_enforcer())
