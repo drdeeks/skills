@@ -12,7 +12,8 @@ Locator order for the validator (first hit wins):
   1. $SKILL_CREATOR_DIR                      (explicit override)
   2. sibling of this skill's parent dir      (.../<skills-root>/skill-creator)
   3. $OPENCODE_SKILLS_DIR/skill-creator
-  4. ~/.config/opencode/skills/skill-creator (legacy default)
+  4. $HOME/.config/opencode/skills/skill-creator (legacy default, resolved
+     via Path.home() at runtime — see find_skill_creator() below)
   5. THIS skill's bundled copy (scripts/validate.py) — a byte-identical copy
      of skill-creator's validator shipped inside skill-installer so the
      installer works STANDALONE, without requiring skill-creator to be
