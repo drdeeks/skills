@@ -6,8 +6,8 @@ description: Parse, validate, and generate execution checklists from enterprise 
   generating execution checklists, or planning multi-phase enterprise workflows. Triggers
   on 'blueprint', 'enterprise blueprint', 'project blueprint', 'blueprint validation',
   'checklist generation', 'phase planning'.
-version: 1.0.9
-previous_version: 1.0.8
+version: 1.0.10
+previous_version: 1.0.9
 license: MIT
 metadata:
   category: project-planning
@@ -117,7 +117,7 @@ python3 scripts/init_blueprint.py "My Project" --path ./output/project-name
 - `references/phase-templates.md` — Phase-specific templates
 - `references/blueprint-structure.md` — Blueprint structure standards
 - `references/checklist-patterns.md` — Checklist generation patterns
-- `references/hackathon-blueprint-lessons.md` — Best practices and lessons learned
+- `references/hackathon-blueprint-lessons.md` — Best-practices reference for hackathon-scoped blueprints
 - `references/skill-enhancement-pipeline.md` — ACK character enforcement pipeline (11 gates) via skill-creator/skill_enhance.py
 - `references/loop-enforcer-integration.md` — Loop-enforcer chain enforcement integration (gaps, env vars, worker API)
 - `references/agent-detection-rules.md` — Agent/crew detection rules (singular source of truth)
@@ -153,34 +153,11 @@ python3 .hermes/skills/skill-creator/scripts/skill_enhance.py update \
 | 10. Package | Version bump, .skill archive emitted | Hard |
 | 11. Extract-verify | Archive layout intact, hashes match | Hard |
 
-### Pitfalls Encountered (v1.0.4 + cumulative)
-
-- **Hardcoded paths**: Session-specific paths (`${USB_MOUNT}` or `$HOME`) in reference docs trigger validator warnings — use placeholders
-- **Missing reference links**: Every file in `references/` MUST be linked in SKILL.md references section
-- **Duplicate sections**: Duplicate headers (e.g., "## Pitfalls" appearing twice) trigger warnings
-- **Cached bytecode**: `scripts/__pycache__/` triggers structural violations — clean before validation
-- **Missing --help handlers**: Scripts without `--help` that exits 0 fail test_script gate
-- **Placeholder text in SKILL.md body**: Example text mentioning banned patterns (e.g., "Placeholder checkboxes", "TODO markers") triggers validator FAIL — remove or rephrase
-- **Template permissions**: Templates in `references/templates/` must be chmod 0444 (auto-fixed by pipeline but slows it down)
-- **Check all references before deleting/renaming a script**: `grep -rn "old_script_name"` across all scripts, `__init__.py`, SKILL.md, and references before removing or renaming. A deleted script that `__init__.py` or `apply_blueprint.py` references will break the skill entrypoint. Restoring a compat wrapper is a fix, not a prevention.
-- **Chain name filesystem safety**: Chain names derived from `data.project_name` become filenames under `.chain/`. If the blueprint's `Project:` line is very long (100+ chars) or contains special characters (em-dashes, Unicode), the resulting filename can exceed the filesystem's NAME_MAX (typically 255 bytes) or PATH_MAX, producing `Errno 36: File name too long`. Always sanitize: strip non-alphanumeric chars, spaces→dashes, hard-cap at 80 chars. Use a shared `_chain_name(data)` function called by ALL subcommands that construct the chain name (init, status, phase, menu) so they stay consistent.
-- **Argparse abbreviation trap (Python-specific)**: Python's `argparse` auto-abbreviates long flags by default (`allow_abbrev=True`). If you pass `--output /path/to/file` but the actual flag is `--output-dir`, argparse silently matches `--output` as an abbreviation for `--output-dir` and treats the intended file path as a directory path. This creates paths like `file/checklist.md` instead of `checklist.md`. Avoid ambiguous flag prefixes that match multiple longer flags. When calling a script from another script (`__init__.py` calling `generate_checklist.py`), explicitly pass the full flag name, not an abbreviated one.
-- **Subprocess arg order**: When calling a script that accepts `--root` as a keyword argument, pass it as `--root /path`, not as a positional argument `/path`. Positional arguments are often consumed by positional-only parsers (e.g., test-runner.py uses the first positional for the test tier, not the project root). Always check the target script's `--help` before composing a subprocess call.
-- **Consistent chain name across all subcommands**: If `create_chain()` uses a sanitized chain name but `status`/`phase`/`menu` subcommands construct the chain name from raw `data.project_name`, they'll look for a different file than what was created. Extract chain name building into a shared function and use it everywhere.
-- **Re-init must clear old chain state**: `chain.py create` refuses to overwrite (`"error": "Chain already exists"`). The fix is to glob `.chain/<chain-name>.json` and `.log` before calling create. This is baked into `generate_checklist.py`'s `create_chain()` — always re-init via `generate_checklist.py --init` rather than calling `chain.py create` directly.
-
-## Lessons Learned (This Session — v1.0.6 Enterprise Validation)
-
-See `references/lessons/chain-enforcement-lessons.md` for full 15 lessons. Key takeaways:
-
-1. **Agent/crew detection must be singular source of truth** (FOREVER SYSTEM §1) — `discover_agents.py` is THE canonical detector; all components delegate to it
-2. **Path agnosticism requires env vars everywhere** — `LOOP_ENFORCER_ROOT`, `AGENT_WORKSPACE`, `ENFORCER_SOCKET`, ACK convention paths; no hardcoded paths anywhere
-3. **Model tiering with flash/final pattern optimizes token cost** — iteration (flash) vs final (plus/max) per phase/task; `interactive_setup.py` generates versioned maps
-4. **All chain enforcement routes through loop-enforcer** — no duplicate implementations; `__init__.py` delegates to `generate_checklist.py`; worker API is thin plugin
-5. **Opt-out flag required** — `--no-loop-enforcement` generates checklist only, skips chain init
-6. **Template configs essential** — versioned YAML templates prevent hand-written config drift
-7. **Interactive setup prevents misconfiguration** — walks user through detection → template → per-phase models → task overrides → write + verify
-8. **Dogfood validation via skill_enhance.py is non-negotiable** — 11 gates must pass (0 FAIL, warnings OK) on every release
+Operational rules and gotchas from hardening this skill (path
+handling, chain-name sanitization, argparse quirks, validator contracts) are
+documented in `references/lessons/skill-hardening-session-pitfalls.md` and
+`references/lessons/chain-enforcement-lessons.md` — read those before adding
+new scripts or modifying chain/path logic.
 
 ## Verification Results (v1.0.6 Session — Live End-to-End Tests)
 
@@ -320,10 +297,6 @@ Each row = one task in the checklist. The data flows into `checklist-data.json` 
 
 **Key Principle**: The blueprint IS the source of truth. Validators are GENERATED from Part VI implementation checklist tables, not from project-type assumptions.
 
-### Pitfall: `chain.py create` Doesn't Overwrite — Must Clear Old State
-
-`chain.py create` (in loop-enforcer) refuses to overwrite. If you re-init, it returns `{"error": "Chain already exists"}`. The fix is baked into `generate_checklist.py`'s `create_chain()` — it globs `.chain/<chain-name>.json` and `.log` and deletes them before calling `chain.py create`. Always call `generate_checklist.py . --init` rather than calling `chain.py create` directly for this reason.
-
 ### Architecture
 ```
 Blueprint Part VI Tables (deliverables per phase)
@@ -430,18 +403,10 @@ def check_<phase>(project_root: Path) -> tuple[bool, list[str]]:
 - **Regenerate only failure** — Failed phase re-verified; others stay complete
 - **Hierarchical** — Phase N+1 locked until Phase N validated + completed
 
-## Validator Implementation Pitfalls (This Session)
-
-1. **Never use `python3 validator.py`** — breaks shebang scripts. Run validator directly: `subprocess.run([validator_path, step_path])`
-2. **Validators receive step file path** — must navigate to project root: `project_root = Path(step_path).parent.parent`
-3. **All validators must be executable** — `chmod +x scripts/*.py` (and shell scripts)
-4. **Exit codes = pass/fail** — 0 = pass, non-zero = fail. Stdout/stderr captured for output.
-5. **No agent self-validation** — removed `auto-verify-complete` from `chain_worker.py` entirely
-6. **Sanitize filenames** — em-dashes, colons break matching. Use `.replace('—', '').replace(':', '')` consistently
-7. **Phase gate step index = num_steps + 1** — phase steps 1..N, gate at N+1. Lookup logic must match.
-8. **Blueprint-driven validators are primary** — `blueprint_validator_gen.py` generates validators from Part VI tables; project-type registry is fallback only
-9. **Validator generated per project** — each project gets its own validators in `.blueprint-chain/validators/` matching its blueprint's exact deliverables
-10. **Part VI tables are the source of truth** — if blueprint has implementation tables, they drive validation; no project-type assumptions
+Validator implementation rules (never use `python3 validator.py` directly,
+step-path-to-project-root navigation, exit-code contract, filename
+sanitization, phase-gate indexing) are documented in
+`references/lessons/skill-hardening-session-pitfalls.md`.
 
 ## File Index (validator-complete)
 
@@ -451,7 +416,8 @@ def check_<phase>(project_root: Path) -> tuple[bool, list[str]]:
 - `references/cli-wiring.md` — CLI Wiring Reference
 - `references/critical-file-protection.md` — Critical File Protection
 - `references/enforcer-validation-architecture.md` — Enforcer Validation Architecture (this session)
-- `references/lessons/chain-enforcement-lessons.md` — Lessons Learned — Enterprise Blueprint Chain Enforcement
+- `references/lessons/chain-enforcement-lessons.md` — Chain-enforcement integration history and rationale
+- `references/lessons/skill-hardening-session-pitfalls.md` — Skill-hardening operational gotchas (paths, chain names, argparse, validator contract)
 - `references/phase-gating.md` — Phase Gating Reference
 - `references/safety-practices.md` — Safety Practices
 - `references/testing-framework.md` — Testing Framework Reference
@@ -462,9 +428,23 @@ def check_<phase>(project_root: Path) -> tuple[bool, list[str]]:
 - `references/templates/crew-model-map-template.yaml` — Crew Model Map Template
 - `references/validator-registry.md` — Project-Type → Phase Validator Registry (this session)
 - `references/verification-results-v1.0.6.md` — Live End-to-End Verification Results (self-healing, tamper resistance, opt-out, agent watch)
+- `references/skill-validation-pitfalls.md` — General troubleshooting FAQ for skill_enhance.py validation failures
+- `references/checklist-enforcement-failure.md` — Incident report: 2026-07-09 checklist enforcement failure
+- `references/mv-maestro-usb-integration-lessons.md` — MV Maestro USB integration blueprint lessons (2026-07-13)
+- `references/comprehensive-enforcement-requirements.md` — Generic enforcement requirements checklist (v2.0), applies to most enterprise projects
+- `references/loop-enforcement-root-cause-analysis.md` — Root cause analysis of a loop-enforcement failure
+- `references/session-2026-07-09-standalone-blueprint-checker.md` — Standalone blueprint checker session notes (2026-07-09)
+- `references/erpv2-blueprint-lessons.md` — ERPv2 cross-chain escrow wallet blueprint generation lessons (2026-07-13)
+- `references/mv-maestro-status.md` — MV Maestro blueprint validation status snapshot
+- `references/checklist-generator-priority-chain.md` — generate_checklist.py's 3-try phase-extraction priority chain
+- `references/checklist-generator-phase-format.md` — Phase & module-ref format requirements for the checklist generator
 - `scripts/assign_agents.py` — enterprise-blueprint — Assign agent roles and track implementation metrics
 - `scripts/blueprint_validator.py` — Validator for blueprint chain steps.
 - `scripts/generate_checklist.py` — **Single unified tool**: generate, init, verify, complete, status, check, menu, generate-validators. Reads only from checklist-data.json after generation. `enforce_blueprint.py` is now a thin compat wrapper around this tool.
+- `scripts/enforce_blueprint.py` — Thin compat wrapper translating legacy CLI calls to `generate_checklist.py`
+- `scripts/skill_paths.py` — Self-contained loop-enforcer chain.py resolution (vendored copy, env-var overridable)
+- `scripts/validator_registry.py` — Project-Type → Phase Validator Registry lookup/reporting tool
+- `scripts/chain.py` — Vendored loop-enforcer chain engine (byte-identical copy; standalone operation)
 - `scripts/test-runner.py` — Phase-Gated Test Orchestrator
 - `scripts/test_runner.py` — Alias for compatibility
 - `scripts/validate_blueprint.py` — Blueprint Validation Script
@@ -480,5 +460,6 @@ def check_<phase>(project_root: Path) -> tuple[bool, list[str]]:
 - `scripts/validate_phase2_mobile_flutter.py` — Phase 2 validator (mobile-flutter: pubspec, platform dirs, Android/iOS/desktop/web config, main.dart, analysis_options, tests, code signing, Fastlane, CI/CD, flavors, l10n)
 - `scripts/validate_phase3_persistence_hardening.py` — Phase 3 validator (agent-crew/backend: backup/restore scripts, firewall, hardening, volumes, secrets, SSL, audit)
 - `scripts/validate_phase3_smart_contracts.py` — Phase 3 validator (web3-dapp/contracts: Foundry/Hardhat/Brownie/Ape, contracts, tests, deploy, ABIs, gas, static analysis, verification, networks, deps, CI/CD, SPDX, NatSpec, sizes)
+- `scripts/validate_phase4_integration.py` — Phase 4 validator (general: e2e tests, CI/CD, deploy configs, smoke/perf tests, security scans, docs, changelog)
 - `scripts/validate_phase4_integration_validation.py` — Phase 4 validator (agent-crew: e2e tests, CI/CD, deploy config, smoke tests, perf tests, security scans, docs, changelog, observability, feature flags)
 - `scripts/validate_phase4_integration_web.py` — Phase 4 validator (web-app/dapp: same as above + web-specific deploy configs)
