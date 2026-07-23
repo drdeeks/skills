@@ -119,11 +119,11 @@
       ]
     },
     "skill-installer": {
-      "current_version": "1.0.14",
-      "previous_version": "1.0.13",
-      "last_packaged": "2026-07-04T14:33:10.334782+00:00",
+      "current_version": "1.0.16",
+      "previous_version": "1.0.15",
+      "last_packaged": "2026-07-23T04:58:16.660410+00:00",
       "files": 14,
-      "size_bytes": 123232,
+      "size_bytes": 134097,
       "history": [
         {
           "version": "1.0.11",
@@ -149,6 +149,11 @@
         {
           "version": "1.0.14",
           "timestamp": "2026-07-04T14:33:10.334782+00:00",
+          "files": 14
+        },
+        {
+          "version": "1.0.16",
+          "timestamp": "2026-07-23T04:58:16.660410+00:00",
           "files": 14
         }
       ]
@@ -246,6 +251,6 @@
       ]
     }
   },
-  "last_packaged": "2026-07-22T20:58:47.048823+00:00",
+  "last_packaged": "2026-07-23T04:58:16.660410+00:00",
   "total_packaged": 1
 }
