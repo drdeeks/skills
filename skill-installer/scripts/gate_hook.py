@@ -136,11 +136,14 @@ def ensure_gate_hook(skills_root, verbose: bool = False) -> str:
 def main() -> int:
     args = [a for a in sys.argv[1:] if a != "--verbose"]
     verbose = "--verbose" in sys.argv
-    if not args:
+    if not args or args[0] in ("--help", "-h"):
         print(__doc__)
-        return 2
+        print("\nUsage: gate_hook.py <skills_root> [--verbose]")
+        return 0 if args and args[0] in ("--help", "-h") else 2
     status = ensure_gate_hook(args[0], verbose=True if verbose else True)
     print(f"[gate-hook] status: {status}")
+    if status in ("no-root", "error"):
+        return 1
     return 0
 
 

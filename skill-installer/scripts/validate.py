@@ -47,7 +47,7 @@ except ImportError:
 MAX_SKILL_NAME_LENGTH = 64
 MAX_DESCRIPTION_LENGTH = 1024
 MIN_DESCRIPTION_LENGTH = 100
-ALLOWED_PROPERTIES = {'name', 'description', 'license', 'metadata', 'allowed-tools', 'version'}
+ALLOWED_PROPERTIES = {'name', 'description', 'license', 'metadata', 'allowed-tools', 'version', 'previous_version'}
 
 PLACEHOLDER_PATTERNS = [
     (r'(?:^|(?<=\s))(?<!`)TODO(?!\w)(?!.*\btodo\b)(?!\s*,)(?!\s+list)', 'TODO marker'),
@@ -76,6 +76,103 @@ HARDCODED_PATTERNS = [
 ]
 
 STALE_TEMPLATE_NAMES = {"example.py", "api_reference.md", "example_asset.txt"}
+
+# ─── PATH-AGNOSTIC ENFORCEMENT ──────────────────────────────────────────────
+# A skill's executable code must resolve locations dynamically, never assume a
+# user-specific home or an absolute mount point. This catches bare literal
+# paths under user/mount roots. It deliberately does NOT match:
+#   - variable-bearing paths (/media/$USER/..., /mnt/${LABEL}) — the char right
+#     after the final slash is required to be alphanumeric, so a `$`/`{` there
+#     never matches.
+#   - configurable defaults (see _line_allows_hardcoded_path below): shell
+#     `:-`/`:=` expansion, or python os.environ.get(...,"default")/getenv.
+# System roots (/opt, /etc, /var, /usr, /tmp) are intentionally excluded —
+# they are not user- or mount-specific and forcing them into variables adds
+# noise without improving portability.
+# Also catches tilde-prefixed provider install paths (~/.hermes/, ~/.openclaw/,
+# ~/.config/opencode/, ~/.claude/) — confirmed missed entirely before this was
+# added: a real skill (loop-enforcer) shipped 6 literal ~/.hermes/... paths
+# that this check ran against and passed, because the original pattern only
+# ever matched absolute /home/... form, never the tilde form providers use.
+NONPORTABLE_PATH_RE = re.compile(
+    r'(?<![\w$])/(?:home|Users|media|mnt|run/media)/[A-Za-z0-9][\w.+-]*'
+    r'|~[/\\]\.(?:hermes|openclaw|config/opencode|claude)(?:[/\\][\w.+-]*)*'
+)
+
+
+def _line_allows_hardcoded_path(line: str) -> bool:
+    """True when a literal path on this line is an overridable default (and so
+    effectively portable) or is merely a comment, not live code."""
+    s = line.strip()
+    if s.startswith(('#', '//', ';', '*', '<!--')):
+        return True  # comment / doc line — not executed
+    if ':-' in line or ':=' in line:
+        return True  # shell parameter-expansion default
+    if re.search(r'\b(?:os\.)?(?:environ\.get|getenv)\s*\(', line):
+        return True  # python env lookup with a default
+    if re.search(r'''r['"][~/]''', line):
+        return True  # a raw-string pattern LITERAL (regex/pattern-list data
+        # defining what to detect) is not itself a live path being used —
+        # confirmed false-positive: this check's own pattern-definition lines
+        # in analyze_skill.py/validate.py otherwise flag themselves
+    return False
+
+
+def check_hardcoded_paths_in_scripts(skill_path, checks):
+    """FAIL a skill whose executable scripts hardcode user/mount-specific
+    absolute paths instead of resolving them at runtime. Reference docs get a
+    WARN (examples in guides are expected, but real usernames still surface)."""
+    scripts_dir = skill_path / "scripts"
+    if scripts_dir.is_dir():
+        for f in sorted(scripts_dir.rglob("*")):
+            if not f.is_file() or f.suffix.lower() not in {".sh", ".py", ".bash", ".zsh", ".ps1"}:
+                continue
+            rel = f.relative_to(skill_path)
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            for i, line in enumerate(text.splitlines(), 1):
+                if _line_allows_hardcoded_path(line):
+                    continue
+                m = NONPORTABLE_PATH_RE.search(line)
+                if m:
+                    checks.append(Check(
+                        f"Hardcoded path in script — {rel}:{i}",
+                        "FAIL", False,
+                        f"'{m.group(0)}' — resolve the mount/home at runtime "
+                        "(detect it, or read $HOME / an overridable ${VAR:-default})"
+                    ))
+                    break  # one finding per file keeps output actionable
+
+    # Reference docs: advisory only, but flag genuine per-user paths loudly.
+    refs = skill_path / "references"
+    if refs.is_dir():
+        user_path_re = re.compile(
+            r'(?<![\w$])/(?:home|Users|media|run/media)/[A-Za-z0-9][\w.-]*/'
+            r'|~[/\\]\.(?:hermes|openclaw|config/opencode|claude)(?:[/\\][\w.+-]*)*'
+        )
+        for f in sorted(refs.rglob("*")):
+            if not f.is_file() or f.suffix.lower() not in {".md", ".txt", ".html"}:
+                continue
+            if _is_template_path(f.relative_to(skill_path)):
+                continue
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            # Strip fenced code blocks — a doc demonstrating detection
+            # patterns in an example snippet isn't itself a hardcoded path
+            # in live use (matches check_placeholders_all_files' convention).
+            text_no_code = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+            m = user_path_re.search(text_no_code)
+            if m:
+                checks.append(Check(
+                    f"Hardcoded path in doc — {f.relative_to(skill_path)}",
+                    "WARN", False,
+                    f"'{m.group(0)}' — prefer a ${{USB_MOUNT}}/$HOME placeholder so "
+                    "readers don't copy a machine-specific path"
+                ))
 
 # ─── CL-022: STRICT STRUCTURAL RULES (apply in BOTH basic + enterprise) ────
 #
@@ -549,6 +646,115 @@ def check_duplicate_sections(checks, skill_md_content):
             ))
         seen.add(key)
 
+# ─── CL-043: content-classification (lesson contamination) ──────────────────
+# Historical/narrative material ("what happened during a specific session")
+# belongs in references/lessons/, never in the operational contract (SKILL.md)
+# or in a script. This is what would have caught doc/reality drift like a
+# script being renamed/removed while SKILL.md's prose kept describing the old
+# one — structural checks (counts, extensions) can't see that; only scanning
+# for narrative language can.
+LESSON_SHAPED_PATTERNS = [
+    (r'\blessons?\s+learned\b', 'Lessons Learned'),
+    (r'\bpitfalls?\b', 'Pitfalls'),
+    (r'\bduring\s+testing\b', 'During testing'),
+    (r'\bin\s+this\s+session\b', 'In this session'),
+    (r'\bwe\s+discovered\b', 'We discovered'),
+    (r'\bfixed\s+by\b', 'Fixed by'),
+    (r'\boriginally\b', 'Originally'),
+]
+
+def _scan_lesson_shaped_language(text):
+    """Yield (pattern_label, matched_line) for narrative language, skipping
+    fenced code blocks and inline code spans (docs may legitimately DISCUSS
+    these phrases inside an example)."""
+    in_code_block = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        scan_line = re.sub(r"`[^`]*`", "", line)
+        for pattern, label in LESSON_SHAPED_PATTERNS:
+            if re.search(pattern, scan_line, re.IGNORECASE):
+                yield label, stripped
+                break  # one finding per line keeps output readable
+
+def check_lesson_shaped_content_in_skill_md(skill_path, checks, skill_md_body):
+    """WARN when SKILL.md's body (operational contract) or a script's
+    docstring reads like a case study / session log instead of an
+    instruction. Points at references/lessons/ as the correct home — never
+    auto-moved, a human/agent judges what's operational vs. historical."""
+    for label, line in _scan_lesson_shaped_language(skill_md_body):
+        checks.append(Check(
+            "Lesson-shaped content in SKILL.md", "WARN", False,
+            f"{label}: '{line[:70]}' — if this is a historical account of a "
+            "specific past failure/fix, move it to references/lessons/; if "
+            "it's a general operational rule, rephrase it as one"
+        ))
+
+    scripts_dir = skill_path / "scripts"
+    if not scripts_dir.is_dir():
+        return
+    for f in sorted(scripts_dir.rglob("*.py")):
+        if not f.is_file():
+            continue
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        try:
+            import ast
+            doc = ast.get_docstring(ast.parse(text)) or ""
+        except SyntaxError:
+            continue
+        for label, line in _scan_lesson_shaped_language(doc):
+            rel = f.relative_to(skill_path)
+            checks.append(Check(
+                f"Lesson-shaped content in script docstring — {rel}",
+                "WARN", False,
+                f"{label}: '{line[:70]}' — move historical narrative to "
+                "references/lessons/, keep the docstring operational"
+            ))
+
+def check_lesson_frontmatter(skill_path, checks):
+    """Every references/lessons/*.md must open with YAML frontmatter carrying
+    the structured fields — free-text narrative without these fields isn't
+    machine-checkable and tends to rot into unverifiable prose."""
+    lessons_dir = skill_path / "references" / "lessons"
+    if not lessons_dir.is_dir():
+        return
+    required = {"title", "category", "failure", "root_cause", "resolution",
+                "prevention", "date", "verified"}
+    for f in sorted(lessons_dir.glob("*.md")):
+        if not f.is_file():
+            continue
+        rel = f.relative_to(skill_path)
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        frontmatter_text, _ = extract_frontmatter(text)
+        if frontmatter_text is None:
+            checks.append(Check(
+                f"Lesson missing YAML frontmatter — {rel}", "FAIL", False,
+                f"Required keys: {', '.join(sorted(required))}"
+            ))
+            continue
+        fm = parse_frontmatter(frontmatter_text)
+        if not fm or not isinstance(fm, dict):
+            checks.append(Check(
+                f"Lesson frontmatter not a YAML dict — {rel}", "FAIL", False
+            ))
+            continue
+        missing = required - set(fm.keys())
+        if missing:
+            checks.append(Check(
+                f"Lesson frontmatter missing keys — {rel}", "FAIL", False,
+                f"Missing: {', '.join(sorted(missing))}"
+            ))
+
 # ─── CL-022: auto-fix (called when --fix passed) ────────────────────────────
 # CONSERVATIVE CONTRACT (CL-023):
 #   --fix may DELETE only:
@@ -596,7 +802,8 @@ def validate_skill(skill_path: str, basic_mode: bool = False) -> Dict:
     # 1. File existence
     skill_md = skill_path / "SKILL.md"
     if not skill_md.exists():
-        return {"valid": False, "status": "fail", "issues": ["SKILL.md not found"], "warnings": []}
+        missing = Check("SKILL.md not found", "FAIL", False, f"No SKILL.md at {skill_path}")
+        return {"valid": False, "status": "fail", "checks": [missing], "fails": 1, "warnings": 0}
     
     # 2. __init__.py required
     init_py = skill_path / "__init__.py"
@@ -607,7 +814,8 @@ def validate_skill(skill_path: str, basic_mode: bool = False) -> Dict:
     try:
         content = skill_md.read_text(encoding='utf-8')
     except OSError as e:
-        return {"valid": False, "status": "fail", "issues": [f"Could not read SKILL.md: {e}"], "warnings": []}
+        unreadable = Check("Could not read SKILL.md", "FAIL", False, str(e))
+        return {"valid": False, "status": "fail", "checks": [unreadable], "fails": 1, "warnings": 0}
     
     lines = content.splitlines()
     line_count = len(lines)
@@ -871,8 +1079,15 @@ def validate_skill(skill_path: str, basic_mode: bool = False) -> Dict:
     check_templates_readonly(skill_path, checks)
     check_secrets_in_scripts(skill_path, checks)
     check_placeholders_all_files(skill_path, checks, content)
+    check_hardcoded_paths_in_scripts(skill_path, checks)
     check_internal_links(skill_path, checks, content)
     check_duplicate_sections(checks, content)
+
+    # 13. CL-043 content-classification — narrative/lesson-shaped content
+    # doesn't belong in the operational contract; structured lesson files
+    # must be machine-checkable YAML frontmatter, not free prose.
+    check_lesson_shaped_content_in_skill_md(skill_path, checks, body)
+    check_lesson_frontmatter(skill_path, checks)
     
     # Calculate status
     fails = [c for c in checks if not c.passed and c.severity == "FAIL"]
