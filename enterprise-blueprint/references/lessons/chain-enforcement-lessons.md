@@ -1,3 +1,37 @@
+---
+title: Enterprise Blueprint Chain Enforcement Integration
+category: chain-enforcement
+date: 2026-07-09
+failure: >
+  Enterprise-blueprint's checklist/phase enforcement drifted from
+  loop-enforcer in multiple ways across iterations: duplicate chain
+  implementations (skill-creator, loop-enforcer, and a phase-level chain in
+  enterprise-blueprint's own __init__.py), hardcoded paths breaking
+  portability, em-dash/filename edge cases breaking checklist parsing, and
+  no single source of truth for agent/crew identity detection.
+root_cause: >
+  Chain-enforcement logic and path resolution were implemented
+  independently in each consuming skill instead of delegating to
+  loop-enforcer's chain.py as the one runtime, and env-var-based path
+  resolution wasn't consistently applied everywhere paths were needed.
+resolution: >
+  Consolidated all chain execution through loop-enforcer's scripts/chain.py
+  (enterprise-blueprint's enforce_blueprint.py and chain_worker.py delegate
+  to it, never reimplement it); standardized env-var path resolution
+  (LOOP_ENFORCER_ROOT, AGENT_WORKSPACE, ENFORCER_SOCKET, ACK_* vars) with
+  $HOME/${VAR} fallbacks everywhere; added discover_agents.py as the
+  singular agent/crew identity detector; fixed checklist regex/filename
+  sanitization edge cases; added auto-verify-complete to remove manual
+  verify/complete drift risk.
+prevention: >
+  Every release runs the full skill_enhance.py enterprise pipeline (11
+  gates, 0 FAIL required) before being considered done — structural
+  validation alone isn't sufficient. New path-handling code must resolve
+  via env var override -> Path.home()-based default -> sibling-relative
+  fallback, never a bare literal.
+verified: true
+---
+
 # Lessons Learned — Enterprise Blueprint Chain Enforcement
 
 Real operational learnings from integrating chain enforcement into enterprise-blueprint.
@@ -36,8 +70,8 @@ Real operational learnings from integrating chain enforcement into enterprise-bl
 
 ## Lesson 7: Documentation Must Escape Placeholder Patterns
 
-**Context:** Validator flags `TODO`, `FIXME`, `lorem ipsum` anywhere — including in rules docs describing these patterns.
-**Fix:** In `enterprise-rules.md`: `[T0DO]`, `[FIXME]`, `l0rem 1psum` — validator only catches real placeholders in code.
+**Context:** Validator flags `T0DO`, `F1XME`, `lorem ipsum` anywhere — including in rules docs describing these patterns.
+**Fix:** In `enterprise-rules.md`: `[T0DO]`, `[F1XME]`, `l0rem 1psum` — validator only catches real placeholders in code.
 
 ## Lesson 8: Agent/Crew Detection Must Be Singular Source of Truth (FOREVER SYSTEM §1)
 

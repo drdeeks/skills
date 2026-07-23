@@ -16,7 +16,8 @@ Usage (agent calls via pre-tool-call hook):
   python3 chain_worker.py complete .blueprint-chain PHASE-3.2
 
 Environment (self-resolving paths §2):
-  LOOP_ENFORCER_ROOT → /path/to/loop-enforcer (default: ~/.hermes/skills/devops/loop-enforcer)
+  LOOP_ENFORCER_ROOT → /path/to/loop-enforcer (default: $HOME/.hermes/skills/devops/loop-enforcer,
+    resolved via Path.home() at runtime — see resolve_loop_enforcer() below)
   ENFORCER_SOCKET → /run/ack-enforcer.sock (for daemon connection)
 """
 

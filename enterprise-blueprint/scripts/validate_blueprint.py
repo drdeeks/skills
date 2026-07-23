@@ -14,6 +14,8 @@ from pathlib import Path
 class BlueprintValidator:
     def __init__(self, blueprint_path):
         self.path = Path(blueprint_path)
+        if not self.path.is_file():
+            raise FileNotFoundError(f"Blueprint not found: {self.path}")
         self.content = self.path.read_text()
         self.results = []
 
@@ -114,9 +116,13 @@ if __name__ == "__main__":
     
     blueprint_path = sys.argv[1]
     as_json = "--json" in sys.argv
-    
-    validator = BlueprintValidator(blueprint_path)
-    result = validator.run()
+
+    try:
+        validator = BlueprintValidator(blueprint_path)
+        result = validator.run()
+    except (FileNotFoundError, OSError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     
     if as_json:
         print(json.dumps(result, indent=2))

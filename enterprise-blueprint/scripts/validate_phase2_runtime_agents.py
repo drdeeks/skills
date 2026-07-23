@@ -105,8 +105,22 @@ def main():
         sys.exit(1)
     
     step_path = Path(sys.argv[1])
+
+    # step_path.parent.parent resolves to a real directory (even '/') for
+    # ANY nonexistent input with >=2 path segments, since parent-traversal
+    # doesn't require the path to actually exist. Check step_path itself —
+    # a real caller always passes a real step marker path — before deriving
+    # project_root and scanning it, to avoid silently rglob-ing the whole
+    # filesystem root on bad input.
+    if not step_path.exists():
+        print(f"Error: step path not found: {step_path}", file=sys.stderr)
+        sys.exit(1)
+
     project_root = step_path.parent.parent
-    
+    if not project_root.is_dir():
+        print(f"Error: project root not found: {project_root}", file=sys.stderr)
+        sys.exit(1)
+
     passed, messages = check_runtime_agents(project_root)
     
     for msg in messages:
