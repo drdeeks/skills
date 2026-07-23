@@ -107,7 +107,7 @@ def generate_blueprint(project_name, phases):
 
     parts = []
     parts.append(f"# {project_name} — ENTERPRISE BLUEPRINT")
-    parts.append(f"## Version 1.0 | Document Class: MASTER SPECIFICATION")
+    parts.append(f"## Version: 1.0 | Document Class: MASTER SPECIFICATION")
     parts.append(f"### Generated: {d}")
     parts.append("")
     parts.append("> **READ FIRST — DOCUMENT AUTHORITY**")
@@ -295,7 +295,7 @@ def generate_blueprint(project_name, phases):
     parts.append("")
     parts.append("> This section is append-only. No entry may be modified or deleted.")
     parts.append("")
-    parts.append("## CL-000 — Document Initialization")
+    parts.append("## CL-0000 — Document Initialization")
     parts.append("")
     parts.append("```")
     parts.append(f"Date        : {d}")
@@ -325,7 +325,7 @@ def generate_changelog(project_name, phases):
     parts.append("")
     parts.append("---")
     parts.append("")
-    parts.append("## CL-000 — Document Initialization")
+    parts.append("## CL-0000 — Document Initialization")
     parts.append("")
     parts.append("```")
     parts.append(f"Date        : {d}")
@@ -419,7 +419,7 @@ def generate_checklist(project_name, phases):
 
     parts = []
     parts.append(f"# {project_name} — ENTERPRISE CHECKLIST")
-    parts.append(f"## Version 1.0 | Coexists with: blueprint.md")
+    parts.append(f"## Version: 1.0 | Coexists with: blueprint.md")
     parts.append(f"### Generated: {d}")
     parts.append("")
     parts.append("> **CHECKLIST AUTHORITY**")
