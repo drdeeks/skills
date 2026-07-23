@@ -23,7 +23,8 @@ order, first hit wins:
 1. `$SKILL_CREATOR_DIR` — explicit override, points at the skill-creator dir
 2. Sibling directory — `<skills-root>/skill-creator` next to this skill
 3. `$OPENCODE_SKILLS_DIR/skill-creator`
-4. `~/.config/opencode/skills/skill-creator` — legacy default location
+4. `$HOME/.config/opencode/skills/skill-creator` — legacy default location
+   (resolved via `Path.home()` at runtime, never a literal path)
 5. **The bundled copy** — `scripts/validate.py` inside this skill
 
 A live candidate counts only if `scripts/validate.py` exists inside it. If
