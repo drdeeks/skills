@@ -107,10 +107,34 @@ def extract_blueprint_deliverables(blueprint_path: Path) -> List[Dict[str, Any]]
             deliverables = re.findall(r"\*\*Deliverable:\*\*\s*`?([^`\n]+)`?", section)
             gate_match = re.search(r"\*\*Validation Gate:\*\*\s*`?([^`\n]+)`?", section)
             validation_gate = gate_match.group(1).strip() if gate_match else ""
-            tag_match = re.search(r"\*\*Tag:\*\*\s*`?([^`\n]+)`?", section)
+            tag_match = re.search(r"\*\*(?:Tag|Section Tag):\*\*\s*`?([^`\n]+)`?", section)
             tag = tag_match.group(1).strip() if tag_match else ""
-            flag_match = re.search(r"\*\*Flag:\*\*\s*`?([^`\n]+)`?", section)
+            flag_match = re.search(r"\*\*(?:Flag|Feature Flag):\*\*\s*`?([^`\n]+)`?", section)
             flag = flag_match.group(1).strip() if flag_match else ""
+
+            # Second fallback: init_blueprint.py's own scaffold format —
+            # a "### Deliverables" sub-heading containing checkbox items
+            # "- [ ] **PHASE-N.M** <deliverable text>", not a "**Deliverable:**"
+            # bold label. Confirmed via real end-to-end testing: without this,
+            # blueprint_validator_gen.py silently produces validators with an
+            # empty deliverables list for every blueprint init_blueprint.py
+            # itself generates — an always-pass validator that checks nothing.
+            if not deliverables:
+                deliv_section_match = re.search(
+                    r"###\s*Deliverables\s*\n(.*?)(?=\n###\s|\Z)", section, re.DOTALL)
+                if deliv_section_match:
+                    deliverables = [
+                        d.strip() for d in re.findall(
+                            r"^-\s*\[[ xX]\]\s*\*\*PHASE-[\d.]+\*\*\s*(.+)$",
+                            deliv_section_match.group(1), re.MULTILINE)
+                        if d.strip() and "[Define deliverable" not in d
+                    ]
+                if not validation_gate:
+                    gate_section_match = re.search(
+                        r"###\s*Validation Gate\s*\n(.*?)(?=\n###\s|\Z)", section, re.DOTALL)
+                    if gate_section_match:
+                        quote_lines = re.findall(r"^>\s*(.+)$", gate_section_match.group(1), re.MULTILINE)
+                        validation_gate = " ".join(quote_lines).strip()
             
             phases.append({
                 "phase": phase_num,
