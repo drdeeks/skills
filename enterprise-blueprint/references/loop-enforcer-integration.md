@@ -1,5 +1,20 @@
 # Loop-Enforcer Integration — Enterprise Blueprint
 
+> **Correction (scope-tier generalization pass):** two items below are now
+> resolved, confirmed against current code:
+> - The "Chain File Naming" requirement (line ~34) — `generate_checklist.py`'s
+>   `_chain_name()` now emits `checklist-<project>` (was `blueprint-<project>`),
+>   and `chain_worker.py`'s discovery fallback matches.
+> - The `__init__.py` line 14 `SKILLS_ROOT` hardcoded-path claim below is
+>   **stale** — the current `__init__.py` has no `SKILLS_ROOT` constant at
+>   all. `chain_worker.py`'s path resolution was separately broken in a
+>   different way (a parent-walk sibling search that only worked when this
+>   skill lived at its original repo location) and has been fixed to
+>   delegate to `skill_paths.py`'s self-relative vendored-copy resolution —
+>   see that file's docstring.
+> The rest of this document (env var conventions, integration status table)
+> is otherwise still accurate as a historical/reference record.
+
 ## Current State (v1.0.3)
 
 | Component | Integration Status |

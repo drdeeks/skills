@@ -1,8 +1,14 @@
 # Validation Rules Reference
 
+> Rules below describe the PROJECT-tier bar (the original, unchanged full
+> enterprise rigor). MICRO and TASK tiers apply a scaled-down subset of the
+> same rules — see `references/blueprint-standard.md` §1/§13/§14 for the
+> per-tier minimums, and the N/A-with-rationale mechanism that lets Parts
+> II–IV legitimately scale down instead of being silently skipped.
+
 ## Document Structure Validation
 
-### Required Parts (FAIL if missing)
+### Required Parts (FAIL if missing, every tier)
 - PART I — System Overview
 - PART II — Module Registry
 - PART III — Specifications
@@ -32,7 +38,23 @@ Format: `> **Rollback Tag:** \`[TAG-NAME-v1]\``
 ### Data Architecture
 - SQL schemas with proper types (TEXT, TIMESTAMP, JSONB, SERIAL)
 - API Contracts: Endpoint, Method, Description, Request, Response
-- Migration naming: `V{NNN}__<kebab-case>.sql` + rollback file
+- Migration naming: `YYYYMMDD_NNN_description.sql` + rollback file (this is
+  the convention `init_blueprint.py` actually scaffolds and
+  `validate_blueprint.py` checks for; the older `V{NNN}__` form is still
+  accepted if present but is not what's generated)
+
+### Deliverable Types (Part VI)
+Every deliverable may declare `Type: file|glob|approval|external-check|review`
+(default `file`). `approval` requires an attestation marker with
+`Approved-By:`/`Date:` fields; `external-check` requires an explicit
+`Validator: <path>` or the chain step fails closed instead of
+auto-passing; `review` requires `Reviewed-By:`/`Date:`/`Critique:` fields
+AND fails closed if `Reviewed-By:` matches the phase's assigned agent in
+`assignments.json` — reviewer must be independent of implementer (Creative
+Orchestration Doctrine Principle V). Every phase must declare exactly one
+`Type: review` deliverable and a `**Reviewer Agent:**` field, at every
+scope tier — see `references/blueprint-standard.md` §6 and
+`references/agent-roles.md` §9.
 
 ### Change Log
 Each entry requires 9 fields:

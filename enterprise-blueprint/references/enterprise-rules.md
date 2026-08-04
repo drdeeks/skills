@@ -64,7 +64,17 @@ but all FAILs must be resolved before the first production deployment.
 
 ## 2. Validation Check Catalog
 
-The following is the complete catalog of checks run by `validate_blueprint.py`.
+The following describes the PROJECT-tier catalog run by
+`validate_blueprint.py` (62 checks total, confirmed by running it against a
+project-tier blueprint). MICRO and TASK tiers run a scaled-down subset of
+the same rule table (fewer/lower-threshold checks — see
+`references/blueprint-standard.md` §13/§14), not a different tool; the
+tier is read from the blueprint's own `## Scope:` header or passed via
+`--tier`. The version of this document from before the scope-tier pass
+claimed "58+ rules" — that number never matched what was actually
+implemented; the catalog below reflects the real, now-tier-aware rule
+table (`validate_blueprint.py`'s `RULES` list).
+
 Each check lists its classification (FAIL or WARN), what it validates, and
 the fix guidance.
 
@@ -81,7 +91,7 @@ the fix guidance.
 | Module ID column | `Module ID` in registry table | Add the four-column registry table |
 | CHANGE LOG section | `# CHANGE LOG` heading | Add the change log section after Part VII |
 | At least one CL entry | `## CL-` heading | Add the initialization CL-001 entry |
-| Migration naming convention | `YYYYMMDD` pattern | Add migration naming rule to Part V |
+| Migration naming convention | `YYYYMMDD_NNN_description` or legacy `V{NNN}__` pattern | Add migration naming rule to Part V |
 | At least 1 module (MOD-NNN) | `MOD-NNN` in content | Populate the module registry |
 | At least 1 feature flag | `FEAT_[A-Z]` pattern | Add feature flags (must start with letter after FEAT_) |
 | Document >1500 lines | Line count check | Enterprise blueprints must be 1500+ lines |
@@ -111,10 +121,9 @@ the fix guidance.
 | 5-level error hierarchy | 3+ error level references | Add 5-level hierarchy to Part VII |
 | Concrete performance metrics | 6+ metric values with units (ms, GB, req/s) | Add concrete numbers to budgets |
 | Rollback procedures per phase | 3+ rollback procedure references | Add rollback procedure to each phase |
-|| No [TODO] markers | Zero `[T0DO` occurrences | Replace with real content |
-|| ≤5 unfilled placeholders | Fewer than 6 `[Def1ne`/`[Descrlbe` patterns | Populate before marking phase complete |
-|| Document thorough | > 2500 lines | Add more detail for thorough coverage ||
-|| No dummy content | ≤10 dummy patterns (l0rem 1psum, f00, bar, etc.) | Remove test data and placeholders |
+| No [TODO] markers | Zero `[TODO` occurrences | Replace with real content |
+| ≤N unfilled placeholders | Tier-scaled max of `[Define...]`/`[Describe...]`/`[Insert...]` patterns (2 MICRO / 3 TASK / 5 PROJECT) | Populate before marking phase complete |
+| Document thorough | > 2500 lines (PROJECT tier only) | Add more detail for thorough coverage |
 
 ---
 

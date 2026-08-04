@@ -14,6 +14,7 @@ blueprint implementation phases.
 6. [Measurement Framework](#6-measurement-framework)
 7. [Multi-Agent Coordination](#7-multi-agent-coordination)
 8. [Escalation Procedures](#8-escalation-procedures)
+9. [Review Gate](#9-review-gate)
 
 ---
 
@@ -36,6 +37,15 @@ scope split.
 | **DevOps** | CI/CD, feature flags, monitoring, deployment | Part V contributor rules, pipeline configuration |
 | **Security** | Auth flows, payment security, compliance, audits | Auth specs in Part III, GDPR items in Part VII |
 | **Agent (AI)** | Autonomous implementation within assigned scope | Same domains as above; operates without human hand-holding |
+| **Reviewer** | Critiques a phase's finished work — never implements it | Nothing; a Reviewer owns no Part or deliverable, only a critique |
+
+Every role above except Reviewer is an **implementation** role — it owns
+and produces some slice of the blueprint. Reviewer is structurally
+different: per the Creative Orchestration Doctrine's Principle V ("every
+creative layer has a corresponding reviewer... creation without evaluation
+produces inconsistency"), every phase needs a reviewer distinct from
+whoever implemented it, and that reviewer produces a critique artifact,
+not a deliverable. See §9 (Review Gate) below.
 
 **Agent vs. human distinction:** An agent assigned to a scope operates
 autonomously and produces deliverables without per-step human direction.
@@ -270,3 +280,55 @@ require a corrective change log entry, a retrospective review of what
 produced the bypass, and a process note appended to the relevant phase
 block in the checklist documenting the violation and corrective action.
 Gate violations are never silently resolved.
+
+---
+
+## 9. Review Gate
+
+Every deliverable-producing check built into this skill before this
+section answers "does the artifact exist / is it well-formed" — a
+mechanical, producible-level check. None of them ask "is this actually
+good, does it hold up to independent scrutiny." The Creative Orchestration
+Doctrine's Principle V exists precisely for that gap: *"every creative
+layer has a corresponding reviewer... creation without evaluation produces
+inconsistency, evaluation without creation produces stagnation. The system
+requires both."*
+
+### What the Review Gate actually is
+
+Every phase, at every scope tier (MICRO/TASK/PROJECT — no exceptions; see
+`references/blueprint-standard.md` §14), MUST declare:
+
+- A **`**Reviewer Agent:**`** field in Part VI, alongside `**Assigned
+  Agent:**` — structurally checked by `validate_blueprint.py`'s
+  `rule_review_gate`.
+- Exactly one `Type: review` deliverable (see `blueprint-standard.md` §6)
+  — a critique artifact (default filename `review-phase{N}.md`) containing
+  three required fields: `Reviewed-By:`, `Date:`, and `Critique:` (must be
+  a real sentence, not a rubber stamp — the generated validator rejects a
+  `Critique:` field under 10 characters).
+
+### Why this is enforcement, not documentation
+
+The system cannot judge whether a critique is *insightful* — that stays a
+judgment call, same as it can't judge whether an `approval` sign-off was
+made thoughtfully. What it CAN and DOES mechanically enforce, at the
+phase's validation gate, is that **`Reviewed-By:` names a different agent
+than the one `assignments.json` has assigned to that phase**. Self-review
+is rejected outright, closing exactly the gap the doctrine calls out:
+"creation without evaluation," where the same agent both builds and
+rubber-stamps its own work.
+
+This was proven live during the skill's own hardening: a phase gate with
+no review artifact FAILs; the same gate with a review artifact whose
+`Reviewed-By:` matches the phase's own assignee still FAILs, with an
+explicit `"reviewer must be independent"` message; only a review from a
+genuinely different agent lets the gate — and the chain — complete.
+
+### Relationship to other roles
+
+The **Reviewer** role (§1) exists specifically for this — it owns no Part,
+no deliverable, only critique, and is never assigned as the same agent as
+a phase's implementer for that phase. An agent may be Reviewer on one
+phase and Backend/Frontend/etc. implementer on a different phase in the
+same project; the constraint is per-phase, not per-project.

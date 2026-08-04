@@ -237,7 +237,7 @@ Examples:
                 str(agent_dir),
                 "--model-map", args.model_map,
                 "--output", str(assignments_path)
-            ], check=False)  # assign_agents may not have --model-map yet
+            ])
     
     # Final summary
     print(f"\n✓ Blueprint applied to {len(target_agents)} agent(s)")

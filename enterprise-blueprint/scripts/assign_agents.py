@@ -15,6 +15,11 @@ Usage:
     python3 scripts/assign_agents.py <project-dir> --report
     python3 scripts/assign_agents.py <project-dir> --metrics
     python3 scripts/assign_agents.py <project-dir> --json
+
+    # Bulk-assign every phase/module from an agent- or crew-model-map.yaml
+    # (references/templates/) in one call, instead of one --assign per scope:
+    python3 scripts/assign_agents.py <project-dir> --model-map agent-model-map.yaml
+    python3 scripts/assign_agents.py <project-dir> --model-map crew-model-map.yaml --output assignments.json
 """
 
 import json
@@ -22,6 +27,9 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import simple_yaml
 
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -38,6 +46,16 @@ ROLE_DEFINITIONS = {
     "devops":          "Owns CI/CD, feature flags, monitoring, deployment pipeline.",
     "security":        "Owns auth flows, payment security, smart contract audit, GDPR.",
     "agent":           "AI agent operating autonomously within assigned scope.",
+    # Distinct from every role above: none of those own or implement any
+    # deliverable — a reviewer only critiques another agent's finished
+    # phase. Per Creative Orchestration Doctrine Principle V ("every
+    # creative layer has a corresponding reviewer") and Principle II
+    # (singular responsibility) — see references/agent-detection-rules.md
+    # and the phase Review Gate check in blueprint_validator_gen.py, which
+    # FAILs if the reviewer on a phase is the same agent as its assignee.
+    "reviewer":        "Critiques a phase's finished work for quality/intent adherence. "
+                        "Never the same agent as the phase's assignee — see "
+                        "references/agent-roles.md §Review Gate.",
     "unassigned":      "No agent currently assigned to this scope.",
 }
 
@@ -73,8 +91,12 @@ def load_assignments(project_dir):
     return data
 
 
+_OUTPUT_OVERRIDE = None  # set by main() when --output is given
+
+
 def save_assignments(project_dir, data):
-    write_json(Path(project_dir) / "assignments.json", data)
+    path = _OUTPUT_OVERRIDE if _OUTPUT_OVERRIDE else (Path(project_dir) / "assignments.json")
+    write_json(path, data)
 
 
 def load_project(project_dir):
@@ -185,6 +207,60 @@ def cmd_complete(project_dir, raw_scope, assignments_data):
 
     save_assignments(project_dir, assignments_data)
     print(f"[OK] Marked complete: {scope_label(scope)} ({scope})")
+    return True
+
+
+def cmd_assign_from_model_map(project_dir, model_map_path, assignments_data):
+    """Bulk-assign agents to phases from an agent-model-map.yaml or
+    crew-model-map.yaml (references/templates/). This is the real
+    read side of the model-map — previously the YAML was only ever
+    written (by interactive_setup.py) and never consumed by anything,
+    so `assignments.json` only ever got populated by a human manually
+    running --assign one scope at a time."""
+    map_path = Path(model_map_path)
+    if not map_path.is_file():
+        print(f"[ERROR] Model map not found: {map_path}")
+        return False
+
+    try:
+        data = simple_yaml.safe_load(map_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"[ERROR] Could not parse model map {map_path}: {exc}")
+        return False
+
+    if not isinstance(data, dict):
+        print(f"[ERROR] Model map {map_path} did not parse to a mapping")
+        return False
+
+    assigned_any = False
+
+    if isinstance(data.get("agents"), list):
+        # crew-model-map.yaml shape: a roster of agents, each with its own
+        # `phases`/`modules` list.
+        for entry in data["agents"]:
+            if not isinstance(entry, dict):
+                continue
+            agent_id = entry.get("agent_id")
+            if not agent_id:
+                continue
+            scopes = list(entry.get("phases") or []) + list(entry.get("modules") or [])
+            for scope in scopes:
+                if cmd_assign(project_dir, f"{agent_id}:{scope}", assignments_data):
+                    assigned_any = True
+    elif data.get("agent_id"):
+        # agent-model-map.yaml shape: one agent, assigned to every phase it
+        # declares a model tier for.
+        agent_id = data["agent_id"]
+        for scope in (data.get("phase_model_map") or {}).keys():
+            if cmd_assign(project_dir, f"{agent_id}:{scope}", assignments_data):
+                assigned_any = True
+    else:
+        print(f"[ERROR] {map_path} has neither an 'agents' roster (crew map) "
+              f"nor an 'agent_id' (agent map) — nothing to assign.")
+        return False
+
+    if not assigned_any:
+        print(f"[WARN] {map_path} declared no phase/module assignments.")
     return True
 
 
@@ -364,10 +440,24 @@ def main():
         print(f"[ERROR] Project directory not found: {project_dir}")
         sys.exit(1)
 
-    assignments_data = load_assignments(project_dir)
+    # --output overrides where assignments.json is written/read for this
+    # invocation (apply_blueprint.py passes an explicit --output path).
+    global _OUTPUT_OVERRIDE
+    if "--output" in sys.argv:
+        idx = sys.argv.index("--output")
+        if idx + 1 < len(sys.argv):
+            _OUTPUT_OVERRIDE = Path(sys.argv[idx + 1])
+
+    load_path = _OUTPUT_OVERRIDE if _OUTPUT_OVERRIDE else (project_dir / "assignments.json")
+    assignments_data = read_json(load_path) or {"assignments": {}, "history": [], "created_at": now_iso()}
     success = True
 
-    if "--assign" in sys.argv:
+    if "--model-map" in sys.argv:
+        idx = sys.argv.index("--model-map")
+        model_map_path = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else ""
+        success = cmd_assign_from_model_map(project_dir, model_map_path, assignments_data)
+
+    elif "--assign" in sys.argv:
         idx = sys.argv.index("--assign")
         value = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else ""
         success = cmd_assign(project_dir, value, assignments_data)
@@ -395,8 +485,8 @@ def main():
         print("[ERROR] No command specified. Use --help to see available commands.")
         success = False
 
-    # Emit JSON statistics for assign/unassign/complete
-    if "--json" in sys.argv and "--assign" in sys.argv:
+    # Emit JSON statistics for assign/model-map assignment
+    if "--json" in sys.argv and ("--assign" in sys.argv or "--model-map" in sys.argv):
         result = {
             "operation": "assign_agents",
             "timestamp": now_iso(),

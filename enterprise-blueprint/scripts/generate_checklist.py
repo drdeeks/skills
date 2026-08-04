@@ -36,6 +36,28 @@ CHAIN_PY = resolve_loop_enforcer()
 
 SKILL_ROOT = Path(__file__).parent.parent
 
+DELIVERABLE_TYPES = ("file", "glob", "approval", "external-check")
+
+_TYPE_RE = re.compile(
+    r"\s*Type:\s*(file|glob|approval|external-check|review)"
+    r"(?:\s+Validator:\s*([^\s,;]+))?\s*$",
+    re.IGNORECASE,
+)
+
+
+def parse_deliverable_type(raw: str) -> Tuple[str, str, str]:
+    """Strip a trailing 'Type: <type>' (and optional 'Validator: <path>')
+    tag off a deliverable string. Returns (clean_text, type, validator_path).
+    Default type is 'file' when no tag is present, so old blueprints with no
+    Type: taxonomy at all keep behaving exactly as before."""
+    m = _TYPE_RE.search(raw)
+    if not m:
+        return raw.strip(), "file", ""
+    clean = raw[: m.start()].strip()
+    dtype = m.group(1).lower()
+    validator = m.group(2) or ""
+    return clean, dtype, validator
+
 # ─── DATA MODELS ──────────────────────────────────────────────────────────────
 
 @dataclass
@@ -47,6 +69,8 @@ class Task:
     rollback: str = ""
     prerequisite: str = ""
     feature_flag: str = ""
+    deliverable_type: str = "file"
+    validator_path: str = ""
 
 @dataclass
 class Phase:
@@ -140,7 +164,7 @@ class ChecklistGenerator:
         h1 = re.search(r"^#\s+(.+)$", self.content, re.MULTILINE)
         if h1:
             title = h1.group(1).strip()
-            title = re.sub(r"\s*[—-]\s*ENTERPRISE BLUEPRINT\s*$", "", title, flags=re.IGNORECASE)
+            title = re.sub(r"\s*[—-]\s*(?:ENTERPRISE\s+)?BLUEPRINT\s*$", "", title, flags=re.IGNORECASE)
             return title.strip()
         fm = re.search(r"Project\s*:\s*`?([^`\n]+)`?", self.content)
         if fm:
@@ -150,9 +174,20 @@ class ChecklistGenerator:
     def extract_phases(self) -> List[Phase]:
         phases = []
 
-        # Extract Part VI tables (authoritative deliverable source)
+        # Extract Part VI tables (authoritative deliverable source).
+        # Boundary matches init_blueprint.py's actual `# PART VI` (single
+        # hash) heading, not `## PART VI` (double) — the old double-hash
+        # pattern never matched a real blueprint, silently producing zero
+        # tasks for anyone using the documented "Part VI Tables" format
+        # (confirmed via reproduction: a real 5-column table blueprint
+        # yielded 0 tasks before this fix). Kept in sync with
+        # blueprint_validator_gen.py's identical boundary — single source
+        # of truth for "where does Part VI end."
         part_vi = ""
-        pvi = re.search(r"## PART VI.*?(?=\n## [A-Z]|$)", self.content, re.DOTALL | re.IGNORECASE)
+        pvi = re.search(
+            r"#{1,2}\s*PART\s+VI\b.*?(?=\n#{1,2}\s*PART\s+|\n#{1,2}\s*CHANGE LOG\b|\Z)",
+            self.content, re.DOTALL | re.IGNORECASE,
+        )
         if pvi:
             part_vi = pvi.group(0)
 
@@ -178,35 +213,61 @@ class ChecklistGenerator:
             if fl:
                 flag = fl.group(1).strip()
 
-            # Tasks from Part VI table
+            # Tasks from Part VI table — header-driven column mapping, not a
+            # hardcoded column order, so a reordered or slightly-renamed
+            # table (e.g. "Gate" instead of "Validation Gate") still parses
+            # instead of silently yielding zero tasks.
             tasks = []
             if part_vi:
                 tbl = re.search(
-                    rf"### PHASE-{phase_num}: [^\n]*\n\| Prerequisite \| Feature Flag \| Deliverables \| Validation Gate \| Rollback \|\n\|[-:]+\|[-:]+\|[-:]+\|[-:]+\|[-:]+\|\n((?:\|.*\|\n)+)",
+                    rf"### PHASE-{phase_num}: [^\n]*\n(\|.*\|)\n\|[-:\s|]+\|\n((?:\|.*\|\n?)+)",
                     part_vi
                 )
                 if tbl:
-                    for row in tbl.group(1).strip().split("\n"):
-                        parts = [p.strip() for p in row.split("|") if p.strip()]
-                        if len(parts) >= 5:
-                            prereq, fflag, deliverable, val, rb = parts[:5]
+                    header_cells = [c.strip().lower() for c in tbl.group(1).split("|") if c.strip()]
+                    col_idx = {}
+                    for wanted, aliases in {
+                        "prerequisite": ("prerequisite",),
+                        "feature_flag": ("feature flag",),
+                        "deliverable": ("deliverable", "deliverables"),
+                        "validation": ("validation gate", "gate"),
+                        "rollback": ("rollback",),
+                    }.items():
+                        for i2, cell in enumerate(header_cells):
+                            if any(cell == a or cell.startswith(a) for a in aliases):
+                                col_idx[wanted] = i2
+                                break
+                    if "deliverable" in col_idx:
+                        for row in tbl.group(2).strip().split("\n"):
+                            parts = [p.strip() for p in row.split("|") if p.strip()]
+                            if len(parts) <= col_idx["deliverable"]:
+                                continue
+                            deliverable_cell = parts[col_idx["deliverable"]]
+                            prereq = parts[col_idx["prerequisite"]] if "prerequisite" in col_idx and len(parts) > col_idx["prerequisite"] else ""
+                            fflag = parts[col_idx["feature_flag"]] if "feature_flag" in col_idx and len(parts) > col_idx["feature_flag"] else ""
+                            val = parts[col_idx["validation"]] if "validation" in col_idx and len(parts) > col_idx["validation"] else ""
+                            rb = parts[col_idx["rollback"]] if "rollback" in col_idx and len(parts) > col_idx["rollback"] else ""
                             # Each deliverable gets its own task
-                            for d in re.split(r"[,;]", deliverable):
+                            for d in re.split(r"[,;]", deliverable_cell):
                                 d = d.strip()
                                 if d and not d.startswith("```") and d != "N/A":
+                                    clean, dtype, validator = parse_deliverable_type(d)
                                     tid = f"PHASE-{phase_num}.{len(tasks)+1}"
                                     tasks.append(Task(
-                                        id=tid, description=d, deliverable=d,
+                                        id=tid, description=clean, deliverable=clean,
                                         validation=val, rollback=rb,
-                                        prerequisite=prereq, feature_flag=fflag
+                                        prerequisite=prereq, feature_flag=fflag,
+                                        deliverable_type=dtype, validator_path=validator,
                                     ))
 
             # Fallback: checkbox tasks
             if not tasks:
                 for j, tm in enumerate(re.finditer(r"- \[ \] \*\*PHASE-[\d.]+\*\*\s*(.*)", section)):
+                    clean, dtype, validator = parse_deliverable_type(tm.group(1).strip())
                     tasks.append(Task(
                         id=f"PHASE-{phase_num}.{j+1}",
-                        description=tm.group(1).strip()
+                        description=clean, deliverable=clean,
+                        deliverable_type=dtype, validator_path=validator,
                     ))
 
             phases.append(Phase(
@@ -359,6 +420,10 @@ class ChecklistGenerator:
         cl_json.write_text(json.dumps(data.to_dict(), indent=2))
         print(f"[OK] Data written: {cl_json}")
 
+        scope_m = re.search(r"##\s*Scope:\s*(MICRO|TASK|PROJECT)", self.content, re.IGNORECASE)
+        tier = scope_m.group(1).lower() if scope_m else "project"
+        stamp_immutability(self.output_dir, self.blueprint, tier)
+
         return {
             "checklist_md": str(cl_md),
             "checklist_json": str(cl_json),
@@ -393,17 +458,113 @@ def run_chain(project_dir: Path, chain_name: str, subcmd: str, *args) -> dict:
     return {"error": r.stderr.strip(), "exit_code": r.returncode}
 
 
+def _blueprint_sha256(blueprint_path: Path) -> str:
+    import hashlib
+    return hashlib.sha256(blueprint_path.read_bytes()).hexdigest()
+
+
+def _lock_path(output_dir: Path) -> Path:
+    return output_dir / ".blueprint-lock.json"
+
+
+def stamp_immutability(output_dir: Path, blueprint_path: Path, tier: str) -> None:
+    """Record the blueprint's content hash at generation time (see
+    references/blueprint-standard.md §12). This is what lets a later
+    `generate`/`status` call detect an undocumented edit instead of staying
+    silent about it — the blueprint is meant to be written once."""
+    if not blueprint_path.exists():
+        return
+    lock = {
+        "blueprint_sha256": _blueprint_sha256(blueprint_path),
+        "tier": tier,
+        "stamped_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+    _lock_path(output_dir).write_text(json.dumps(lock, indent=2))
+
+
+def check_immutability(output_dir: Path, blueprint_path: Path) -> Optional[Dict[str, Any]]:
+    """Compare the blueprint's current hash against the stamp from the last
+    `generate`. Returns a warning dict if it changed without a newer CL-####
+    entry in the blueprint than the stamped generation time; None if clean
+    or if there's no stamp yet to compare against."""
+    lock_file = _lock_path(output_dir)
+    if not lock_file.exists() or not blueprint_path.exists():
+        return None
+    try:
+        lock = json.loads(lock_file.read_text())
+    except json.JSONDecodeError:
+        return None
+    current_hash = _blueprint_sha256(blueprint_path)
+    if current_hash == lock.get("blueprint_sha256"):
+        return None
+
+    stamped_at = lock.get("stamped_at", "")
+    content = blueprint_path.read_text()
+    # A CL entry's own text doesn't carry a machine-checkable timestamp tied
+    # to the stamp, so the practical check is: does at least one CL entry
+    # exist beyond CL-0000 (the init entry)? A real amendment always adds a
+    # new CL entry per Part V; if the hash moved but no new entry appeared,
+    # that's an undocumented edit either way.
+    cl_entries = re.findall(r"CL-(\d{4})", content)
+    has_amendment_entry = any(e != "0000" for e in cl_entries)
+    if has_amendment_entry:
+        return None
+    return {
+        "warning": "blueprint.md changed since the last checklist generation, "
+                   "with no Change Log (Part V, CL-####) entry documenting the "
+                   "amendment — this violates the write-once / append-only "
+                   "doctrine (blueprint-standard.md §12).",
+        "stamped_at": stamped_at,
+        "stamped_sha256": lock.get("blueprint_sha256"),
+        "current_sha256": current_hash,
+    }
+
+
 def _phase_name(phase: Phase) -> str:
     return phase.title[:30].replace(" ", "-").replace(":", "").replace("/", "-")
 
 
 def _chain_name(data: ChecklistData) -> str:
-    """Filesystem-safe chain name from project data (max ~128 chars)."""
+    """Filesystem-safe chain name from project data (max ~128 chars).
+
+    Prefixed "checklist-" (not "blueprint-") so loop-enforcer's
+    chain_enforce.py dispatcher — which discovers chain state files via
+    `"checklist" in filename` — can actually find chains this skill
+    creates. The old "blueprint-" prefix made every chain this tool
+    produced invisible to that dispatcher; fixing the name here needs no
+    change to the sibling loop-enforcer skill at all.
+    """
     raw_name = data.project_name.strip()
     safe_name = re.sub(r"[^\w\- ]", "", raw_name)
     safe_name = re.sub(r"\s+", "-", safe_name)
     safe_name = safe_name[:80].strip("-")
-    return f"blueprint-{safe_name}" if safe_name else f"blueprint-{data.generated[:10]}"
+    return f"checklist-{safe_name}" if safe_name else f"checklist-{data.generated[:10]}"
+
+
+def _write_missing_validator_placeholder(chain_dir: Path, task: "Task") -> Path:
+    """A permanently-failing validator for an external-check deliverable
+    that has no real validator wired. Agents never validate their own work
+    (see references/enforcer-validation-architecture.md) — an unvalidated
+    external-check step must not silently auto-pass the way an unvalidated
+    file/glob step does, so this exists to make that failure loud instead
+    of quiet until someone supplies a real `Validator:` path."""
+    vdir = chain_dir / "validators"
+    vdir.mkdir(parents=True, exist_ok=True)
+    path = vdir / f"missing-validator-{task.id.replace('.', '-')}.py"
+    path.write_text(
+        "#!/usr/bin/env python3\n"
+        f'"""Placeholder validator — {task.id} is Type: external-check but no\n'
+        'Validator: path was supplied (or it did not resolve). This step\n'
+        'cannot complete until a real validator is wired in blueprint.md."""\n'
+        "import sys\n"
+        "print("
+        f'"FAIL: {task.id} ({task.description!r}) is Type: external-check '
+        'and has no wired validator — add \'Validator: <script>\' to this '
+        'deliverable in blueprint.md Part VI.")\n'
+        "sys.exit(1)\n"
+    )
+    path.chmod(0o755)
+    return path
 
 
 def create_chain(project_dir: Path, data: ChecklistData, enable_validators: bool = False) -> Tuple[bool, str]:
@@ -453,6 +614,22 @@ def create_chain(project_dir: Path, data: ChecklistData, enable_validators: bool
             sf = chain_dir / f"phase-{i:02d}-step-{j+1:02d}-{sn}"
             sf.touch()
             step_files.append(str(sf))
+
+            # external-check deliverables fail closed: a step for one of
+            # these can never auto-pass, unlike file/glob/approval steps
+            # with no validator attached (see blueprint-standard.md §6).
+            # Either wire the author-supplied validator, or — if none was
+            # given or it doesn't resolve — wire a placeholder that always
+            # fails with a clear message, so the gap is loud, not silent.
+            if task.deliverable_type == "external-check":
+                resolved = None
+                if task.validator_path:
+                    candidate = (project_dir / task.validator_path).resolve()
+                    if candidate.exists():
+                        resolved = candidate
+                if resolved is None:
+                    resolved = _write_missing_validator_placeholder(chain_dir, task)
+                step_validators[str(sf)] = str(resolved)
 
         # Validation gate
         gf = chain_dir / f"phase-{i:02d}-step-{len(phase.tasks)+1:02d}-PHASE-{i}-V-Validation-gate"
@@ -608,12 +785,17 @@ def main():
             print(f"Error: blueprint not found: {bp_path}", file=sys.stderr)
             sys.exit(1)
         output_dir = Path(args.output_dir) if args.output_dir else bp_path.parent
+        immutability_warning = check_immutability(output_dir, bp_path)
         gen = ChecklistGenerator(bp_path, output_dir)
         data = gen.generate(enforcement_mode=args.mode, enable_validators=args.with_validators)
         if args.project_name:
             data.project_name = args.project_name
         result = gen.write(data)
-        print(json.dumps({"operation": "generate", "status": "ok", "details": result}, indent=2))
+        out = {"operation": "generate", "status": "ok", "details": result}
+        if immutability_warning:
+            out["immutability_warning"] = immutability_warning
+            print(f"[WARN] {immutability_warning['warning']}", file=sys.stderr)
+        print(json.dumps(out, indent=2))
 
     elif subcommand == "init":
         project_dir = Path(args.project_dir or action).resolve()
@@ -632,6 +814,9 @@ def main():
         data = load_checklist(project_dir)
         chain_name = _chain_name(data)
         status = get_status(project_dir, chain_name)
+        immutability_warning = check_immutability(project_dir, project_dir / "blueprint.md")
+        if immutability_warning:
+            status["immutability_warning"] = immutability_warning
         print(json.dumps(status) if args.json else json.dumps(status, indent=2))
 
     elif subcommand == "phase":

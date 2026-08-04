@@ -2,11 +2,34 @@
 
 > **Session origin:** 2026-07-13 — ERPv2 Cross-Chain Escrow Wallet blueprint. The `generate_checklist.py` script returned 0 phases and grouped all 8 SPECs under MOD-UNKNOWN because the blueprint format didn't match the generator's regex expectations.
 
+> **Correction (scope-tier generalization pass):** the SPEC-NNN/Module-Ref
+> grouping path described below no longer exists in `generate_checklist.py`
+> — there is one phase-extraction path (`### PHASE-N: Title` headers),
+> confirmed by reading the current script. Two real bugs from that era were
+> fixed: (1) the Part VI boundary regex looked for `## PART VI` when the
+> actual heading is `# PART VI` (single hash), which meant the documented
+> "Part VI Tables" format — this doc's own "Option 1" — silently produced
+> **zero tasks** even when followed correctly; (2) table-column parsing
+> used a fixed column position instead of reading the header row, so any
+> table not in the exact `Prerequisite | Feature Flag | Deliverables |
+> Validation Gate | Rollback` order/wording also silently produced zero
+> tasks. Both are fixed — Part VI's boundary is now `#{1,2}\s*PART\s+VI`
+> (matches either heading depth) and table columns are matched by name.
+> Deliverables may also declare `Type: file|glob|approval|external-check`
+> (see `references/blueprint-standard.md` §6). The "Module Ref" section
+> further down describes a code path that has been removed — kept here
+> only as history, not current behavior.
+
 ---
 
 ## The Fixed Point
 
-**`generate_checklist.py` is NOT to be modified.** The blueprint format must match what the generator expects, not the other way around. Changing the generator to work around one blueprint's formatting breaks every other blueprint in the ecosystem.
+**`generate_checklist.py` is NOT to be modified to work around one
+blueprint's ad hoc formatting.** The blueprint format must match what the
+generator expects. This does not mean the generator's own bugs (e.g. the
+Part VI boundary/column bugs above) go unfixed — it means "reshape your
+blueprint instead of special-casing the parser for it," not "the parser is
+permanently frozen regardless of correctness."
 
 ---
 
@@ -90,25 +113,27 @@ Add a **Part VI — Master Implementation Checklist** to your blueprint with exp
 ```markdown
 # PART VI — MASTER IMPLEMENTATION CHECKLIST
 
-## Phase 0 — Foundation
+### PHASE-0: Foundation
 
 **Section Tag:** `[PHASE-0-v1]` | **Feature Flag:** `FEAT_FOUNDATION`
 
 ### Deliverables
 
-- [ ] 0.1 ERC-4337 EntryPoint v0.7 deployed and verified on Base
-- [ ] 0.2 ERPEscrowWallet implementation deployed via Foundry
-- [ ] 0.3 Beacon proxy factory deployed on Base
+- [ ] **PHASE-0.1** ERC-4337 EntryPoint v0.7 deployed and verified on Base
+- [ ] **PHASE-0.2** ERPEscrowWallet implementation deployed via Foundry
+- [ ] **PHASE-0.3** Beacon proxy factory deployed on Base
 ...
 
 ### Validation Gate
 
-- [ ] All unit tests passing
-- [ ] `FEAT_FOUNDATION` enabled on staging
-- [ ] Change log entry written
+> All unit tests passing. `FEAT_FOUNDATION` enabled on staging. Change log
+> entry written.
 ```
 
-Then run the generator — it will find the `### Phase 0` headers and produce a correct checklist.
+Then run the generator — it will find the `### PHASE-0:` header and produce
+a correct checklist. (The header must be exactly `### PHASE-N: Title` —
+the earlier version of this example used `## Phase 0 — Foundation`, which
+does **not** match the generator's regex; that example has been corrected.)
 
 ### Option 2: Adjust SPEC Table Format
 

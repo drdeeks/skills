@@ -15,9 +15,11 @@ Supports token-optimized tiering (flash iteration → quality final).
 import json
 import os
 import sys
-import yaml
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import simple_yaml as yaml
 
 
 def now_iso():
@@ -115,7 +117,21 @@ def save_yaml(path: Path, data: dict):
     path.write_text(yaml_str)
 
 
+# Set from args.noninteractive at the top of main() before any setup_*()
+# call. When true, every prompt helper below returns its default (or the
+# empty/first-choice fallback) instead of calling input() — this is what
+# actually lets an agent run this script unattended. --noninteractive was
+# previously parsed (main()'s argparse) but only consulted for the single
+# "no identity detected" menu choice — every other prompt in setup_agent()/
+# setup_crew() called input() unconditionally, which meant `--agent
+# --noninteractive` (a completely reasonable, documented invocation) still
+# crashed on the first prompt with a closed/empty stdin.
+NONINTERACTIVE = False
+
+
 def prompt_with_default(prompt: str, default: str = "") -> str:
+    if NONINTERACTIVE:
+        return default
     if default:
         user_input = input(f"{prompt} [{default}]: ").strip()
         return user_input if user_input else default
@@ -128,6 +144,8 @@ def prompt_with_default(prompt: str, default: str = "") -> str:
 
 
 def prompt_yes_no(prompt: str, default: bool = True) -> bool:
+    if NONINTERACTIVE:
+        return default
     default_str = "Y/n" if default else "y/N"
     user_input = input(f"{prompt} [{default_str}]: ").strip().lower()
     if not user_input:
@@ -136,6 +154,8 @@ def prompt_yes_no(prompt: str, default: bool = True) -> bool:
 
 
 def prompt_choice(prompt: str, choices: list, default: str = None) -> str:
+    if NONINTERACTIVE:
+        return default if default else choices[0]
     print(f"{prompt}")
     for i, choice in enumerate(choices, 1):
         marker = " (default)" if choice == default else ""
@@ -347,7 +367,7 @@ def setup_crew(workspace: Path, agent_configs: dict = None) -> dict:
                     "modules": modules
                 })
     
-    if not agents:
+    if not agents and not NONINTERACTIVE:
         print("\nDefine agents (empty agent_id to finish):")
         while True:
             agent_id = input("  Agent ID: ").strip()
@@ -397,7 +417,8 @@ def setup_crew(workspace: Path, agent_configs: dict = None) -> dict:
 
 def main():
     import argparse
-    
+    global NONINTERACTIVE
+
     parser = argparse.ArgumentParser(description="Interactive setup for agent/crew model maps")
     parser.add_argument("workspace", nargs="?", default=".", help="Workspace directory")
     parser.add_argument("--agent", action="store_true", help="Force agent setup")
@@ -407,7 +428,8 @@ def main():
     parser.add_argument("--output-agent", help="Output path for agent model map")
     parser.add_argument("--output-crew", help="Output path for crew model map")
     args = parser.parse_args()
-    
+
+    NONINTERACTIVE = args.noninteractive
     workspace = Path(args.workspace).resolve()
     
     # Parse blueprint for phases

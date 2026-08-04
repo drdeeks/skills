@@ -27,30 +27,27 @@ import sys
 import subprocess
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from skill_paths import resolve_loop_enforcer as _resolve_vendored_chain_py
+
 
 def resolve_loop_enforcer() -> Path:
-    """Self-resolving path to loop-enforcer chain.py (§2)."""
-    env_root = os.environ.get("LOOP_ENFORCER_ROOT")
-    if env_root:
-        chain_py = Path(env_root) / "scripts" / "chain.py"
-        if chain_py.exists():
-            return chain_py
-    
-    # Default: Hermes skills directory
-    skills_root = Path(os.environ.get("HERMES_SKILLS_ROOT", 
-        Path.home() / ".hermes" / "skills"))
-    chain_py = skills_root / "devops" / "loop-enforcer" / "scripts" / "chain.py"
-    if chain_py.exists():
-        return chain_py
-    
-    # Fallback: relative to this script
-    chain_py = Path(__file__).parent.parent.parent / "loop-enforcer" / "scripts" / "chain.py"
-    if chain_py.exists():
-        return chain_py
-    
-    raise FileNotFoundError(
-        "loop-enforcer chain.py not found. Set LOOP_ENFORCER_ROOT env var."
-    )
+    """Self-resolving path to chain.py (§2).
+
+    Delegates to skill_paths.resolve_loop_enforcer() — the same function
+    generate_checklist.py uses — instead of maintaining a second, separately
+    drifting resolution order. That function already tries LOOP_ENFORCER_ROOT
+    first, then falls back to THIS skill's own vendored scripts/chain.py, so
+    it keeps working correctly no matter where enterprise-blueprint as a
+    whole gets copied to (a real requirement: this exact function used to
+    walk three parents up from its own file looking for a *sibling*
+    `loop-enforcer/scripts/chain.py`, which silently broke the moment this
+    directory was copied anywhere outside the original skills repo).
+    HERMES_SKILLS_ROOT / a shared loop-enforcer install is still reachable
+    via LOOP_ENFORCER_ROOT for anyone who wants several skills to share one
+    chain-state engine instead of each using its own vendored copy.
+    """
+    return _resolve_vendored_chain_py()
 
 
 def run_chain_cmd(cmd: str, chain_dir: str, chain_name: str, step: str, extra: list = None) -> dict:
@@ -158,8 +155,10 @@ def find_chain_name(chain_dir: str) -> str:
             if not f.name.endswith(".log"):
                 return f.stem
     
-    # Fallback: use blueprint-<project-name>
-    return f"blueprint-{project_dir.name}"
+    # Fallback: use checklist-<project-name> (matches generate_checklist.py's
+    # _chain_name() prefix, which chain_enforce.py's dispatcher discovers via
+    # a "checklist" substring match)
+    return f"checklist-{project_dir.name}"
 
 
 def main():

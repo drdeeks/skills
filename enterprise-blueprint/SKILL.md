@@ -1,13 +1,15 @@
 ---
 name: enterprise-blueprint
-description: Parse, validate, and generate execution checklists from enterprise project
-  blueprints. Provides 58+ validation rules, phase-gated workflow planning, and CI/CD
-  integration. Use when creating project blueprints, validating blueprint structure,
-  generating execution checklists, or planning multi-phase enterprise workflows. Triggers
+description: Parse, validate, and generate execution checklists from a blueprint —
+  scaled to any scope, from a single trivial task through a full multi-phase
+  enterprise project. Tier-aware validation (MICRO/TASK/PROJECT), phase-gated
+  workflow planning, and CI/CD integration. Use when planning any assigned task
+  end-to-end, creating project blueprints, validating blueprint structure,
+  generating execution checklists, or planning multi-phase workflows. Triggers
   on 'blueprint', 'enterprise blueprint', 'project blueprint', 'blueprint validation',
-  'checklist generation', 'phase planning'.
-version: 1.0.10
-previous_version: 1.0.9
+  'checklist generation', 'phase planning', 'task plan'.
+version: 1.0.14
+previous_version: 1.0.13
 license: MIT
 metadata:
   category: project-planning
@@ -26,12 +28,32 @@ metadata:
 
 # Enterprise Blueprint
 
-Standalone enterprise blueprint workflow engine. Parses blueprint structure, validates against 58+ enterprise rules, generates execution checklists, and plans multi-phase workflows. Zero external dependencies — Python 3.8+ stdlib only.
+Standalone blueprint workflow engine. Parses blueprint structure, validates
+against a tier-scaled rule set (62 checks at PROJECT tier, fewer/looser at
+TASK and MICRO — see `references/blueprint-standard.md`), generates
+execution checklists, and plans multi-phase workflows. Zero external
+dependencies — Python 3.8+ stdlib only.
+
+A blueprint is written **once**, for whatever scope the assigned task
+actually has:
+
+| Scope | For | `--scope` flag |
+|---|---|---|
+| `micro` | A trivial single- or few-step task | `--scope micro` |
+| `task` | A multi-step assignment or single feature | `--scope task` |
+| `project` | A full, complete, multi-phase project (default) | `--scope project` (or omit) |
+
+The seven-part structure (Part I–VII) and the blueprint → checklist →
+chain-enforcement pipeline are the same at every tier; scope only changes
+how much of Parts II–IV must be substantively populated versus legitimately
+marked `N/A — Rationale: ...` (never silently skipped — see
+`references/blueprint-standard.md` §5).
 
 ## When to Use
 
-- Creating or reviewing enterprise project blueprints
-- Validating blueprint structure (7 chapters, 6+ phases, 15+ tasks)
+- Planning any assigned task end-to-end — from a one-off task through a full project
+- Creating or reviewing blueprints at any scope tier
+- Validating blueprint structure against its declared tier
 - Generating phase-by-phase execution checklists
 - Planning resource allocation and dependency chains
 - CI/CD integration for automated validation gates
@@ -39,16 +61,22 @@ Standalone enterprise blueprint workflow engine. Parses blueprint structure, val
 ## Core Capabilities
 
 ### Blueprint Structure Parsing
-- **7 Required Chapters**: Part I-VII following enterprise standards
-- **Phase Extraction**: Detects and tracks 6-7 development phases
+- **7 Required Parts**: Part I-VII at every scope tier
+- **Phase Extraction**: Detects and tracks development phases (1 at MICRO, 3+ at PROJECT)
 - **Task Breakdown**: Granular checklist items with validation gates
+- **Deliverable Types**: `file`/`glob`/`approval`/`external-check`/`review` — `external-check` fails closed with no validator wired, `review` fails closed if the reviewer is the same agent as the phase's assignee — neither silently auto-passes (see `references/blueprint-standard.md` §6)
 - **Rollback Management**: Phase and section rollback tag tracking
 
-### Enterprise Validation
-- **58+ Rules**: Comprehensive validation against enterprise standards
-- **Quality Scoring**: 0-100 compliance score with detailed breakdown
-- **Chapter Validation**: Ensures all 7 enterprise chapters present
-- **Phase Compliance**: Minimum 6 phases, proper structure
+### Tier-Aware Validation
+- **62 checks at PROJECT tier** (48 structural/content + 2 per phase for the Review Gate, §9), scaled down at TASK/MICRO — a data-driven rule table (`validate_blueprint.py`'s `RULES`), not a fixed one-size-fits-all bar
+- **N/A + Rationale enforcement**: Parts II-IV may only be skipped with a stated reason, never silently
+- **Immutability check**: a blueprint's content hash is stamped at generation time; a later undocumented edit (no new CL-#### entry) surfaces as a WARN instead of going unnoticed
+- **Part Compliance**: All 7 parts always required; depth scales by declared tier
+
+### Agent Delegation & Review Gate (Creative Orchestration Doctrine)
+- **Real assignment enforcement**: `assign_agents.py --model-map <agent-or-crew-map.yaml>` bulk-assigns agents to phases from a real model-map file (previously write-only — nothing consumed it); a phase's validation gate now **fails if no real agent is assigned** to it, not just if deliverables are missing (`check_agent_assignment`)
+- **Review Gate (Principle V — "every creative layer has a corresponding reviewer")**: every phase requires a `**Reviewer Agent:**` field and a `Type: review` critique artifact (`Reviewed-By:`/`Date:`/`Critique:`). The phase gate **fails closed if the reviewer is the same agent as the assignee** — proven live: no-review, self-review, and independent-review all produce the expected fail/fail/pass sequence. See `references/agent-roles.md` §9.
+- **Zero external dependencies, for real**: `scripts/simple_yaml.py` is a stdlib-only YAML subset (dump/load) — replaces a prior undeclared `import yaml` (PyYAML) that violated this skill's own dependency contract and silently blocked any model-map data from ever being read back in.
 
 ### Checklist Generation
 - **Phase-by-Phase Breakdown**: Detailed task breakdown per development phase
@@ -93,7 +121,23 @@ python3 scripts/generate_checklist.py ./project --generate-validators
 
 ### Initialize New Blueprint
 ```bash
+# Full project (default — unchanged prior behavior)
 python3 scripts/init_blueprint.py "My Project" --path ./output/project-name
+
+# Trivial single/few-step task
+python3 scripts/init_blueprint.py "Check Weather" --path ./output/weather --scope micro
+
+# Multi-step assignment / single feature
+python3 scripts/init_blueprint.py "CSV Export Feature" --path ./output/csv-export --scope task
+```
+
+### Validate a Blueprint
+```bash
+# Tier read from the blueprint's own "## Scope:" header
+python3 scripts/validate_blueprint.py ./output/project-name/blueprint.md
+
+# Or force a tier explicitly (mismatch vs. the declared header is a FAIL)
+python3 scripts/validate_blueprint.py ./output/weather/blueprint.md --tier micro
 ```
 
 ## Output Formats
@@ -113,7 +157,7 @@ python3 scripts/init_blueprint.py "My Project" --path ./output/project-name
 
 ## Key References
 
-- `references/enterprise-rules.md` — 58+ validation rules
+- `references/enterprise-rules.md` — tier-scaled validation rule catalog (62 checks at PROJECT tier)
 - `references/phase-templates.md` — Phase-specific templates
 - `references/blueprint-structure.md` — Blueprint structure standards
 - `references/checklist-patterns.md` — Checklist generation patterns
@@ -279,19 +323,30 @@ python3 scripts/generate_checklist.py /project --generate-validators
 
 ### Blueprint Structure That Works (Part VI Tables)
 
-The authoritative source of deliverables per phase is the **Part VI implementation checklist table**:
+The authoritative source of deliverables per phase is the **Part VI implementation checklist table** — this is what `init_blueprint.py` actually scaffolds (single `#`, em-dash title):
 
 ```markdown
-## PART VI: Deliverables and Validation
+# PART VI — MASTER IMPLEMENTATION CHECKLIST
 ### PHASE-0: Foundation
 | Prerequisite | Feature Flag | Deliverables | Validation Gate | Rollback |
 |--------------|--------------|--------------|-----------------|----------|
 | Ventoy USB | FEAT_USB_BOOT | iso/maestro.iso | Boot test | RB-001 |
 ```
 
-Each row = one task in the checklist. The data flows into `checklist-data.json` for enforcement.
+Each row = one task in the checklist; each deliverable in the
+`Deliverables` cell may carry a `Type: file|glob|approval|external-check`
+tag (default `file`) — see `references/blueprint-standard.md` §6. The data
+flows into `checklist-data.json` for enforcement.
 
-**Parsing priority**: Part VI tables → fallback to checkbox tasks in phase sections. The old 3-try fallback was removed in favor of this clean single-phase parsing approach.
+Table columns are matched **by header name**, not fixed position — a
+reordered or renamed table (e.g. `Gate` instead of `Validation Gate`) still
+parses correctly, as does either `# PART VI` or `## PART VI` heading depth.
+(An earlier version of this parser matched only `## PART VI` against the
+Part I boundary while the real heading is `# PART VI`, and used fixed
+column positions — both silently produced zero tasks for any table not in
+that exact shape; both are fixed.)
+
+**Parsing priority**: Part VI table → fallback to checkbox tasks in phase sections. There is no other fallback path.
 
 ### Blueprint-Driven Validator Generator (This Session — Primary Pattern)
 

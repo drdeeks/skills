@@ -106,8 +106,40 @@
 
 ## ENFORCEMENT MECHANICS
 
-### Pre-Tool-Call Reminder (FOREVER §6)
-When agent invokes any tool, enforcer injects:
+> **Correction (scope-tier generalization pass):** this section previously
+> described three enforcement mechanisms as if all were implemented. Only
+> the first checklist item under Phase Gate Validation is real. The
+> "Pre-Tool-Call Reminder" injection, "audit via token logs," and Token
+> Budget Tracking below are **not implemented anywhere in this skill's
+> code** (confirmed by grep — no `token_budget`, `audit`, or reminder-
+> injection logic exists in `scripts/`). They describe a policy an agent
+> should follow by discipline, not something the enforcer currently checks.
+> Per FOREVER-SYSTEM §4 (tamper-evident, not tamper-proof — never claim
+> more than what's real), this is corrected below rather than left
+> standing as an unimplemented claim.
+>
+> **What IS real and enforced today:** `assign_agents.py --model-map
+> <path>` reads an agent-/crew-model-map.yaml's `phase_model_map`/`agents`
+> roster and writes real per-phase agent assignments to `assignments.json`
+> (previously this file was write-only from a human running `--assign` by
+> hand — the model-map's data was never actually consumed by anything).
+> A phase's generated validator (`blueprint_validator_gen.py`, when
+> `--with-validators` is used) now calls `check_agent_assignment()`, which
+> **FAILs the phase's validation gate if `assignments.json` has no real
+> agent assigned to that phase** — proven via a live create-fail/assign/
+> pass cycle. This is genuine phase-gate enforcement of delegation, not
+> documentation. What it does NOT do — and cannot do from a shell script
+> with no runtime introspection into the calling agent — is verify which
+> *model* actually executed a given tool call. That half of "agent+model
+> delegation" remains a self-declared convention: the agent-model-map
+> tells an agent which tier to use per phase, and the agent is trusted to
+> follow it, the same way it's trusted to follow any other instruction in
+> its context. This is an honest limitation, not a hidden one.
+
+### Pre-Tool-Call Reminder (FOREVER §6) — not implemented, aspirational
+
+If a calling harness supports per-tool-call context injection, this is the
+intended reminder shape:
 
 ```
 [CHARACTER REMINDER] You are ui-a1b2 (ui). 
@@ -117,14 +149,26 @@ Thinking: DISABLED.
 Strategy: Flash-first iteration. Retrieve don't remember.
 ```
 
-### Phase Gate Validation
-Before phase transition, enforcer verifies:
-1. All checklist items for phase have `verified` state in `.blueprint-chain/`
-2. Agent's model usage matches phase_model_map (audit via token logs)
-3. Token budget not exceeded (alert at 75%)
+Nothing in this skill currently generates or injects this — it would need
+to be wired into whatever harness/orchestrator actually dispatches tool
+calls, which is outside this skill's boundary (it produces the blueprint/
+checklist/chain, not the agent runtime itself).
 
-### Token Budget Tracking
-Per-project token accounting:
+### Phase Gate Validation
+
+Before phase completion, the enforcer verifies:
+1. **Real, enforced:** all checklist items for the phase have `verified`
+   state in `.blueprint-chain/`, AND the phase has a real assigned agent
+   in `assignments.json` (`check_agent_assignment`, FAILs closed if
+   missing — see correction note above).
+2. Not implemented: "agent's model usage matches phase_model_map" — there
+   is no token-log audit trail to check this against.
+3. Not implemented: token budget threshold enforcement (below).
+
+### Token Budget Tracking — documented convention, not enforced
+
+The schema below is written into generated model maps as a planning
+target; nothing currently reads it back to alert or block:
 ```yaml
 # In crew-model-map.yaml or agent-model-map.yaml
 token_budget:
@@ -163,9 +207,16 @@ provider_mapping:
     ...
 ```
 
-### Runtime Resolution
+### Runtime Resolution — reference implementation, not shipped in scripts/
+
+This resolution logic doesn't exist in `scripts/` (confirmed by grep) — it's
+shown here as the reference implementation for whatever runtime actually
+dispatches model calls, since that dispatch happens outside this skill's
+boundary. `simple_yaml.safe_load()` (this skill's own stdlib-only YAML
+reader — see `scripts/simple_yaml.py`) can parse `provider_mapping` back
+out of a model-map file without needing PyYAML:
 ```python
-def resolve_model(tier: str, provider: str = None) -> str:
+def resolve_model(tier: str, model_tiers: dict, provider: str = None) -> str:
     provider = provider or os.environ.get("MODEL_PROVIDER", "qwen")
     return model_tiers[provider].get(tier, model_tiers["qwen"][tier])
 ```

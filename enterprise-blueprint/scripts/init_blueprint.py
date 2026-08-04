@@ -3,11 +3,15 @@
 enterprise-blueprint — Initialize a new blueprint project
 
 Creates blueprint.md and checklist.md side by side, pre-populated with
-all required enterprise sections, rollback tags, module registry placeholder,
-change log stub, and phase scaffolding.
+all required sections, rollback tags, module registry placeholder,
+change log stub, and phase scaffolding — scaled to the declared scope tier
+(micro/task/project). See references/blueprint-standard.md for the full
+tier specification.
 
 Usage:
     python3 scripts/init_blueprint.py <project-name> --path <output-dir>
+    python3 scripts/init_blueprint.py <project-name> --path <output-dir> --scope micro
+    python3 scripts/init_blueprint.py <project-name> --path <output-dir> --scope task
     python3 scripts/init_blueprint.py <project-name> --path <output-dir> --phases "Pre-Build,Foundation,Auth,Core"
     python3 scripts/init_blueprint.py <project-name> --path <output-dir> --dry-run
     python3 scripts/init_blueprint.py <project-name> --path <output-dir> --json
@@ -22,15 +26,26 @@ from pathlib import Path
 
 VERSION = "1.0"
 
-DEFAULT_PHASES = [
-    "Phase 0: Pre-Build",
-    "Phase 1: Foundation",
-    "Phase 2: Authentication & Identity",
-    "Phase 3: Core Feature Build",
-    "Phase 4: Integration Layer",
-    "Phase 5: Testing & Hardening",
-    "Phase 6: Launch & Live Ops",
-]
+SCOPES = ("micro", "task", "project")
+
+DEFAULT_PHASES = {
+    "micro": [
+        "Phase 0: Task Execution",
+    ],
+    "task": [
+        "Phase 0: Implementation",
+        "Phase 1: Verification",
+    ],
+    "project": [
+        "Phase 0: Pre-Build",
+        "Phase 1: Foundation",
+        "Phase 2: Authentication & Identity",
+        "Phase 3: Core Feature Build",
+        "Phase 4: Integration Layer",
+        "Phase 5: Testing & Hardening",
+        "Phase 6: Launch & Live Ops",
+    ],
+}
 
 
 def now_iso():
@@ -62,6 +77,10 @@ def phase_tag(index):
     return f"[PHASE-{index}-v1]"
 
 
+def na_rationale(hint):
+    return f"N/A — Rationale: [{hint}]"
+
+
 # ── Blueprint generation ───────────────────────────────────────────────────────
 
 def blueprint_phase_section(i, phase):
@@ -74,6 +93,7 @@ def blueprint_phase_section(i, phase):
         f"**Section Tag:** `{tag}`",
         f"**Feature Flag:** `{flag}`",
         "**Assigned Agent:** _unassigned_",
+        "**Reviewer Agent:** _unassigned_ — must differ from Assigned Agent (Creative Orchestration Doctrine Principle V)",
         "",
         "### Prerequisites",
         "",
@@ -81,8 +101,9 @@ def blueprint_phase_section(i, phase):
         "",
         "### Deliverables",
         "",
-        f"- [ ] **PHASE-{i}.1** [Define deliverable 1]",
-        f"- [ ] **PHASE-{i}.2** [Define deliverable 2]",
+        f"- [ ] **PHASE-{i}.1** Type: file [Define deliverable 1]",
+        f"- [ ] **PHASE-{i}.2** Type: file [Define deliverable 2]",
+        f"- [ ] **PHASE-{i}.3** review-phase{i}.md Type: review",
         "",
         "### Validation Gate",
         "",
@@ -101,13 +122,180 @@ def blueprint_phase_section(i, phase):
     return "\n".join(lines)
 
 
-def generate_blueprint(project_name, phases):
+def part_i_architecture_block(scope):
+    if scope == "project":
+        return [
+            "```",
+            "┌─────────────────────────────────────────────────────────────┐",
+            "│                     ENTRY LAYER                              │",
+            "└────────────────────┬────────────────────────────────────────┘",
+            "                     │",
+            "┌────────────────────▼────────────────────────────────────────┐",
+            "│                  APPLICATION LAYER                           │",
+            "└────────────────────┬────────────────────────────────────────┘",
+            "                     │",
+            "┌────────────────────▼────────────────────────────────────────┐",
+            "│                   DATA LAYER                                 │",
+            "└─────────────────────────────────────────────────────────────┘",
+            "```",
+            "",
+            "> **PROJECT tier requires this diagram expanded to 50+ lines with",
+            "> box-drawing characters before validation passes — this is a",
+            "> starting skeleton, not the final diagram.**",
+        ]
+    if scope == "task":
+        return [
+            "```",
+            "[Step/Component A] ──▶ [Step/Component B] ──▶ [Outcome]",
+            "```",
+            "",
+            "> A short block diagram or flow description is sufficient at TASK scope.",
+        ]
+    return [
+        "[One or two lines describing the flow of this task from input to",
+        "outcome. A full diagram is not required at MICRO scope.]",
+    ]
+
+
+def part_ii_module_registry(scope):
+    if scope == "micro":
+        return [
+            na_rationale("state why this task has no separable modules/components"),
+        ]
+    if scope == "task":
+        return [
+            "| Module ID | Name | Description | Feature Flag |",
+            "|---|---|---|---|",
+            "| MOD-001 | [Name] | [Description] | FEAT_[NAME] |",
+        ]
+    return [
+        "| Module ID | Name | Description | Feature Flag |",
+        "|---|---|---|---|",
+        "| MOD-001 | [Name] | [Description] | FEAT_[NAME] |",
+        "",
+        "> **PROJECT tier requires 3+ modules** — add MOD-002, MOD-003, etc.",
+    ]
+
+
+def part_iii_feature_specs(scope):
+    if scope == "micro":
+        return [
+            na_rationale("state why this task has no separate screen/feature specs"),
+        ]
+    header = [
+        "Each specification follows this format:",
+        "> ID, Module Ref, Rollback Tag, Feature Flag, Purpose,",
+        "> Components, Rules, Error States, Fallback.",
+        "",
+        "[Insert screen and feature specifications here]",
+    ]
+    if scope == "project":
+        header.append("")
+        header.append("> **PROJECT tier requires 3+ feature specifications** with all fields.")
+    return header
+
+
+def part_iv_data_architecture(scope):
+    if scope == "micro":
+        return {
+            "schemas": [na_rationale("state why this task has no persisted data/state")],
+            "api": [na_rationale("state why this task has no interface/API contract")],
+        }
+    if scope == "task":
+        return {
+            "schemas": [
+                "[Describe any data/state this task reads or writes — a single",
+                "schema, a data shape, or `" + na_rationale("no data involved") + "` if genuinely none.]",
+            ],
+            "api": [
+                "[Describe any interface/contract this task exposes or depends on,",
+                "or `" + na_rationale("no interface involved") + "` if genuinely none.]",
+            ],
+        }
+    return {
+        "schemas": [
+            "[Insert SQL schemas here]",
+            "",
+            "> **PROJECT tier requires 3+ `CREATE TABLE` schemas.**",
+        ],
+        "api": [
+            "All API endpoints follow: `/api/v1/{resource}/{action}`.",
+            "All responses follow the standard error envelope:",
+            "  success, data, error (code + message), meta (requestId + timestamp).",
+            "",
+            "> **PROJECT tier requires 3+ documented endpoints.**",
+        ],
+    }
+
+
+def part_vii_quality(scope):
+    if scope == "micro":
+        return [
+            "## Error Handling",
+            "",
+            "[State in one sentence what happens if this task fails.]",
+            "",
+            "## Done Criteria",
+            "",
+            "[State at least one concrete criterion that proves this task succeeded.]",
+        ]
+    if scope == "task":
+        return [
+            "## Error Handling Standards",
+            "",
+            "1. [Level 1 — e.g. input validation]",
+            "2. [Level 2 — e.g. execution failure]",
+            "3. [Level 3 — e.g. reporting/notification failure]",
+            "",
+            "## Testing / Verification",
+            "",
+            "- [How correctness is confirmed — real test names/commands, or",
+            "  manual verification steps.]",
+            "",
+            "## Done Criteria",
+            "",
+            "| Criterion | Target |",
+            "|---|---|",
+            "| [Criterion 1] | [Concrete value] |",
+            "| [Criterion 2] | [Concrete value] |",
+            "| [Criterion 3] | [Concrete value] |",
+        ]
+    return [
+        "## Error Handling Standards",
+        "",
+        "1. Graceful degradation for all non-critical services.",
+        "2. User-facing messages: friendly, non-technical, no stack traces exposed.",
+        "3. Internal logging: full context — requestId, userId, error code, stack.",
+        "4. Retry: exponential backoff on external calls (3 retries: 1s, 2s, 4s).",
+        "5. Circuit breaker: 10 failures in 60s opens circuit for 5 minutes.",
+        "",
+        "## Testing Requirements",
+        "",
+        "- Unit tests: 80% line coverage on all core modules.",
+        "- Integration tests: every API endpoint has success + error case.",
+        "- E2E tests: all critical user flows have passing automated tests.",
+        "",
+        "## Performance Budgets",
+        "",
+        "| Metric | Budget |",
+        "|---|---|",
+        "| Page load LCP (3G) | < 2.0 seconds |",
+        "| API response time p95 | < 500ms |",
+        "| Background job completion | < 60 seconds |",
+        "",
+        "> **PROJECT tier requires 6+ concrete metrics with units.**",
+    ]
+
+
+def generate_blueprint(project_name, phases, scope):
     d = today()
     phase_block = "".join(blueprint_phase_section(i, p) for i, p in enumerate(phases))
+    doc_class = "ENTERPRISE BLUEPRINT" if scope == "project" else "BLUEPRINT"
 
     parts = []
-    parts.append(f"# {project_name} — ENTERPRISE BLUEPRINT")
+    parts.append(f"# {project_name} — {doc_class}")
     parts.append(f"## Version: 1.0 | Document Class: MASTER SPECIFICATION")
+    parts.append(f"## Scope: {scope.upper()}")
     parts.append(f"### Generated: {d}")
     parts.append("")
     parts.append("> **READ FIRST — DOCUMENT AUTHORITY**")
@@ -142,28 +330,16 @@ def generate_blueprint(project_name, phases):
     parts.append("")
     parts.append("## 1.1 Vision Statement")
     parts.append("")
-    parts.append("[Describe the product vision in 2-3 sentences. What does it do?")
-    parts.append("Who uses it? What is the defining principle of the system?]")
+    parts.append("[Describe the vision in 2-3 sentences. What does it do?")
+    parts.append("Who uses it? What is the defining principle?]")
     parts.append("")
     parts.append("## 1.2 High-Level Architecture")
     parts.append("")
-    parts.append("```")
-    parts.append("┌─────────────────────────────────────────────────────────────┐")
-    parts.append("│                     ENTRY LAYER                              │")
-    parts.append("└────────────────────┬────────────────────────────────────────┘")
-    parts.append("                     │")
-    parts.append("┌────────────────────▼────────────────────────────────────────┐")
-    parts.append("│                  APPLICATION LAYER                           │")
-    parts.append("└────────────────────┬────────────────────────────────────────┘")
-    parts.append("                     │")
-    parts.append("┌────────────────────▼────────────────────────────────────────┐")
-    parts.append("│                   DATA LAYER                                 │")
-    parts.append("└─────────────────────────────────────────────────────────────┘")
-    parts.append("```")
+    parts.extend(part_i_architecture_block(scope))
     parts.append("")
-    parts.append("## 1.3 Tech Stack")
+    parts.append("## 1.3 Tech Stack" if scope == "project" else "## 1.3 Approach")
     parts.append("")
-    parts.append("| Layer | Technology | Rationale |")
+    parts.append("| Layer | Technology | Rationale |" if scope == "project" else "| Step | Approach | Rationale |")
     parts.append("|---|---|---|")
     parts.append("| [Layer] | [Technology] | [Why this was chosen] |")
     parts.append("")
@@ -174,11 +350,10 @@ def generate_blueprint(project_name, phases):
     parts.append("# PART II — MODULE REGISTRY")
     parts.append("")
     parts.append("> **Rollback Tag:** `[MODULE-REGISTRY-v1]`")
-    parts.append("> **Rule:** Every change log entry MUST reference at least one Module ID.")
+    parts.append("> **Rule:** Every change log entry MUST reference at least one Module ID")
+    parts.append("> (unless this Part is N/A for this scope).")
     parts.append("")
-    parts.append("| Module ID | Name | Description | Feature Flag |")
-    parts.append("|---|---|---|---|")
-    parts.append("| MOD-001 | [Name] | [Description] | FEAT_[NAME] |")
+    parts.extend(part_ii_module_registry(scope))
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -187,11 +362,8 @@ def generate_blueprint(project_name, phases):
     parts.append("# PART III — SCREEN & FEATURE SPECIFICATIONS")
     parts.append("")
     parts.append("> **Rollback Tag:** `[SPECS-v1]`")
-    parts.append("> Each specification follows this format:")
-    parts.append("> ID, Module Ref, Rollback Tag, Feature Flag, Purpose,")
-    parts.append("> Components, Rules, Error States, Fallback.")
     parts.append("")
-    parts.append("[Insert screen and feature specifications here]")
+    parts.extend(part_iii_feature_specs(scope))
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -202,17 +374,16 @@ def generate_blueprint(project_name, phases):
     parts.append("> **Rollback Tag:** `[DATA-ARCH-v1]`")
     parts.append("> **Rule:** All schema changes require a migration file named")
     parts.append("> `YYYYMMDD_NNN_description.sql` with a corresponding rollback file,")
-    parts.append("> and must be referenced in the Global Change Log.")
+    parts.append("> and must be referenced in the Global Change Log (where applicable).")
     parts.append("")
-    parts.append("## 4.1 Core Database Schemas")
+    data_blocks = part_iv_data_architecture(scope)
+    parts.append("## 4.1 Core Database Schemas" if scope == "project" else "## 4.1 Core Data / State")
     parts.append("")
-    parts.append("[Insert SQL schemas here]")
+    parts.extend(data_blocks["schemas"])
     parts.append("")
-    parts.append("## 4.2 API Contract Specifications")
+    parts.append("## 4.2 API Contract Specifications" if scope == "project" else "## 4.2 Interface / API Contracts")
     parts.append("")
-    parts.append("All API endpoints follow: `/api/v1/{resource}/{action}`.")
-    parts.append("All responses follow the standard error envelope:")
-    parts.append("  success, data, error (code + message), meta (requestId + timestamp).")
+    parts.extend(data_blocks["api"])
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -243,12 +414,15 @@ def generate_blueprint(project_name, phases):
     parts.append("")
     parts.append("## Contributor Rules")
     parts.append("")
-    parts.append("1. No code merged without a change log entry in the same PR.")
+    parts.append("1. No work merged without a change log entry in the same PR.")
     parts.append("2. No database migration without a rollback migration file.")
-    parts.append("3. Feature flags required for every Phase 2+ feature.")
-    parts.append("4. Minimum: 1 unit test per new function, 1 integration test per endpoint.")
-    parts.append("5. `CHANGELOG.md` CI append-only check must pass on every PR.")
-    parts.append("6. No contributor may modify or delete an existing change log entry.")
+    if scope == "project":
+        parts.append("3. Feature flags required for every Phase 2+ feature.")
+        parts.append("4. Minimum: 1 unit test per new function, 1 integration test per endpoint.")
+        parts.append("5. `CHANGELOG.md` CI append-only check must pass on every PR.")
+        parts.append("6. No contributor may modify or delete an existing change log entry.")
+    else:
+        parts.append("3. No contributor may modify or delete an existing change log entry.")
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -265,27 +439,7 @@ def generate_blueprint(project_name, phases):
     parts.append("")
     parts.append("> **Rollback Tag:** `[QUALITY-v1]`")
     parts.append("")
-    parts.append("## Error Handling Standards")
-    parts.append("")
-    parts.append("1. Graceful degradation for all non-critical services.")
-    parts.append("2. User-facing messages: friendly, non-technical, no stack traces exposed.")
-    parts.append("3. Internal logging: full context — requestId, userId, error code, stack.")
-    parts.append("4. Retry: exponential backoff on external calls (3 retries: 1s, 2s, 4s).")
-    parts.append("5. Circuit breaker: 10 failures in 60s opens circuit for 5 minutes.")
-    parts.append("")
-    parts.append("## Testing Requirements")
-    parts.append("")
-    parts.append("- Unit tests: 80% line coverage on all core modules.")
-    parts.append("- Integration tests: every API endpoint has success + error case.")
-    parts.append("- E2E tests: all critical user flows have passing automated tests.")
-    parts.append("")
-    parts.append("## Performance Budgets")
-    parts.append("")
-    parts.append("| Metric | Budget |")
-    parts.append("|---|---|")
-    parts.append("| Page load LCP (3G) | < 2.0 seconds |")
-    parts.append("| API response time p95 | < 500ms |")
-    parts.append("| Background job completion | < 60 seconds |")
+    parts.extend(part_vii_quality(scope))
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -300,12 +454,12 @@ def generate_blueprint(project_name, phases):
     parts.append("```")
     parts.append(f"Date        : {d}")
     parts.append("Contributor : [author]")
-    parts.append("Modules     : [MOD-001]")
+    parts.append("Modules     : [MOD-001]" if scope != "micro" else "Modules     : [N/A — no modules at MICRO scope]")
     parts.append("Section Tags: [[PHASE-0-v1]]")
     parts.append("Files Changed: [blueprint.md, checklist.md]")
     parts.append(f"Description : Initial blueprint created via enterprise-blueprint skill.")
-    parts.append(f"              Project: {project_name}. All sections pre-populated with")
-    parts.append("              required enterprise structure awaiting content population.")
+    parts.append(f"              Project: {project_name}. Scope: {scope.upper()}. All sections")
+    parts.append("              pre-populated with required structure awaiting content population.")
     parts.append("Tests Passing: none — pre-build")
     parts.append("Phase       : PHASE-0")
     parts.append("Rollback Ref: N/A — initial document creation")
@@ -314,7 +468,7 @@ def generate_blueprint(project_name, phases):
     return "\n".join(parts) + "\n"
 
 
-def generate_changelog(project_name, phases):
+def generate_changelog(project_name, phases, scope):
     """Generate standalone CHANGELOG.md from blueprint's changelog section."""
     d = today()
     parts = []
@@ -330,12 +484,12 @@ def generate_changelog(project_name, phases):
     parts.append("```")
     parts.append(f"Date        : {d}")
     parts.append("Contributor : [author]")
-    parts.append("Modules     : [MOD-001]")
+    parts.append("Modules     : [MOD-001]" if scope != "micro" else "Modules     : [N/A — no modules at MICRO scope]")
     parts.append("Section Tags: [[PHASE-0-v1]]")
     parts.append("Files Changed: [blueprint.md, checklist.md, CHANGELOG.md]")
     parts.append(f"Description : Initial blueprint created via enterprise-blueprint skill.")
-    parts.append(f"              Project: {project_name}. All sections pre-populated with")
-    parts.append("              required enterprise structure awaiting content population.")
+    parts.append(f"              Project: {project_name}. Scope: {scope.upper()}. All sections")
+    parts.append("              pre-populated with required structure awaiting content population.")
     parts.append("Tests Passing: none — pre-build")
     parts.append("Phase       : PHASE-0")
     parts.append("Rollback Ref: N/A — initial document creation")
@@ -363,40 +517,33 @@ def checklist_phase_section(i, phase):
         "Confirm all of the following before starting:",
         "",
         f"- [ ] Prior phase change log entry is written and appended to `CHANGELOG.md`.",
-        "- [ ] All prior phase tests are passing in CI.",
-        f"- [ ] Feature flags for `{flag}` are set to `disabled` in production.",
-        "- [ ] Database migration rollback files for this phase are prepared.",
+        "- [ ] All prior phase tests/verification are passing.",
+        f"- [ ] Feature flags for `{flag}` are set to `disabled` in production (if applicable).",
         "- [ ] Agent assignment for this phase is confirmed in `assignments.json`.",
+        "- [ ] Reviewer Agent (distinct from Assigned Agent) is confirmed for this phase.",
         "",
         "### Implementation Steps",
         "",
-        "> Each step must be completed, tested, and logged before proceeding.",
+        "> Each step must be completed, verified, and logged before proceeding.",
         "",
         "- [ ] **Step 1:** [First concrete implementation action]",
-        "  - _Example:_ Create migration `YYYYMMDD_001_[table_name].sql` with rollback `_ROLLBACK.sql`.",
-        "  - _Validation:_ Migration applies and rolls back cleanly on a fresh database.",
-        "  - _Rollback Ref:_ Execute `YYYYMMDD_001_ROLLBACK.sql`.",
+        "  - _Validation:_ [How this step's correctness is confirmed.]",
+        "  - _Rollback Ref:_ [How to undo this step if needed.]",
         "",
-        "- [ ] **Step 2:** [Next implementation action]",
-        "  - _Example:_ Implement `POST /api/v1/[resource]` with standard error envelope.",
-        "  - _Validation:_ Unit test passes: `[module].[feature].[scenario]`.",
-        "  - _Rollback Ref:_ Revert the route file; redeploy.",
-        "",
-        "- [ ] **Step 3:** [Continue for all steps specific to this phase]",
-        "  - _Example:_ Enable feature flag on staging; run smoke test suite.",
-        "  - _Validation:_ All Phase smoke tests pass; no p95 regression > 20%.",
-        "  - _Rollback Ref:_ Disable feature flag; no code change required.",
+        "- [ ] **Step 2:** [Continue for all steps specific to this phase]",
+        "  - _Validation:_ [How this step's correctness is confirmed.]",
+        "  - _Rollback Ref:_ [How to undo this step if needed.]",
         "",
         "### Phase Validation Gate",
         "",
         "All of the following must be true before this phase is marked `COMPLETE`:",
         "",
         "- [ ] All implementation steps above are checked.",
-        "- [ ] All tests introduced in this phase are passing in CI.",
-        f"- [ ] `{flag}` is confirmed enabled on staging, disabled on production.",
+        "- [ ] All verification introduced in this phase is passing.",
         "- [ ] Change log entry for this phase is written and appended.",
         "- [ ] Blueprint updated to reflect any deviations from specification.",
         "- [ ] Assigned agent has signed off (name + date below).",
+        f"- [ ] `review-phase{i}.md` exists with Reviewed-By/Date/Critique fields, Reviewed-By ≠ Assigned Agent.",
         "",
         "### Agent Sign-Off",
         "",
@@ -413,13 +560,14 @@ def checklist_phase_section(i, phase):
     return "\n".join(lines)
 
 
-def generate_checklist(project_name, phases):
+def generate_checklist(project_name, phases, scope):
     d = today()
     phase_block = "".join(checklist_phase_section(i, p) for i, p in enumerate(phases))
+    doc_class = "ENTERPRISE CHECKLIST" if scope == "project" else "CHECKLIST"
 
     parts = []
-    parts.append(f"# {project_name} — ENTERPRISE CHECKLIST")
-    parts.append(f"## Version: 1.0 | Coexists with: blueprint.md")
+    parts.append(f"# {project_name} — {doc_class}")
+    parts.append(f"## Version: 1.0 | Scope: {scope.upper()} | Coexists with: blueprint.md")
     parts.append(f"### Generated: {d}")
     parts.append("")
     parts.append("> **CHECKLIST AUTHORITY**")
@@ -437,13 +585,16 @@ def generate_checklist(project_name, phases):
     parts.append("")
     parts.append("Before any phase begins:")
     parts.append("")
-    parts.append("- [ ] Repository created with `/app`, `/lib`, `/db`, `/contracts`, `/tests`, `/docs`.")
-    parts.append("- [ ] `CHANGELOG.md` created with append-only CI enforcement check.")
-    parts.append("- [ ] `global_change_log` database table created with INSERT-only trigger.")
-    parts.append("- [ ] All module IDs registered in `modules` config table.")
-    parts.append("- [ ] Feature flags system initialized; all flags default to `disabled`.")
-    parts.append("- [ ] CI/CD pipeline configured: test → lint → build → staging deploy.")
-    parts.append("- [ ] Monitoring and error tracking connected to staging environment.")
+    if scope == "project":
+        parts.append("- [ ] Repository created with `/app`, `/lib`, `/db`, `/contracts`, `/tests`, `/docs`.")
+        parts.append("- [ ] `CHANGELOG.md` created with append-only CI enforcement check.")
+        parts.append("- [ ] `global_change_log` database table created with INSERT-only trigger.")
+        parts.append("- [ ] All module IDs registered in `modules` config table.")
+        parts.append("- [ ] Feature flags system initialized; all flags default to `disabled`.")
+        parts.append("- [ ] CI/CD pipeline configured: test → lint → build → staging deploy.")
+        parts.append("- [ ] Monitoring and error tracking connected to staging environment.")
+    else:
+        parts.append("- [ ] `CHANGELOG.md` created with append-only convention noted.")
     parts.append("- [ ] `assignments.json` populated for at least Phase 0.")
     parts.append("")
     parts.append("---")
@@ -453,15 +604,16 @@ def generate_checklist(project_name, phases):
     parts.append("")
     parts.append("## GLOBAL COMPLETION CRITERIA")
     parts.append("")
-    parts.append("The project is production-complete when:")
+    parts.append("This task is complete when:" if scope != "project" else "The project is production-complete when:")
     parts.append("")
     parts.append("- [ ] All phase statuses are `COMPLETE`.")
-    parts.append("- [ ] All feature flags are enabled in production.")
-    parts.append("- [ ] Performance budgets verified by load test (results in change log).")
-    parts.append("- [ ] Security audit of all auth and payment flows is complete.")
-    parts.append("- [ ] Data export and deletion (GDPR compliance) is verified.")
-    parts.append("- [ ] Post-launch monitoring dashboards live and alerting configured.")
-    parts.append("- [ ] Final change log entry written documenting the production launch.")
+    if scope == "project":
+        parts.append("- [ ] All feature flags are enabled in production.")
+        parts.append("- [ ] Performance budgets verified by load test (results in change log).")
+        parts.append("- [ ] Security audit of all auth and payment flows is complete.")
+        parts.append("- [ ] Data export and deletion (GDPR compliance) is verified.")
+        parts.append("- [ ] Post-launch monitoring dashboards live and alerting configured.")
+    parts.append("- [ ] Final change log entry written documenting completion.")
 
     return "\n".join(parts) + "\n"
 
@@ -470,24 +622,32 @@ def generate_checklist(project_name, phases):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Initialize an enterprise blueprint + checklist project."
+        description="Initialize a blueprint + checklist project, scaled to a scope tier."
     )
     parser.add_argument("project_name", help="Project name (used in headings)")
     parser.add_argument("--path", required=True, help="Output directory")
     parser.add_argument(
+        "--scope",
+        choices=SCOPES,
+        default="project",
+        help="Scope tier: micro (trivial task), task (multi-step assignment), "
+             "project (full project, default — matches prior behavior)",
+    )
+    parser.add_argument(
         "--phases",
         default=None,
-        help="Comma-separated list of phase names (default: 7-phase standard set)",
+        help="Comma-separated list of phase names (default: scope's standard phase set)",
     )
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing files")
     parser.add_argument("--json", action="store_true", help="Output JSON statistics only")
     args = parser.parse_args()
 
     started = now_iso()
+    scope = args.scope
     phases = (
         [p.strip() for p in args.phases.split(",")]
         if args.phases
-        else DEFAULT_PHASES
+        else DEFAULT_PHASES[scope]
     )
     output_dir = Path(args.path)
     blueprint_path = output_dir / "blueprint.md"
@@ -502,17 +662,18 @@ def main():
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
             blueprint_path.write_text(
-                generate_blueprint(args.project_name, phases), encoding="utf-8"
+                generate_blueprint(args.project_name, phases, scope), encoding="utf-8"
             )
             checklist_path.write_text(
-                generate_checklist(args.project_name, phases), encoding="utf-8"
+                generate_checklist(args.project_name, phases, scope), encoding="utf-8"
             )
             changelog_path.write_text(
-                generate_changelog(args.project_name, phases), encoding="utf-8"
+                generate_changelog(args.project_name, phases, scope), encoding="utf-8"
             )
             metadata = {
                 "project": args.project_name,
                 "slug": slugify(args.project_name),
+                "scope": scope,
                 "phases": phases,
                 "version": VERSION,
                 "created_at": started,
@@ -532,6 +693,7 @@ def main():
         "status": status,
         "project": args.project_name,
         "details": {
+            "scope": scope,
             "phases": len(phases),
             "phase_names": phases,
             "output_dir": str(output_dir),
@@ -555,9 +717,10 @@ def main():
             print(f"  {checklist_path}")
             print(f"  {changelog_path}")
             print(f"  {metadata_path}")
+            print(f"  Scope: {scope}")
             print(f"  Phases ({len(phases)}): {', '.join(phases)}")
         elif status == "success":
-            print(f"[OK] Blueprint initialized: {output_dir}")
+            print(f"[OK] Blueprint initialized ({scope}): {output_dir}")
             print(f"  blueprint.md  → {blueprint_path}")
             print(f"  checklist.md  → {checklist_path}")
             print(f"  CHANGELOG.md  → {changelog_path}")
