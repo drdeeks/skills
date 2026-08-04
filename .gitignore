@@ -19,11 +19,12 @@ __pycache__/
 # ── Superseded skills: preserved on disk, kept OUT of the pushed repo ─────────
 archived/
 
+# ── Removed-from-repo skills + other local cleanup debris: preserved on disk,
+# never tracked (see .trash/ for what's actually in there at any given time) ──
+.trash/
+
 # ── Editor / OS junk ─────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 *.swp
 *~
-
-# ── Fetched on demand by portable-usb-manager (never commit the blob) ─────────
-ventoy-*-linux.tar.gz
