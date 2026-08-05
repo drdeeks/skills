@@ -232,6 +232,9 @@ def main():
     args = ap.parse_args()
     
     scripts_dir = Path(args.scripts_dir)
+    if not scripts_dir.is_dir():
+        print(f"error: no such directory: {scripts_dir}", file=sys.stderr)
+        sys.exit(1)
     # Auto-detect scripts subdirectory
     if (scripts_dir / "scripts").is_dir():
         scripts_dir = scripts_dir / "scripts"

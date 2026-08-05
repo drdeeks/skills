@@ -48,8 +48,12 @@ def main():
     
     workspace_root = Path(os.environ.get("WORKSPACE_ROOT", Path.home() / "crews"))
     crew_dir = workspace_root / args.crew_id
-    crew_dir.mkdir(parents=True, exist_ok=True)
-    
+    try:
+        crew_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(f"error: could not create crew workspace at {crew_dir}: {exc}", file=sys.stderr)
+        return 1
+
     print(f"=== Initializing Crew: {args.crew_id} ===")
     print(f"  Workspace: {crew_dir}")
     

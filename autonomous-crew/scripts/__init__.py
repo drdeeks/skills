@@ -42,3 +42,14 @@ __compatible_with__ = [
     "openclaw-gateway",
     "hermes-agent"
 ]
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print("Usage: __init__.py\n\n"
+              "This is skill package metadata (name/version/tags/deps), not a "
+              "runnable script -- import it instead: `import __init__ as meta`.")
+        sys.exit(0)
+    print("error: scripts/__init__.py is skill package metadata, not a runnable "
+          "script -- import it instead.", file=sys.stderr)
+    sys.exit(1)

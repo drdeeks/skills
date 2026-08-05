@@ -4,6 +4,7 @@ Generate Kanban tasks from project checklist.md files
 Parses the detailed deliverables and validation gates from each phase
 """
 
+import argparse
 import os
 import re
 import sqlite3
@@ -166,8 +167,13 @@ def sync_to_kanban(tasks):
     print(f"Synced {len(tasks)} tasks to kanban")
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Generate kanban tasks from each project's checklist.md",
+    )
+    parser.parse_args()  # takes no arguments; unexpected ones are a usage error
+
     projects = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
-    
+
     print("Parsing checklists...")
     tasks = generate_kanban_tasks(projects)
     

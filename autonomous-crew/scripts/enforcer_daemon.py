@@ -341,9 +341,13 @@ Example:
         sys.exit(0)
     
     parser.parse_args()
-    
-    config = EnforcerConfig(args.agent_id)
-    enforcer = AgentEnforcer(config)
+
+    try:
+        config = EnforcerConfig(args.agent_id)
+        enforcer = AgentEnforcer(config)
+    except OSError as exc:
+        print(f"error: could not initialize enforcer for agent '{args.agent_id}': {exc}", file=sys.stderr)
+        sys.exit(1)
     asyncio.run(enforcer.run())
 
 if __name__ == "__main__":

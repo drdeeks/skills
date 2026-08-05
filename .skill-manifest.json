@@ -64,11 +64,11 @@
       ]
     },
     "skill-creator": {
-      "current_version": "3.0.18",
-      "previous_version": "3.0.17",
-      "last_packaged": "2026-07-22T20:58:30.746134+00:00",
+      "current_version": "3.0.19",
+      "previous_version": "3.0.18",
+      "last_packaged": "2026-08-05T13:18:15.033055+00:00",
       "files": 39,
-      "size_bytes": 346450,
+      "size_bytes": 346446,
       "history": [
         {
           "version": "3.0.8",
@@ -104,6 +104,11 @@
         {
           "version": "3.0.18",
           "timestamp": "2026-07-22T20:58:30.746134+00:00",
+          "files": 39
+        },
+        {
+          "version": "3.0.19",
+          "timestamp": "2026-08-05T13:18:15.033055+00:00",
           "files": 39
         }
       ]
@@ -168,11 +173,11 @@
       ]
     },
     "autonomous-crew": {
-      "current_version": "1.2.0",
+      "current_version": "1.2.1",
       "previous_version": "1.2.0",
-      "last_packaged": "2026-08-05T12:23:51.311656+00:00",
+      "last_packaged": "2026-08-05T13:13:43.238247+00:00",
       "files": 106,
-      "size_bytes": 539514,
+      "size_bytes": 541601,
       "history": [
         {
           "version": "1.2.2",
@@ -197,6 +202,11 @@
         {
           "version": "1.2.0",
           "timestamp": "2026-08-05T12:23:51.311656+00:00",
+          "files": 106
+        },
+        {
+          "version": "1.2.1",
+          "timestamp": "2026-08-05T13:13:43.238247+00:00",
           "files": 106
         }
       ]
@@ -251,20 +261,25 @@
       ]
     },
     "portable-usb-manager": {
-      "current_version": "2.0.11",
-      "previous_version": "2.0.10",
-      "last_packaged": "2026-08-05T12:23:23.666761+00:00",
+      "current_version": "2.0.12",
+      "previous_version": "2.0.11",
+      "last_packaged": "2026-08-05T13:17:31.563257+00:00",
       "files": 121,
-      "size_bytes": 1476551,
+      "size_bytes": 1480874,
       "history": [
         {
           "version": "2.0.11",
           "timestamp": "2026-08-05T12:23:23.666761+00:00",
           "files": 121
+        },
+        {
+          "version": "2.0.12",
+          "timestamp": "2026-08-05T13:17:31.563257+00:00",
+          "files": 121
         }
       ]
     }
   },
-  "last_packaged": "2026-08-05T12:23:51.311656+00:00",
+  "last_packaged": "2026-08-05T13:18:15.033055+00:00",
   "total_packaged": 1
 }

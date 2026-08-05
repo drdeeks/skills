@@ -111,6 +111,10 @@ def main():
         print("Monitors project progress every 30 seconds.")
         print("Environment: WORKSPACE_ROOT")
         return 0
+    if len(sys.argv) > 1:
+        print(f"error: unexpected argument {sys.argv[1]!r} -- this script takes none "
+              "(configure via $WORKSPACE_ROOT).", file=sys.stderr)
+        return 2
 
     # Run monitor loop
     print(f"[{now_iso()}] Progress monitor started (30-second interval)")

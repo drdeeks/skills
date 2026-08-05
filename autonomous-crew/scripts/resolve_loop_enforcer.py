@@ -16,6 +16,7 @@ path that may not be there. See CANDIDATE_HOME_SUBPATHS below for the exact,
 resolved-at-call-time paths checked.
 """
 import os
+import sys
 from pathlib import Path
 
 # Home-relative suffixes for candidate #2 and #3 above, kept as data (not
@@ -49,4 +50,15 @@ def find_chain_enforce_script() -> str:
 
 
 if __name__ == "__main__":
-    print(find_chain_enforce_script())
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ("-h", "--help"):
+            print(__doc__)
+            sys.exit(0)
+        print(f"error: unexpected argument {sys.argv[1]!r} -- this script takes none "
+              "(set $CHAIN_ENFORCER_SCRIPT to override).", file=sys.stderr)
+        sys.exit(2)
+    try:
+        print(find_chain_enforce_script())
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(1)

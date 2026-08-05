@@ -261,8 +261,14 @@ def main():
         sys.exit(0)
     
     parser.parse_args()
-    
-    asyncio.run(Agent(args.agent_id).run())
+
+    try:
+        agent = Agent(args.agent_id)
+    except (FileNotFoundError, OSError) as exc:
+        print(f"error: could not load identity for agent '{args.agent_id}': {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    asyncio.run(agent.run())
 
 if __name__ == "__main__":
     main()

@@ -56,10 +56,13 @@ def main():
     
     args, _ = parser.parse_known_args()
     
-    if args.help or not (args.source and args.target):
+    if args.help:
         show_help()
         return 0
-    
+    if not (args.source and args.target):
+        show_help()
+        return 1
+
     parser.parse_args()
     
     workspace = Path(args.workspace)

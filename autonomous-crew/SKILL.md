@@ -1,6 +1,7 @@
 ---
 name: autonomous-crew-integration
-version: 1.2.0
+version: 1.2.1
+previous_version: 1.2.0
 description: Identity-first autonomous crew system with blueprint-driven phase enforcement
   (routed through loop-enforcer, the singular chain-enforcement runtime — see FOREVER-SYSTEM.md
   Sec 1), self-healing, kanban integration, and a natively-integrated crew knowledge-sharing

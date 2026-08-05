@@ -193,8 +193,12 @@ def main():
         sys.exit(0)
     
     parser.parse_args()
-    
-    curator = MemoryCurator(args.agent_id)
+
+    try:
+        curator = MemoryCurator(args.agent_id)
+    except OSError as exc:
+        print(f"error: could not initialize memory workspace for agent '{args.agent_id}': {exc}", file=sys.stderr)
+        sys.exit(1)
     results = curator.run_daily_curation()
     
     print(f"\n[Curator] Daily curation complete:")

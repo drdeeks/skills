@@ -214,7 +214,11 @@ def main():
         print("Usage: task-dispatcher.py [--help]")
         print("Runs continuously, dispatching tasks based on chain state.")
         sys.exit(0)
-    
+    if len(sys.argv) > 1:
+        print(f"error: unexpected argument {sys.argv[1]!r} -- this script takes none "
+              "(configure via $WORKSPACE_ROOT).", file=sys.stderr)
+        sys.exit(2)
+
     projects = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
     
     print(f"Starting Task Dispatcher for {len(projects)} projects")
