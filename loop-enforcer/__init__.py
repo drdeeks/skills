@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 NAME = "loop-enforcer"
-VERSION = "1.0.22"
+VERSION = "1.0.23"
 DESCRIPTION = "Sequential dependency chain enforcement with file locking and verification gates"
 
 

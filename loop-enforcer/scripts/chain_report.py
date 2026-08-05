@@ -42,6 +42,9 @@ def report(project_dir, chain_name):
             print(f"  {line}")
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
     if len(sys.argv) < 3:
         print("Usage: chain_report.py <project-dir> <chain-name>")
         sys.exit(1)

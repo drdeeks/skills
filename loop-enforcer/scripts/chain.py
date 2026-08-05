@@ -418,7 +418,7 @@ def run_menu(project_dir, chain_name):
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
         print(__doc__)
         sys.exit(0)
 

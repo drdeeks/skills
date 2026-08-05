@@ -212,11 +212,11 @@
       ]
     },
     "loop-enforcer": {
-      "current_version": "1.0.22",
-      "previous_version": "1.0.21",
-      "last_packaged": "2026-07-22T20:58:47.048823+00:00",
+      "current_version": "1.0.23",
+      "previous_version": "1.0.22",
+      "last_packaged": "2026-08-05T14:03:41.608775+00:00",
       "files": 22,
-      "size_bytes": 92526,
+      "size_bytes": 92806,
       "history": [
         {
           "version": "1.0.15",
@@ -257,6 +257,11 @@
           "version": "1.0.22",
           "timestamp": "2026-07-22T20:58:47.048823+00:00",
           "files": 22
+        },
+        {
+          "version": "1.0.23",
+          "timestamp": "2026-08-05T14:03:41.608775+00:00",
+          "files": 22
         }
       ]
     },
@@ -280,6 +285,6 @@
       ]
     }
   },
-  "last_packaged": "2026-08-05T13:18:15.033055+00:00",
+  "last_packaged": "2026-08-05T14:03:41.608775+00:00",
   "total_packaged": 1
 }
