@@ -38,7 +38,8 @@ metadata:
   - hermes
   - copilot
   - any
-version: 0.1.6
+version: 0.1.7
+previous_version: 0.1.6
 ---
 
 # Guardrail Enforcement

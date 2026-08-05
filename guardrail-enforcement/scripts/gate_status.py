@@ -23,6 +23,14 @@ DEFAULT_LOG = ".loop-log.jsonl"
 
 
 def main() -> int:
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ("-h", "--help"):
+            print(__doc__)
+            return 0
+        print(f"error: unexpected argument {sys.argv[1]!r} -- this script takes none "
+              "(it always reports on its own skill directory).", file=sys.stderr)
+        return 2
+
     report = {"skill_dir": str(SKILL_DIR)}
 
     # 1. Gate configured?

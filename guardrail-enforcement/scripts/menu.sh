@@ -33,8 +33,10 @@ EOF
 }
 
 case "${1:-}" in
+    "") ;;
     -h|--help) usage; exit 0 ;;
     --dry-run|-n) usage; echo "(--dry-run: no prompt)"; exit 0 ;;
+    *) echo "error: unrecognized argument: $1" >&2; usage >&2; exit 2 ;;
 esac
 
 ask() { local q="$1" d="${2:-}"; local a; read -r -p "? $q${d:+ [$d]}: " a || true; echo "${a:-$d}"; }
