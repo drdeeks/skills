@@ -4,7 +4,7 @@ Concrete recipes for reconciling crew/kanban status into one consistent view.
 
 ## 1. The kanban `tasks` schema quirk
 
-The kanban DB (`~/.hermes/kanban.db`) `tasks` table has **NO `project` column**.
+The Hermes kanban DB (`$HOME/.hermes/kanban.db`, resolved at runtime) `tasks` table has **NO `project` column**.
 Project is encoded in the task `id` prefix:
 
 ```

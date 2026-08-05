@@ -100,7 +100,7 @@ Checks project functionality and progress every 30 seconds, generating a consoli
 ### Configuration
 ```python
 # Environment variables
-WORKSPACE_ROOT=$HOME/qwen-cloud-2026  # Projects root directory
+WORKSPACE_ROOT=${WORKSPACE_ROOT}/qwen-cloud-2026  # Projects root directory
 MONITOR_INTERVAL=30                          # Check interval (seconds)
 MONITOR_PORTS={"mnemosyne": 41212, ...}     # Custom port mapping
 ```
@@ -129,17 +129,17 @@ python3 progress-monitor.py &
 #!/bin/bash
 # start-monitoring.sh
 
-WORKSPACE="$HOME/qwen-cloud-2026"
+WORKSPACE="${WORKSPACE_ROOT}/qwen-cloud-2026"
 PROJECTS="mnemosyne aires autopilot agora edgewalker"
 
 # Start self-healing for each project
 for p in $PROJECTS; do
-    python3 ~/.hermes/skills/devops/autonomous-crew/scripts/self-healing-loop.py \
+    python3 ~/.hermes/skills/devops/autonomous-crew-integration/scripts/self-healing-loop.py \
         --project "$WORKSPACE/$p" --interval 30 &
 done
 
 # Start progress monitor
-python3 ~/.hermes/skills/devops/autonomous-crew/scripts/progress-monitor.py &
+python3 ~/.hermes/skills/devops/autonomous-crew-integration/scripts/progress-monitor.py &
 
 # Wait for all
 wait
@@ -153,11 +153,11 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=$HOME/qwen-cloud-2026
-ExecStart=/bin/bash -c "source $HOME/start-monitoring.sh"
+WorkingDirectory=${WORKSPACE_ROOT}/qwen-cloud-2026
+ExecStart=/bin/bash -c "source ${WORKSPACE_ROOT}/start-monitoring.sh"
 Restart=always
 RestartSec=10
-Environment=WORKSPACE_ROOT=$HOME/qwen-cloud-2026
+Environment=WORKSPACE_ROOT=${WORKSPACE_ROOT}/qwen-cloud-2026
 
 [Install]
 WantedBy=multi-user.target

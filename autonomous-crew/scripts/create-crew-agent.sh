@@ -101,8 +101,9 @@ agent_dir = agent_workspace / ".agent"
 for d in ["habits", "logs", "metrics", "templates", "constitutions", "templates/tool-enforcement"]:
     (agent_dir / d).mkdir(parents=True, exist_ok=True)
 
-# Install agent-identity-architecture skill
-identity_skill_path="${AGENT_IDENTITY_SKILL:-$HOME/.hermes/skills/devops/agent-identity-architecture}"
+# Install agent-identity-architecture skill (optional external dependency;
+# guarded below by identity_skill.exists() -- degrades gracefully if absent)
+identity_skill_path = os.environ.get("AGENT_IDENTITY_SKILL") or str(Path.home() / ".hermes" / "skills" / "devops" / "agent-identity-architecture")
 identity_skill = Path(identity_skill_path)
 if identity_skill.exists():
     import shutil

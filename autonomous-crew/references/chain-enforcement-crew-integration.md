@@ -16,14 +16,14 @@ chain_enforce.py searches for chains in this order:
 ```json
 {
   "name": "mnemosyne-blueprint",
-  "project": "$HOME/qwen-cloud-2026/mnemosyne",
-  "crew": "$HOME/qwen-cloud-2026/mnemosyne/.crew-mnemosyne-crew",
+  "project": "${WORKSPACE_ROOT}/qwen-cloud-2026/mnemosyne",
+  "crew": "${WORKSPACE_ROOT}/qwen-cloud-2026/mnemosyne/.crew-mnemosyne-crew",
   "created_at": "2026-07-09T05:05:47Z",
-  "blueprint": "$HOME/qwen-cloud-2026/mnemosyne/blueprint.md",
+  "blueprint": "${WORKSPACE_ROOT}/qwen-cloud-2026/mnemosyne/blueprint.md",
   "steps": [
     {
       "index": 0,
-      "path": "$HOME/qwen-cloud-2026/mnemosyne/.crew-mnemosyne-crew/.blueprint-chain/phase-00-Foundation-and-Infrastructure.marker",
+      "path": "${WORKSPACE_ROOT}/qwen-cloud-2026/mnemosyne/.crew-mnemosyne-crew/.blueprint-chain/phase-00-Foundation-and-Infrastructure.marker",
       "state": "active",
       "validator": null
     }
@@ -111,7 +111,7 @@ wire-kanban-to-chain.py creates mapping in `.crew-<name>/config/kanban-wiring.js
   "crew_dir": "/project/.crew-mnemosyne-crew",
   "project_dir": "/project",
   "chain_dir": "/project/.crew-mnemosyne-crew/.blueprint-chain",
-  "kanban_db": "$HOME/.hermes/kanban.db",
+  "kanban_db": "${WORKSPACE_ROOT}/.hermes/kanban.db",
   "created_at": "2026-07-09T05:05:47Z"
 }
 ```

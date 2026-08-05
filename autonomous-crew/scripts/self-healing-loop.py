@@ -25,10 +25,10 @@ class SelfHealingLoop:
     def __init__(self, project_dir, interval=300):
         self.project_dir = Path(project_dir)
         self.interval = interval
-        self.chain_dir = self.project_dir / ".blueprint-chain"
+        self.chain_dir = self.project_dir / ".chain"
         self.memory_dir = self.project_dir / "memory"
         self.identity_dir = self.project_dir / ".agent"
-        self.log_file = self.project_dir / ".blueprint-chain" / "self-healing.log"
+        self.log_file = self.project_dir / ".chain" / "self-healing.log"
         self.running = True
         
     def log(self, message, level="INFO"):

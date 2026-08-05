@@ -149,12 +149,12 @@ for AGENT_TYPE in "${AGENT_TYPES[@]}"; do
     echo ""
     echo "  → Spawning $AGENT_TYPE agent..."
     
-    # Use the create-crew-agent.sh from autonomous-crew
+    # Use the create-crew-agent.sh from autonomous-crew-integration
     CREW_WORKSPACE="$CREW_DIR" \
     CREW_ID="$CREW_ID" \
     WORKSPACE_ROOT="$HOME/agents" \
     AGENT_IDENTITY_SKILL="$AGENT_IDENTITY_SKILL" \
-    bash "$HOME/.hermes/skills/devops/autonomous-crew/scripts/create-crew-agent.sh" \
+    bash "$HOME/.hermes/skills/devops/autonomous-crew-integration/scripts/create-crew-agent.sh" \
     "$AGENT_TYPE" 2>&1 | sed 's/^/     /'
     
     # Wait a moment and check for newly created agent

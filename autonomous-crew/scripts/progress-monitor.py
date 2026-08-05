@@ -11,7 +11,10 @@ import subprocess
 from pathlib import Path
 from datetime import datetime, timezone
 
-WORKSPACE = os.environ.get("WORKSPACE_ROOT", str(__import__("pathlib").Path.home() / "qwen-cloud-2026"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from resolve_loop_enforcer import find_chain_enforce_script
+
+WORKSPACE = os.environ.get("WORKSPACE_ROOT", "/home/ubuntu/qwen-cloud-2026")
 PROJECTS = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
 
 def now_iso():
@@ -21,7 +24,7 @@ def check_chain_status(project):
     """Check chain status for a project."""
     try:
         result = subprocess.run(
-            ["python3", os.path.expanduser("~/.hermes/scripts/chain_enforce.py"), "status", project],
+            ["python3", find_chain_enforce_script(), "status", project],
             capture_output=True, text=True, cwd=os.path.join(WORKSPACE, project)
         )
         if result.returncode == 0:

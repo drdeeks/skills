@@ -1,3 +1,26 @@
+---
+title: Skill Update Workflow — Use skill_enhance.py, Never Raw Patch
+category: workflow
+date: 2026-07-09
+failure: >
+  Skills were updated via a raw text-patch operation that only edits files
+  and never runs validation, so structurally broken or non-enterprise-tier
+  skills were silently left in that state after an "update."
+root_cause: >
+  No enforced workflow tied skill edits to re-validation; editing and
+  validating were two independent, easily-skipped steps.
+resolution: >
+  Standardized on skill_enhance.py update --tier enterprise --noninteractive
+  as the only sanctioned update path — it runs the full 11-gate pipeline
+  (frontmatter, scripts, references, validation, auto-fix, re-validation,
+  script testing, packaging) after every edit.
+prevention: >
+  Treat "if the user mentions skill_manage or raw patching" as a stop
+  signal to switch to skill_enhance.py immediately, and never consider a
+  skill edit done until the full pipeline has been re-run.
+verified: true
+---
+
 # Skill Update Workflow — CRITICAL
 
 ## NEVER use skill_manage(action='patch') to update skills

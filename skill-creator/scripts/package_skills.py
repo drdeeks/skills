@@ -480,12 +480,12 @@ def main():
 
     # Write manifest
     manifest_path = packager.write_manifest(results)
+    details = results.get("details", results)
 
     if args.json:
         results["manifest"] = str(manifest_path)
         print(json.dumps(results, indent=2))
     else:
-        details = results.get("details", results)
         print(f"=== Skill Packaging Report ===")
         print(f"Skills root: {details.get('skills_root', args.skills_root)}")
         print(f"Output dir: {details.get('output_dir', args.skills_root)}")

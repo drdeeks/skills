@@ -1,3 +1,26 @@
+---
+title: Configurable Models — Never Hardcode
+category: configuration
+date: 2026-07-09
+failure: >
+  Agents hardcoded specific model names (e.g. "qwen-plus-latest") as
+  defaults, which breaks for any user on a different provider (OpenAI,
+  Anthropic, local models) or without that specific quota.
+root_cause: >
+  Model selection was written directly into scripts instead of being read
+  from a configuration file with environment-based provider auto-detection.
+resolution: >
+  Introduced config/providers.json with per-provider model lists, an
+  env-var-based auto-detection pass (DASHSCOPE_API_KEY, OPENAI_API_KEY,
+  ANTHROPIC_API_KEY), and a role_model_mapping layer so callers request a
+  role ("reasoning", "creative") rather than a specific model name.
+prevention: >
+  Always fall back to an explicit "model-not-configured" sentinel rather
+  than a real model name as the default — a silent wrong-provider default
+  is worse than a loud missing-configuration error.
+verified: true
+---
+
 # Configurable Models — Never Hardcode
 
 ## The Rule

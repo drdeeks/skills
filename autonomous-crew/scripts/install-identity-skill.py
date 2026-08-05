@@ -4,6 +4,7 @@ Install Identity Skill - Deploy agent-identity-architecture into agent workspace
 """
 
 import argparse
+import os
 import shutil
 from pathlib import Path
 

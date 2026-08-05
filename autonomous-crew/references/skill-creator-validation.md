@@ -43,9 +43,9 @@ python3 ~/agent-toolkit-v14/skills/skill-creator/scripts/skill_enhance.py update
 - ❌ `/Users/...`
 
 **USE placeholders:**
-- ✅ `<HEMLOCK_HOME>` — Hermes home directory
+- ✅ `<HERMES_HOME>` — Hermes home directory
 - ✅ `<WORKSPACE_ROOT>` — Workspace root directory
-- ✅ `~/.hermes` — User Hermes directory
+- ✅ the Hermes home directory, resolved via `$HOME` at runtime (never a literal per-user path)
 - ✅ `$HOME` — Home directory
 
 The validator will FAIL on hardcoded paths in scripts and references.
@@ -94,7 +94,7 @@ metadata:
 ```
 ✗ [FAIL] Hardcoded path in script — scripts/chain_enforce.py:10
 ```
-**Fix:** Replace `${WORKSPACE_ROOT}/qwen-cloud-2026` with `<WORKSPACE_ROOT>/qwen-cloud-2026`
+**Fix:** Replace a literal per-user path with a placeholder, e.g. `<WORKSPACE_ROOT>/qwen-cloud-2026`
 
 ### 2. Unexpected Frontmatter Keys
 ```

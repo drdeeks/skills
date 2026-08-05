@@ -94,20 +94,21 @@ if len(sys.argv) > 1 and sys.argv[1] in ("--help", "-h"):
 
 ## Hardcoded Paths
 
-The validator FAILS on hardcoded paths like `/home/<user>/...` in scripts and references.
+The validator FAILS on a literal per-user home path (e.g. a specific
+person's home directory baked into a script or doc) in scripts and references.
 
 **Fix:** Replace with placeholders:
-- `$HOME/qwen-cloud-2026` → `${WORKSPACE_ROOT}/qwen-cloud-2026`
-- `$HOME/.hermes` → `${HEMLOCK_HOME}` or `~/.hermes`
-- `$HOME/projects` → `${WORKSPACE_ROOT}/projects`
+- a literal per-user `qwen-cloud-2026` path → `${WORKSPACE_ROOT}/qwen-cloud-2026`
+- a literal per-user Hermes-home path → `${HERMES_HOME}` (or resolve via `$HOME` at runtime)
+- a literal per-user `projects` path → `${WORKSPACE_ROOT}/projects`
 
 ---
 
 ## Skill Name Ambiguity
 
-If `skill_view(name='autonomous-crew')` returns "Ambiguous skill name", use the categorized path:
+If `skill_view(name='autonomous-crew-integration')` returns "Ambiguous skill name", use the categorized path:
 ```bash
-skill_view(name='devops/autonomous-crew')
+skill_view(name='devops/autonomous-crew-integration')
 ```
 
 This happens when the same skill name exists in multiple directories.

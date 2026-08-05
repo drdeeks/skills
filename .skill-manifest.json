@@ -168,11 +168,11 @@
       ]
     },
     "autonomous-crew": {
-      "current_version": "1.2.5",
-      "previous_version": "1.2.4",
-      "last_packaged": "2026-07-17T13:56:37.322576+00:00",
-      "files": 107,
-      "size_bytes": 531903,
+      "current_version": "1.2.0",
+      "previous_version": "1.2.0",
+      "last_packaged": "2026-08-05T12:23:51.311656+00:00",
+      "files": 106,
+      "size_bytes": 539514,
       "history": [
         {
           "version": "1.2.2",
@@ -188,6 +188,16 @@
           "version": "1.2.5",
           "timestamp": "2026-07-17T13:56:37.322576+00:00",
           "files": 107
+        },
+        {
+          "version": "1.2.0",
+          "timestamp": "2026-08-05T12:23:21.717963+00:00",
+          "files": 106
+        },
+        {
+          "version": "1.2.0",
+          "timestamp": "2026-08-05T12:23:51.311656+00:00",
+          "files": 106
         }
       ]
     },
@@ -239,8 +249,22 @@
           "files": 22
         }
       ]
+    },
+    "portable-usb-manager": {
+      "current_version": "2.0.11",
+      "previous_version": "2.0.10",
+      "last_packaged": "2026-08-05T12:23:23.666761+00:00",
+      "files": 121,
+      "size_bytes": 1476551,
+      "history": [
+        {
+          "version": "2.0.11",
+          "timestamp": "2026-08-05T12:23:23.666761+00:00",
+          "files": 121
+        }
+      ]
     }
   },
-  "last_packaged": "2026-08-04T16:54:17.059534+00:00",
+  "last_packaged": "2026-08-05T12:23:51.311656+00:00",
   "total_packaged": 1
 }

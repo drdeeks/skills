@@ -2,7 +2,7 @@
 
 ## Chain State Mismatch (Fixed)
 
-**Problem:** Loop-enforcer chain files in `${WORKSPACE_ROOT}/qwen-cloud-2026/` pointed to old workspace path. Actual working code was in `${WORKSPACE_ROOT}/qwen-cloud-2026/`. Chain state showed 2/131 complete with many locked/active steps, but all work was actually done and tested.
+**Problem:** Loop-enforcer chain files in `${WORKSPACE_ROOT}/hermes-agent/workspaces/hackathon-2026/` pointed to old workspace path. Actual working code was in `${WORKSPACE_ROOT}/qwen-cloud-2026/`. Chain state showed 2/131 complete with many locked/active steps, but all work was actually done and tested.
 
 **Root Cause:** Chain JSON files created with wrong `project_dir` during initial setup. The `chain_enforce.py` helper only looked in `.chain/` directory, not `.blueprint-chain/`.
 
@@ -65,9 +65,10 @@ All 5 projects verified production-ready:
 ## Commands for Verification
 
 ```bash
-# Chain status for all projects
+# Chain status for all projects (resolve_loop_enforcer.py finds the real
+# chain_enforce.py -- see the 2026-08-05 correction note below)
 for p in mnemosyne autopilot aires agora edgewalker; do
-  python3 ~/.hermes/scripts/chain_enforce.py status $p
+  python3 "$(python3 scripts/resolve_loop_enforcer.py)" status $p
 done
 
 # Test all projects
@@ -78,7 +79,7 @@ cd ${WORKSPACE_ROOT}/qwen-cloud-2026/edgewalker && cargo test
 cd ${WORKSPACE_ROOT}/qwen-cloud-2026/aires && npx tsc --noEmit
 
 # Kanban board
-sqlite3 ~/.hermes/kanban.db "SELECT title, status FROM tasks WHERE title LIKE '%Phase%';"
+sqlite3 "${HERMES_HOME:-$HOME/.hermes}/kanban.db" "SELECT title, status FROM tasks WHERE title LIKE '%Phase%';"
 ```
 
 ---
@@ -96,6 +97,15 @@ sqlite3 ~/.hermes/kanban.db "SELECT title, status FROM tasks WHERE title LIKE '%
 
 ## Related Files
 
-- `~/.hermes/scripts/chain_enforce.py` — Updated to check both `.blueprint-chain` and `.chain`
-- `${WORKSPACE_ROOT}/qwen-cloud-2026/*/.blueprint-chain/*-blueprint.json` — Regenerated chain files
+- `${WORKSPACE_ROOT}/qwen-cloud-2026/*/.chain/*-blueprint.json` — Chain state files
 - `devops/kanban-orchestrator/references/chain-enforcement.md` — Worker lifecycle docs
+
+## Correction (2026-08-05)
+
+This doc originally listed a vendored `chain_enforce.py` "updated to check
+both `.blueprint-chain` and `.chain`." That local fork no longer exists —
+chain enforcement now routes through loop-enforcer's canonical
+`chain_enforce.py` via `scripts/resolve_loop_enforcer.py`, and this skill's
+own chain-writing scripts were changed to write `.chain/` to match it,
+rather than the enforcer accommodating multiple directory names. See
+`references/lessons/2026-08-merge-and-forever-system-audit.md`.

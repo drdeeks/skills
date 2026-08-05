@@ -20,7 +20,7 @@ def create_blueprint_chain(project_dir, blueprint_json_path):
         blueprint = json.load(f)
     
     project_dir = Path(project_dir)
-    chain_dir = project_dir / ".blueprint-chain"
+    chain_dir = project_dir / ".chain"
     chain_dir.mkdir(parents=True, exist_ok=True)
     
     # Extract chain info

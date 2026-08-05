@@ -14,23 +14,23 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 KANBAN_DB = Path.home() / ".hermes" / "kanban.db"
-WORKSPACE_ROOT = Path(os.environ.get("WORKSPACE_ROOT", str(Path.home() / "qwen-cloud-2026")))
+WORKSPACE_ROOT = Path(os.environ.get("WORKSPACE_ROOT", "/home/ubuntu/qwen-cloud-2026"))
 
 def now_iso():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def get_chain_status(project):
-    """Get chain status from .crew-*/.blueprint-chain/ first, then fallbacks"""
+    """Get chain status from .crew-*/.chain/ first, then fallbacks"""
     search_dirs = []
     project_dir = WORKSPACE_ROOT / project
     
     # Check .crew-* directories first
     for item in project_dir.iterdir():
         if item.is_dir() and item.name.startswith(".crew-"):
-            search_dirs.append(item / ".blueprint-chain")
+            search_dirs.append(item / ".chain")
     
     # Fallbacks
-    search_dirs.append(project_dir / ".blueprint-chain")
+    search_dirs.append(project_dir / ".chain")
     search_dirs.append(project_dir / ".chain")
     
     chain_file = None
@@ -139,15 +139,15 @@ def update_kanban_status(task_id, status, assignee=None):
     conn.close()
 
 def update_chain_step(project, step_index, state):
-    """Update chain step state in .crew-*/.blueprint-chain/ first"""
+    """Update chain step state in .crew-*/.chain/ first"""
     search_dirs = []
     project_dir = WORKSPACE_ROOT / project
     
     for item in project_dir.iterdir():
         if item.is_dir() and item.name.startswith(".crew-"):
-            search_dirs.append(item / ".blueprint-chain")
+            search_dirs.append(item / ".chain")
     
-    search_dirs.append(project_dir / ".blueprint-chain")
+    search_dirs.append(project_dir / ".chain")
     search_dirs.append(project_dir / ".chain")
     
     chain_file = None

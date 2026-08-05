@@ -73,7 +73,7 @@ This checklist is derived from the blueprint and must be kept in sync.
         """Step 3: Create loop-enforcer chain"""
         self.log("create_chain", "START", "Creating chain...")
         
-        chain_dir = self.project_dir / ".blueprint-chain"
+        chain_dir = self.project_dir / ".chain"
         chain_dir.mkdir(parents=True, exist_ok=True)
         
         # Create chain state
@@ -179,12 +179,12 @@ This checklist is derived from the blueprint and must be kept in sync.
         dispatcher_config = {
             "crew_id": self.crew_id,
             "mode": self.mode,
-            "chain_dir": str(self.project_dir / ".blueprint-chain"),
+            "chain_dir": str(self.project_dir / ".chain"),
             "agent_dir": str(self.project_dir / ".agent"),
             "interval": 300,
         }
         
-        config_file = self.project_dir / ".blueprint-chain" / "dispatcher.json"
+        config_file = self.project_dir / ".chain" / "dispatcher.json"
         with open(config_file, "w") as f:
             json.dump(dispatcher_config, f, indent=2)
         
@@ -222,7 +222,7 @@ This checklist is derived from the blueprint and must be kept in sync.
         print(f"{'='*60}\n")
         
         # Save results
-        results_file = self.project_dir / ".blueprint-chain" / "init-results.json"
+        results_file = self.project_dir / ".chain" / "init-results.json"
         with open(results_file, "w") as f:
             json.dump(self.results, f, indent=2)
         

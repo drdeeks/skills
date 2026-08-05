@@ -197,7 +197,7 @@ for AGENT_TYPE in "${AGENT_TYPES[@]}"; do
     CREW_ID="$CREW_ID" \
     WORKSPACE_ROOT="$AGENTS_DIR" \
     AGENT_IDENTITY_SKILL="$AGENT_IDENTITY_SKILL" \
-    bash "$HOME/.hermes/skills/devops/autonomous-crew/scripts/create-crew-agent.sh" \
+    bash "$HOME/.hermes/skills/devops/autonomous-crew-integration/scripts/create-crew-agent.sh" \
     "$AGENT_TYPE" 2>&1 | sed 's/^/     /'
     
     # Update enforcer registry with agent info

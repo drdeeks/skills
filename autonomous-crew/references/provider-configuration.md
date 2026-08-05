@@ -1,7 +1,7 @@
 # Provider Configuration Pattern
 
 ## Overview
-The crew-manager.py and autonomous-crew system uses a configurable provider system instead of hardcoded models.
+The crew-manager.py and autonomous-crew-integration system uses a configurable provider system instead of hardcoded models.
 
 ## Configuration File: config/providers.json
 
@@ -117,7 +117,7 @@ Each blueprint.json includes a token_budget section:
 
 ❌ NEVER hardcode model names in scripts
 ❌ NEVER assume specific provider is available
-❌ NEVER use `$HOME/` paths - use ${WORKSPACE_ROOT}
+❌ NEVER use a literal per-user home path - use `${WORKSPACE_ROOT}`
 ✅ Always read from providers.json
 ✅ Always auto-detect from environment
 ✅ Always provide fallback "model-not-configured"

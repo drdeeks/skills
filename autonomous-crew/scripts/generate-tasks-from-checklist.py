@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 KANBAN_DB = Path.home() / ".hermes" / "kanban.db"
-WORKSPACE_ROOT = Path(os.environ.get("WORKSPACE_ROOT", str(Path.home() / "qwen-cloud-2026")))
+WORKSPACE_ROOT = Path(os.environ.get("WORKSPACE_ROOT", "/home/ubuntu/qwen-cloud-2026"))
 
 def now_iso():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -166,13 +166,8 @@ def sync_to_kanban(tasks):
     print(f"Synced {len(tasks)} tasks to kanban")
 
 def main():
-    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
-        print("Usage: generate-tasks-from-checklist.py")
-        print("Parses each known project's checklist.md and syncs tasks to the kanban DB.")
-        sys.exit(0)
-
     projects = ["mnemosyne", "aires", "autopilot", "agora", "edgewalker"]
-
+    
     print("Parsing checklists...")
     tasks = generate_kanban_tasks(projects)
     

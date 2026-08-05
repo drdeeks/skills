@@ -24,16 +24,20 @@ def start_enforcer(agent_workspace, agent_id):
         except:
             pass  # Stale PID file
     
-    # Start enforcer.
-    # HEMLOCK_HOME is canonical; HERMES_HOME set too as legacy mirror (older runtimes).
-    home = os.environ.get("HEMLOCK_HOME") or os.environ.get("HERMES_HOME") or str(Path.home() / ".hermes")
-    enforcer_script = Path(home) / "skills" / "devops" / "agent-identity-architecture" / "scripts" / "enforcer_daemon.py"
-
+    # Start enforcer -- prefer the copy installed directly in the agent
+    # workspace (this skill bundles enforcer_daemon.py and copies it in at
+    # spawn time), fall back to the external agent-identity-architecture
+    # skill if that's what's installed on this machine instead.
+    workspace_enforcer = agent_workspace / "enforcer_daemon.py"
+    identity_skill_enforcer = Path(
+        os.environ.get("AGENT_IDENTITY_SKILL", str(Path.home() / ".hermes" / "skills" / "devops" / "agent-identity-architecture"))
+    ) / "scripts" / "enforcer_daemon.py"
+    enforcer_script = workspace_enforcer if workspace_enforcer.exists() else identity_skill_enforcer
+    
     env = os.environ.copy()
     env["WORKSPACE_ROOT"] = str(agent_workspace)
     env["AGENT_ID"] = agent_id
-    env["HEMLOCK_HOME"] = home
-    env["HERMES_HOME"] = home
+    env["HERMES_HOME"] = str(Path.home() / ".hermes")
     
     try:
         proc = subprocess.Popen(

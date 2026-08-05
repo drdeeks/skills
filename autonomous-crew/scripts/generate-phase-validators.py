@@ -112,7 +112,7 @@ def main():
     with open(blueprint_path) as f:
         blueprint = json.load(f)
     
-    output_dir = Path(args.output_dir) if args.output_dir else project_dir / ".blueprint-chain" / "validators"
+    output_dir = Path(args.output_dir) if args.output_dir else project_dir / ".chain" / "validators"
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Extract phases and their deliverables from blueprint
