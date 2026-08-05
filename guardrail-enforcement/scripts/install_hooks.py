@@ -11,8 +11,12 @@ enforceable rather than advisory.
 Hooks installed:
   * ``pre-commit``  — refuse the commit if the loop log fails verification or has
     no PASS entry within the freshness window.
-  * ``post-commit`` — record the commit hash alongside the latest log entry
-    (advisory; never blocks).
+  * ``post-commit`` — chains any foreign post-commit hook this install replaced
+    (see Safety below), records the commit against the audit log, then runs
+    ``verify_manifest.py`` scoped to the skill dir(s) this commit touched. If
+    the manifest doesn't match what was just committed for any touched skill,
+    reverts the commit (``git revert``, never history-rewriting) and exits
+    nonzero. Pre-existing drift in *untouched* skills never blocks.
   * ``pre-push``    — re-verify the whole log chain before anything leaves the
     machine.
 
@@ -56,14 +60,52 @@ def resolve_repo(repo_arg):
     return repo
 
 
-def hook_body(hook_name, verify_script, secret_path, log_name, freshness):
+def hook_body(hook_name, verify_script, secret_path, log_name, freshness, verify_manifest_script=None):
     """Portable POSIX-sh hook that shells out to verify_log.py."""
     if hook_name == "post-commit":
         return f"""#!/bin/sh
 {MARKER}
-# Advisory only — records the commit against the audit log, never blocks.
 REPO="$(git rev-parse --show-toplevel)"
+
+# Chain any foreign post-commit hook this install replaced (backed up to
+# post-commit.pre-guardrail) so its behavior isn't silently lost.
+FOREIGN_HOOK="$REPO/.git/hooks/post-commit.pre-guardrail"
+if [ -x "$FOREIGN_HOOK" ]; then
+    "$FOREIGN_HOOK" || echo "guardrail: chained foreign post-commit hook exited nonzero (continuing)" >&2
+fi
+
 echo "guardrail: commit $(git rev-parse HEAD) over $REPO/{log_name}" >&2
+
+# Hash/manifest check, scoped to the skill dir(s) this commit actually
+# touched — never blocks on pre-existing drift in untouched skills.
+# Reverts (never rewrites history) if a touched skill's manifest entry
+# doesn't match what was just committed.
+VERIFY_MANIFEST="{verify_manifest_script}"
+if [ -f "$VERIFY_MANIFEST" ]; then
+    CHANGED_SKILLS=$(git diff-tree --no-commit-id --name-only -r HEAD | cut -d/ -f1 | sort -u)
+    REPORT="$(mktemp)"
+    trap 'rm -f "$REPORT"' EXIT
+    python3 "$VERIFY_MANIFEST" --repo "$REPO" --json > "$REPORT" 2>/dev/null
+    for skill in $CHANGED_SKILLS; do
+        [ -f "$REPO/$skill/SKILL.md" ] || continue
+        BAD=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('$REPORT'))
+except Exception:
+    sys.exit(0)
+bad = [f for f in d.get('findings', []) if f.get('skill') == '$skill' and f.get('severity') == 'fail']
+print('yes' if bad else 'no')
+for f in bad:
+    print('  - ' + f.get('type', '?') + ': ' + f.get('detail', ''), file=sys.stderr)
+")
+        if [ "$BAD" = "yes" ]; then
+            echo "guardrail: post-commit manifest check FAILED for '$skill' -- this commit doesn't match the manifest. Reverting." >&2
+            git -C "$REPO" revert --no-edit HEAD >&2
+            exit 1
+        fi
+    done
+fi
 exit 0
 """
     recent = f"--recent {freshness}" if hook_name == "pre-commit" else ""
@@ -90,12 +132,13 @@ def install(repo, secret_path, log_name, freshness):
     hooks_dir = repo / ".git" / "hooks"
     hooks_dir.mkdir(parents=True, exist_ok=True)
     verify_script = SCRIPTS_DIR / "verify_log.py"
+    verify_manifest_script = SCRIPTS_DIR / "verify_manifest.py"
     installed = []
     for name in HOOKS:
         dest = hooks_dir / name
         if dest.exists() and MARKER not in dest.read_text(errors="ignore"):
             shutil.copy2(dest, dest.with_name(name + BACKUP_SUFFIX))
-        dest.write_text(hook_body(name, verify_script, secret_path, log_name, freshness))
+        dest.write_text(hook_body(name, verify_script, secret_path, log_name, freshness, verify_manifest_script))
         dest.chmod(dest.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         installed.append(name)
     return installed
