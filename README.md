@@ -1,5 +1,10 @@
 # Curated Skills Repository
 
+[![Python](https://img.shields.io/badge/python-%3E%3D3.8-blue.svg)](#)
+[![Dependencies](https://img.shields.io/badge/dependencies-stdlib--only-success.svg)](#)
+[![Enforcement](https://img.shields.io/badge/enforcement-fail--closed-success.svg)](guardrail-enforcement)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **The canonical, version-tracked, self-enforcing source of truth for every curated skill maintained in this repository.**
 
 This repository is not a loose folder of scripts. It is a governed skill library: every skill has passed an enforced validation and packaging workflow, is tracked by version, recorded in a verifiable manifest, and maintained through a consistent lifecycle.
