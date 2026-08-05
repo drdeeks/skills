@@ -1,0 +1,30 @@
+{
+  "pre_checks": [
+    [
+      "python3",
+      "skill-creator/scripts/validate.py",
+      "{path}",
+      "--basic"
+    ]
+  ],
+  "loop_command": [
+    "python3",
+    "skill-creator/scripts/skill_enhance.py",
+    "update",
+    "--path",
+    "{path}",
+    "--tier",
+    "enterprise",
+    "--noninteractive"
+  ],
+  "post_checks": [
+    [
+      "python3",
+      "skill-creator/scripts/validate.py",
+      "{path}"
+    ]
+  ],
+  "hmac_secret_path": "~/.config/gate/hmac.key",
+  "log_path": ".loop-log.jsonl",
+  "git_integration": true
+}

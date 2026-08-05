@@ -38,8 +38,8 @@ metadata:
   - hermes
   - copilot
   - any
-version: 0.1.7
-previous_version: 0.1.6
+version: 0.1.9
+previous_version: 0.1.8
 ---
 
 # Guardrail Enforcement
@@ -180,6 +180,8 @@ signed and chained.
 | `scripts/install_hooks.py` | Install/remove git hooks binding commits to a valid recent log entry; backs up existing hooks; `--dry-run`. |
 | `scripts/menu.sh` | Interactive composable front-end: pick a directory, what to watch, what to trigger; run watcher/gate/locks/verifiers. |
 | `scripts/pre-commit-hook.sh` | Stricter skills-specific example hook (per-skill `validate.py --basic`); template only. |
+| `scripts/watchdog.sh` | Keeps `monitor.py scan` running on an interval forever, self-resolving the skills repo root (env override → own-location default). `--dry-run`, `--once`. |
+| `scripts/install_watchdog.sh` | Generates and installs `watchdog.sh` as a system-level systemd service (`Restart=always`, boot-enabled). `--dry-run`, `--uninstall`, `--user`. Requires sudo. |
 
 ## Enforced Output Statistics
 
