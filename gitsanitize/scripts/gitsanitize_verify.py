@@ -24,6 +24,23 @@ _REWRITE_SCOPE = ["--branches", "--tags"]
 # what got measured.
 
 
+def _post_apply_head(state: Path) -> str | None:
+    """The HEAD gitsanitize recorded right after the most recent successful
+    `apply` finished (Session.complete()'s "completed" checkpoint), if any."""
+    manifest_path = state / "session" / "manifest.yaml"
+    if not manifest_path.exists():
+        return None
+    try:
+        import gitsanitize_yamlx as yamlx
+        data = yamlx.load(manifest_path)
+    except Exception:
+        return None
+    for entry in reversed(data.get("steps", []) or []):
+        if entry.get("step") == "completed" and entry.get("head"):
+            return entry["head"]
+    return None
+
+
 def _shortlog(repo: Path):
     """Return {email_lower: (name, count)} and total from git shortlog."""
     proc = run_git(["shortlog", "-sne", *_REWRITE_SCOPE], repo, check=False)
@@ -113,12 +130,41 @@ def verify(repo: Path, plan, state: Path, audit, strict: bool = True) -> dict:
 
     issues = []
 
-    # commit count: expect baseline - expected_delta (within tolerance)
+    # commit count: expect baseline - expected_delta (within tolerance).
+    #
+    # A count LOWER than expected is always a hard failure -- data loss,
+    # full stop. A count HIGHER than expected is not automatically a
+    # problem: `publish` re-runs this same check against the ORIGINAL
+    # apply-time baseline, and ordinary work (new, real commits) between
+    # apply and publish is completely normal -- it must not be blocked
+    # forever just because verify has no other reference point. The
+    # distinction that actually matters: is the HEAD gitsanitize recorded
+    # right after apply finished still an ancestor of the current HEAD? If
+    # so, everything since then is fast-forward growth on top of the
+    # rewrite -- fine. If not (history was altered again in a way that
+    # isn't a simple continuation), that's the real red flag and still
+    # fails closed.
     expected = baseline["commit_count"] - baseline.get("expected_commit_delta", 0)
-    if post_commits != expected:
+    if post_commits < expected:
         issues.append(
             f"commit count mismatch: expected {expected}, got {post_commits}"
         )
+    elif post_commits > expected:
+        post_apply_head = _post_apply_head(state)
+        grew_on_top = False
+        if post_apply_head:
+            check = subprocess.run(
+                ["git", "merge-base", "--is-ancestor", post_apply_head, "HEAD"],
+                cwd=str(repo), capture_output=True,
+            )
+            grew_on_top = check.returncode == 0
+        if not grew_on_top:
+            issues.append(
+                f"commit count mismatch: expected {expected}, got {post_commits} "
+                "(could not confirm the extra commits are ordinary growth on top "
+                "of the rewrite -- the recorded post-apply HEAD is not an "
+                "ancestor of the current one; investigate before publishing)"
+            )
 
     # authors expected to be gone (merged away or removed)
     intentionally_lost = {r["from_email"].lower() for r in plan.removals}
