@@ -12,8 +12,8 @@ description: Interactive-by-default git history identity sanitization. Scans a r
   -- consolidating duplicate identities, dropping automated bot noise, or deliberately
   protecting specific identities (an agent's own commits, a co-founder's) from being
   touched.
-version: 0.2.3
-previous_version: 0.2.2
+version: 0.2.5
+previous_version: 0.2.4
 license: MIT
 metadata:
   tags:
@@ -70,6 +70,11 @@ exists so that class of mistake is structurally hard to make.
 ```bash
 python3 scripts/gitsanitize.py                    # interactive wizard, default
 python3 scripts/gitsanitize.py --repo /path scan   # any raw subcommand
+
+python3 scripts/sanitize.py                        # same wizard, short form:
+python3 scripts/sanitize.py /path/to/repo           # path first, no --repo,
+python3 scripts/sanitize.py /path/to/repo scan      # verifies it's a real
+                                                     # git repo before anything
 ```
 
 That's it. No `pip install`, no `pipx`, no `PYTHONPATH`. `gitsanitize.py`
@@ -80,6 +85,7 @@ engine, each independently readable:
 
 | Module | Responsibility |
 |---|---|
+| `sanitize.py` | Short, path-first front door: `sanitize [path] [subcommand...]`, defaulting to the current directory and verifying it's a real git repo first. Delegates to `gitsanitize_cli.py`, no reimplemented logic. |
 | `gitsanitize_cli.py` | Command dispatch, the wizard, argument parsing |
 | `gitsanitize_core.py` | git subprocess helpers, errors, hashing |
 | `gitsanitize_config.py` | Self-resolving paths, layered policy loading |
@@ -93,10 +99,10 @@ engine, each independently readable:
 | `gitsanitize_plugins.py` | Optional pre/post-stage hook dispatch |
 | `gitsanitize_yamlx.py` | Stdlib-only YAML fallback (used when PyYAML isn't installed) |
 
-If you want the bare `gitsanitize` word on your shell PATH for
-convenience, run `scripts/install_alias.sh` -- it is entirely optional,
-asks before it touches your shell config, and tells you exactly what line
-it adds.
+If you want the bare `gitsanitize` and `sanitize` words on your shell PATH
+for convenience, run `scripts/install_alias.sh` -- it is entirely
+optional, asks before it touches your shell config, and tells you exactly
+what lines it adds.
 
 ## Interactive by default
 
