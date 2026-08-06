@@ -327,8 +327,32 @@
           "files": 10
         }
       ]
+    },
+    "gitsanitize": {
+      "current_version": "0.2.3",
+      "previous_version": "0.2.2",
+      "last_packaged": "2026-08-06T02:01:29.431753+00:00",
+      "files": 23,
+      "size_bytes": 161392,
+      "history": [
+        {
+          "version": "0.2.1",
+          "timestamp": "2026-08-06T01:41:05.846748+00:00",
+          "files": 23
+        },
+        {
+          "version": "0.2.2",
+          "timestamp": "2026-08-06T01:47:38.315165+00:00",
+          "files": 23
+        },
+        {
+          "version": "0.2.3",
+          "timestamp": "2026-08-06T02:01:29.431753+00:00",
+          "files": 23
+        }
+      ]
     }
   },
-  "last_packaged": "2026-08-05T19:22:52.295752+00:00",
+  "last_packaged": "2026-08-06T02:01:29.431753+00:00",
   "total_packaged": 1
 }

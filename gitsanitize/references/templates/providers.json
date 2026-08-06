@@ -1,0 +1,56 @@
+[
+  {
+    "name": "GitHub Copilot",
+    "id_pattern": "github-copilot\\[bot\\]",
+    "trailer_pattern": "copilot",
+    "content_pattern": "",
+    "action": "remove_author",
+    "default_action": "remove_author",
+    "confidence": 95
+  },
+  {
+    "name": "Dependabot",
+    "id_pattern": "dependabot\\[bot\\]|^dependabot@",
+    "trailer_pattern": "",
+    "content_pattern": "",
+    "action": "remove_author",
+    "default_action": "remove_author",
+    "confidence": 98
+  },
+  {
+    "name": "Renovate",
+    "id_pattern": "renovate\\[bot\\]",
+    "trailer_pattern": "renovate",
+    "content_pattern": "",
+    "action": "remove_author",
+    "default_action": "remove_author",
+    "confidence": 96
+  },
+  {
+    "name": "GitHub Actions",
+    "id_pattern": "github-actions\\[bot\\]",
+    "trailer_pattern": "",
+    "content_pattern": "",
+    "action": "remove_author",
+    "default_action": "remove_author",
+    "confidence": 93
+  },
+  {
+    "name": "Claude",
+    "id_pattern": "claude@anthropic.com|claude-?bot",
+    "trailer_pattern": "Claude|anthropic|Generated-by: OpenAI.*claude|claude-code",
+    "content_pattern": "",
+    "action": "flag_for_review",
+    "default_action": "flag_for_review",
+    "confidence": 85
+  },
+  {
+    "name": "Codecov",
+    "id_pattern": "codecov",
+    "trailer_pattern": "",
+    "content_pattern": "",
+    "action": "remove_author",
+    "default_action": "remove_author",
+    "confidence": 90
+  }
+]
