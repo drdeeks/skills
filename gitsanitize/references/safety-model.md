@@ -34,8 +34,17 @@ automatically — keep it until you're confident you don't need it.
 Comparing before/after, and blocking (in strict mode, the default) if any
 of these don't match expectations:
 
-- **Commit count** — baseline minus whatever the plan's removals account
-  for, exactly.
+- **Commit count** — must never be *lower* than baseline minus whatever
+  the plan's removals account for; that's data loss, always a hard
+  failure. Higher is not automatically a problem: `publish` re-runs this
+  same check later, and ordinary work continuing between `apply` and
+  `publish` is normal and must not be blocked forever. The real question
+  for a higher count is whether the HEAD recorded right after `apply`
+  finished is still an ancestor of the current HEAD (`git merge-base
+  --is-ancestor`) — if so, everything since is fast-forward growth on top
+  of the rewrite and that's fine, no matter how much of it there is. If
+  not, that's history having been altered again in a way that isn't a
+  simple continuation, and it still fails closed.
 - **Author list** — everyone from before is still present after, except
   identities the plan intentionally merged away or removed.
 - **Branches and tags** — none silently lost.

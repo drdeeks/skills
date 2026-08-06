@@ -12,8 +12,8 @@ description: Interactive-by-default git history identity sanitization. Scans a r
   -- consolidating duplicate identities, dropping automated bot noise, or deliberately
   protecting specific identities (an agent's own commits, a co-founder's) from being
   touched.
-version: 0.2.5
-previous_version: 0.2.4
+version: 0.2.6
+previous_version: 0.2.5
 license: MIT
 metadata:
   tags:

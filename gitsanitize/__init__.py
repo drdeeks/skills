@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 NAME = "gitsanitize"
-VERSION = "0.2.5"
+VERSION = "0.2.6"
 DESCRIPTION = (
     "Layered, fail-closed git history identity sanitization. Interactive by "
     "default: scan -> classify -> plan -> review -> apply -> publish, "
